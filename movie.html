@@ -1,0 +1,19 @@
+<iframe id="ifr"></iframe>
+<style>
+  iframe {
+    border: none; 
+    margin: 0;
+    display: none;
+  }
+</style>
+<input id="IMDB" placeholder="Put Your IMDB ID here.>
+<button onclick="StartVid()"> Start Video </button>
+<script>
+  const imdb = document.getElementById("IMDB");
+  const frame = document.getElementById("ifr");
+  const url = "https://vidsrc.xyz/embed/movie?imdb=" + imdb;
+  function StartVid() { 
+    frame.src = url;
+    frame.style.display = block;
+  }
+</script>
