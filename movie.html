@@ -11,9 +11,9 @@
 <input id="IMDB" placeholder="Put Your IMDB ID here."> </input>
 <button onclick="StartVid()"> Start Video </button>
 <script>
-  const imdb = document.getElementById("IMDB");
+  const imdb = document.getElementById("IMDB").value;
   const frame = document.getElementById("ifr");
-  const url = "https://vidsrc.net/embed/movie?imdb=" + imdb.value;
+  const url = "https://vidsrc.net/embed/movie?imdb=" + imdb;
   function StartVid() { 
     frame.src = url;
     frame.style.display = block;
