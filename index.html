@@ -1,275 +1,104 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Site Manager with JSONBin</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css" />
+  <meta charset="utf-8">
+  <title>JSONBin CMS - Editor + Preview</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
   <style>
-    body {
-      font-family: Inter, system-ui, sans-serif;
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: #f5f7fb;
-    }
-    header {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      padding: 12px 20px;
-      background: #fff;
-      border-bottom: 1px solid #e2e6ef;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    header .title {
-      font-weight: 700;
-      font-size: 18px;
-    }
-    .btn {
-      background: #0b84ff;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background 0.2s;
-    }
-    .btn:hover { background: #066ad8; }
-    main {
-      display: flex;
-      flex: 1;
-      gap: 16px;
-      padding: 16px;
-    }
-    .col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .frame-wrap, .editor-wrap {
-      border: 1px solid #dce1eb;
-      border-radius: 10px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      background: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-    .frame-controls, .editor-controls {
-      display: flex;
-      gap: 8px;
-      padding: 10px;
-      background: #fafbfe;
-      border-bottom: 1px solid #e2e6ef;
-      align-items: center;
-    }
-    iframe { flex: 1; border: 0; }
-    .projects { display: flex; gap: 8px; flex-wrap: wrap; }
-    .project-chip {
-      background: #eef3ff;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .project-chip:hover { background: #dbe7ff; }
-    #editor { flex: 1; height: 320px; }
-    .chat {
-      border-top: 1px solid #eee;
-      padding: 8px;
-      height: 160px;
-      overflow-y: auto;
-      background: #fafbff;
-    }
-    .chat-entry {
-      margin-bottom: 6px;
-      font-size: 13px;
-    }
-    .chat-entry strong { color: #333; }
-    input, textarea {
-      padding: 8px;
-      border: 1px solid #d0d6e4;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-    footer {
-      padding: 8px;
-      text-align: center;
-      font-size: 13px;
-      color: #777;
-    }
-    #siteList a {
-      display: block;
-      margin: 6px 0;
-      color: #0b84ff;
-      text-decoration: none;
-      font-size: 14px;
-    }
-    #siteList a:hover { text-decoration: underline; }
+    body { margin:0; font-family:system-ui, sans-serif; background:#f5f7fb; }
+    header { background:#0b84ff; color:#fff; padding:12px 20px; font-weight:bold; }
+    main { display:flex; flex-direction:column; gap:16px; padding:16px; }
+    label { font-size:14px; font-weight:600; margin-bottom:4px; display:block; }
+    input { padding:8px; font-size:14px; border:1px solid #ccc; border-radius:6px; width:200px; }
+    .btn { background:#0b84ff; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-size:14px; }
+    .btn:hover { background:#066ad8; }
+    .editor { flex:1; border:1px solid #ccc; border-radius:6px; overflow:hidden; height:300px; }
+    iframe { flex:1; border:1px solid #ccc; border-radius:6px; height:300px; }
+    .row { display:flex; gap:16px; }
   </style>
 </head>
 <body>
-<header>
-  <div class="title">JSONBin Site Manager</div>
-  <button id="homeBtn" class="btn">Home</button>
-  <button id="createBtn" class="btn">Create Site</button>
-</header>
-
+<header>JSONBin CMS (Single Bin, Multiple Sites)</header>
 <main>
-  <div class="col">
-    <div class="frame-wrap">
-      <div class="frame-controls">
-        <input id="browseUrl" placeholder="https://example.com" style="flex:1" />
-        <button id="goBtn" class="btn">Go</button>
-      </div>
-      <iframe id="browserFrame"></iframe>
-    </div>
-
-    <div class="editor-wrap">
-      <div class="editor-controls">
-        <div class="projects" id="projectList"></div>
-        <div style="margin-left:auto;display:flex;gap:8px">
-          <button id="loadBtn" class="btn">Load</button>
-          <button id="saveBtn" class="btn">Save</button>
-        </div>
-      </div>
-      <div id="editor"></div>
-      <div class="chat" id="chatLog"></div>
-      <div style="padding:8px;background:#fff;border-top:1px solid #eee;display:flex;gap:8px">
-        <input id="chatInput" placeholder="Say something" style="flex:1" />
-        <button id="chatSend" class="btn">Send</button>
-      </div>
-    </div>
+  <div>
+    <label for="siteName">Site Name</label>
+    <input id="siteName" placeholder="Enter site name">
+    <button id="loadBtn" class="btn">Load</button>
+    <button id="saveBtn" class="btn">Save</button>
   </div>
-
-  <div class="col" style="flex:0.6">
-    <h3>Site Info</h3>
-    <input id="projName" placeholder="Site name" />
-    <textarea id="projMeta" placeholder="Description" rows="3"></textarea>
-    <footer>Using one JSONBin bin for all sites.</footer>
+  <div class="row">
+    <div class="editor" id="editor"></div>
+    <iframe id="preview"></iframe>
   </div>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
 <script>
-const JSONBIN_API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH."; 
-const BIN_ID = "68cad7bd43b1c97be9463d0e"; // One bin for all sites
+const JSONBIN_API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
+const BIN_ID = "68cad7bd43b1c97be9463d0e";
 
-let sites = [];
-let currentSiteId = null;
+let sites = {};
+let currentSite = null;
 
-const editor = CodeMirror(document.getElementById("editor"), {
-  value: "<!-- start coding -->",
-  mode: "htmlmixed",
-  lineNumbers: true
-});
-
-// ---- Load Sites from JSONBin ----
+// ---- Load all sites ----
 async function loadSites() {
   const res = await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
     headers: { "X-Master-Key": JSONBIN_API_KEY }
   });
   const data = await res.json();
-  sites = data.record.sites || [];
-  renderSiteList();
-  renderChips();
+  sites = data.record.sites || {};
 }
 
-// ---- Save Sites to JSONBin ----
+// ---- Save all sites ----
 async function saveSites() {
   await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", "X-Master-Key": JSONBIN_API_KEY },
+    headers: { "Content-Type":"application/json", "X-Master-Key": JSONBIN_API_KEY },
     body: JSON.stringify({ sites })
   });
 }
 
-// ---- UI Renderers ----
-function renderSiteList() {
-  const html = `<h3 style="padding:10px;font-family:system-ui">Sites</h3>` +
-    sites.map(s => `<a href="#" onclick="openSite('${s.id}')">${s.name}</a>`).join("");
-  document.getElementById("browserFrame").srcdoc = html;
-}
-function renderChips() {
-  const list = document.getElementById("projectList");
-  list.innerHTML = "";
-  sites.forEach(s => {
-    let d = document.createElement("div");
-    d.className = "project-chip";
-    d.textContent = s.name;
-    d.onclick = () => openSite(s.id);
-    list.appendChild(d);
-  });
-}
-function renderChat(chat) {
-  const log = document.getElementById("chatLog");
-  log.innerHTML = "";
-  (chat || []).forEach(m => {
-    log.innerHTML += `<div class="chat-entry"><strong>${m.who}</strong> <span class="small">${new Date(m.t).toLocaleString()}</span><div>${m.text}</div></div>`;
-  });
-  log.scrollTop = log.scrollHeight;
+// ---- Load a specific site ----
+async function loadSite(name) {
+  await loadSites();
+  currentSite = name;
+  const code = sites[name] || "<!-- new site -->";
+  editor.setValue(code);
+  updatePreview();
 }
 
-// ---- Site Actions ----
-function createSite(name) {
-  const id = "s" + Date.now();
-  const newSite = { id, name, meta: "", code: "<!-- empty -->", chat: [] };
-  sites.push(newSite);
-  currentSiteId = id;
-  openSite(id);
-  saveSites();
+// ---- Save current site ----
+async function saveSite() {
+  if (!currentSite) {
+    alert("Enter a site name first.");
+    return;
+  }
+  sites[currentSite] = editor.getValue();
+  await saveSites();
+  alert("Saved site: " + currentSite);
 }
-function openSite(id) {
-  const s = sites.find(x => x.id === id);
-  if (!s) return;
-  currentSiteId = id;
-  document.getElementById("projName").value = s.name;
-  document.getElementById("projMeta").value = s.meta;
-  editor.setValue(s.code);
-  renderChat(s.chat);
-  document.getElementById("browserFrame").srcdoc = s.code;
+
+// ---- Preview ----
+function updatePreview() {
+  document.getElementById("preview").srcdoc = editor.getValue();
 }
-function updateCurrentSite() {
-  if (!currentSiteId) return;
-  const s = sites.find(x => x.id === currentSiteId);
-  s.name = document.getElementById("projName").value;
-  s.meta = document.getElementById("projMeta").value;
-  s.code = editor.getValue();
-}
+
+// ---- Setup CodeMirror ----
+const editor = CodeMirror(document.getElementById("editor"), {
+  value: "<!-- choose a site -->",
+  mode: "htmlmixed",
+  lineNumbers: true
+});
+editor.on("change", updatePreview);
 
 // ---- Buttons ----
-document.getElementById("createBtn").onclick = () => {
-  let name = prompt("Site name?");
-  if (name) createSite(name);
+document.getElementById("loadBtn").onclick = () => {
+  const name = document.getElementById("siteName").value.trim();
+  if (name) loadSite(name);
 };
-document.getElementById("homeBtn").onclick = renderSiteList;
-document.getElementById("goBtn").onclick = () => {
-  const url = document.getElementById("browseUrl").value;
-  if (url) document.getElementById("browserFrame").src = url;
-};
-document.getElementById("saveBtn").onclick = async () => {
-  updateCurrentSite();
-  await saveSites();
-  alert("Saved!");
-  renderChips();
-};
-document.getElementById("loadBtn").onclick = loadSites;
-document.getElementById("chatSend").onclick = () => {
-  if (!currentSiteId) return;
-  const text = document.getElementById("chatInput").value.trim();
-  if (!text) return;
-  const s = sites.find(x => x.id === currentSiteId);
-  s.chat.push({ who: "You", text, t: Date.now() });
-  document.getElementById("chatInput").value = "";
-  renderChat(s.chat);
-  saveSites();
-};
+document.getElementById("saveBtn").onclick = saveSite;
 
 // ---- Start ----
 loadSites();
