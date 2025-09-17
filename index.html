@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>JSONBin CMS + Viewer</title>
+  <title>JSONBin CMS + Viewer + AI</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
   <style>
@@ -27,8 +27,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script>
-const JSONBIN_API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
-const BIN_ID = "68cad7bd43b1c97be9463d0e";
+const JSONBIN_API_KEY = "";  // <-- replace$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.
+const BIN_ID = "68cad7bd43b1c97be9463d0e";               // <-- replace
 
 let sites = {};
 let currentSite = null;
@@ -64,8 +64,10 @@ async function renderViewer(siteName) {
     document.body.innerHTML = "<h1 style='font-family:sans-serif;text-align:center;margin-top:40px'>Site not found: " + siteName + "</h1>";
     return;
   }
-  // Replace whole body with just the site content
-  document.documentElement.innerHTML = code;
+  // Replace whole page with site HTML
+  document.open();
+  document.write(code);
+  document.close();
 }
 
 // ---- Editor Mode ----
@@ -121,15 +123,27 @@ async function renderEditor() {
     if (name) loadSite(name);
   };
   document.getElementById("saveBtn").onclick = saveSite;
+
+  // AI Button
   document.getElementById("aiBtn").onclick = async () => {
-    const prompt = document.getElementById("aiPrompt").value.trim();
-    if (!prompt) return;
+    const userPrompt = document.getElementById("aiPrompt").value.trim();
+    if (!userPrompt) return;
     try {
-      const completion = await puter.ai.chat(prompt);
-      const suggestion = completion.message || completion.choices?.[0]?.message?.content || "";
-      if (suggestion) {
-        editor.setValue(suggestion);
-        document.getElementById("preview").srcdoc = suggestion;
+      let output = "";
+      // Force AI to only return HTML
+      const systemPrompt = "You are an AI web developer. Always return only static HTML code. No explanations, no markdown, no text outside <html>...</html>.";
+      const completion = await puter.ai.chat([
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ]);
+      for await (const msg of completion) {
+        output += msg.message?.content || "";
+      }
+      if (output) {
+        editor.setValue(output);
+        document.getElementById("preview").srcdoc = output;
+      } else {
+        alert("AI returned no content.");
       }
     } catch(e) {
       alert("AI Error: " + e.message);
