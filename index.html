@@ -131,11 +131,8 @@ async function renderEditor() {
     try {
       let output = "";
       // Force AI to only return HTML
-      const systemPrompt = "You are an AI web developer. Always return only static HTML code. No explanations, no markdown, no text outside <html>...</html>.";
-      const completion = await puter.ai.chat([
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ]);
+      const systemPrompt = "You are an AI web developer. Always return only static HTML code. No explanations, no markdown, no text outside <html>...</html>. generate a website that: ";
+      const completion = await puter.ai.chat([ systemPrompt + userPrompt ]);
       for await (const msg of completion) {
         output += msg.message?.content || "";
       }
