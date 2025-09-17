@@ -2,45 +2,41 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>JSONBin CMS - Editor + Preview</title>
+  <title>JSONBin CMS + Viewer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
   <style>
     body { margin:0; font-family:system-ui, sans-serif; background:#f5f7fb; }
     header { background:#0b84ff; color:#fff; padding:12px 20px; font-weight:bold; }
-    main { display:flex; flex-direction:column; gap:16px; padding:16px; }
+    main { padding:16px; }
     label { font-size:14px; font-weight:600; margin-bottom:4px; display:block; }
-    input { padding:8px; font-size:14px; border:1px solid #ccc; border-radius:6px; width:200px; }
+    input, textarea { padding:8px; font-size:14px; border:1px solid #ccc; border-radius:6px; }
     .btn { background:#0b84ff; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-size:14px; }
     .btn:hover { background:#066ad8; }
-    .editor { flex:1; border:1px solid #ccc; border-radius:6px; overflow:hidden; height:300px; }
-    iframe { flex:1; border:1px solid #ccc; border-radius:6px; height:300px; }
-    .row { display:flex; gap:16px; }
+    .row { display:flex; gap:16px; margin-top:12px; }
+    .editor { flex:1; border:1px solid #ccc; border-radius:6px; overflow:hidden; height:400px; }
+    iframe { flex:1; border:1px solid #ccc; border-radius:6px; height:400px; }
+    .ai-box { margin-top:12px; padding:10px; border:1px solid #ccc; border-radius:6px; background:#fff; }
   </style>
 </head>
 <body>
-<header>JSONBin CMS (Single Bin, Multiple Sites)</header>
-<main>
-  <div>
-    <label for="siteName">Site Name</label>
-    <input id="siteName" placeholder="Enter site name">
-    <button id="loadBtn" class="btn">Load</button>
-    <button id="saveBtn" class="btn">Save</button>
-  </div>
-  <div class="row">
-    <div class="editor" id="editor"></div>
-    <iframe id="preview"></iframe>
-  </div>
-</main>
+<header id="header">JSONBin CMS</header>
+<main id="app">Loading…</main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://js.puter.com/v2/"></script>
 <script>
 const JSONBIN_API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
 const BIN_ID = "68cad7bd43b1c97be9463d0e";
 
 let sites = {};
 let currentSite = null;
+
+// ---- Helpers ----
+function getQueryParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
 
 // ---- Load all sites ----
 async function loadSites() {
@@ -60,48 +56,94 @@ async function saveSites() {
   });
 }
 
-// ---- Load a specific site ----
-async function loadSite(name) {
+// ---- Viewer Mode ----
+async function renderViewer(siteName) {
   await loadSites();
-  currentSite = name;
-  const code = sites[name] || "<!-- new site -->";
-  editor.setValue(code);
-  updatePreview();
-}
-
-// ---- Save current site ----
-async function saveSite() {
-  if (!currentSite) {
-    alert("Enter a site name first.");
+  const code = sites[siteName];
+  if (!code) {
+    document.body.innerHTML = "<h1 style='font-family:sans-serif;text-align:center;margin-top:40px'>Site not found: " + siteName + "</h1>";
     return;
   }
-  sites[currentSite] = editor.getValue();
-  await saveSites();
-  alert("Saved site: " + currentSite);
+  // Replace whole body with just the site content
+  document.documentElement.innerHTML = code;
 }
 
-// ---- Preview ----
-function updatePreview() {
-  document.getElementById("preview").srcdoc = editor.getValue();
+// ---- Editor Mode ----
+async function renderEditor() {
+  await loadSites();
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div>
+      <label for="siteName">Site Name</label>
+      <input id="siteName" placeholder="Enter site name">
+      <button id="loadBtn" class="btn">Load</button>
+      <button id="saveBtn" class="btn">Save</button>
+    </div>
+    <div class="row">
+      <div class="editor" id="editor"></div>
+      <iframe id="preview"></iframe>
+    </div>
+    <div class="ai-box">
+      <h3>AI Coder (Puter.js)</h3>
+      <textarea id="aiPrompt" rows="2" style="width:100%" placeholder="Describe what you want to code..."></textarea><br>
+      <button id="aiBtn" class="btn">Generate Code</button>
+    </div>
+  `;
+  const editor = CodeMirror(document.getElementById("editor"), {
+    value: "<!-- choose or create a site -->",
+    mode: "htmlmixed",
+    lineNumbers: true
+  });
+  editor.on("change", ()=> {
+    document.getElementById("preview").srcdoc = editor.getValue();
+  });
+
+  async function loadSite(name) {
+    await loadSites();
+    currentSite = name;
+    const code = sites[name] || "<!-- new site -->";
+    editor.setValue(code);
+    document.getElementById("preview").srcdoc = code;
+  }
+  async function saveSite() {
+    if (!currentSite) {
+      alert("Enter a site name first.");
+      return;
+    }
+    sites[currentSite] = editor.getValue();
+    await saveSites();
+    alert("Saved site: " + currentSite);
+  }
+
+  // Buttons
+  document.getElementById("loadBtn").onclick = () => {
+    const name = document.getElementById("siteName").value.trim();
+    if (name) loadSite(name);
+  };
+  document.getElementById("saveBtn").onclick = saveSite;
+  document.getElementById("aiBtn").onclick = async () => {
+    const prompt = document.getElementById("aiPrompt").value.trim();
+    if (!prompt) return;
+    try {
+      const completion = await puter.ai.chat(prompt);
+      const suggestion = completion.message || completion.choices?.[0]?.message?.content || "";
+      if (suggestion) {
+        editor.setValue(suggestion);
+        document.getElementById("preview").srcdoc = suggestion;
+      }
+    } catch(e) {
+      alert("AI Error: " + e.message);
+    }
+  };
 }
 
-// ---- Setup CodeMirror ----
-const editor = CodeMirror(document.getElementById("editor"), {
-  value: "<!-- choose a site -->",
-  mode: "htmlmixed",
-  lineNumbers: true
-});
-editor.on("change", updatePreview);
-
-// ---- Buttons ----
-document.getElementById("loadBtn").onclick = () => {
-  const name = document.getElementById("siteName").value.trim();
-  if (name) loadSite(name);
-};
-document.getElementById("saveBtn").onclick = saveSite;
-
-// ---- Start ----
-loadSites();
+// ---- Router ----
+const siteParam = getQueryParam("site");
+if (siteParam) {
+  renderViewer(siteParam);
+} else {
+  renderEditor();
+}
 </script>
 </body>
 </html>
