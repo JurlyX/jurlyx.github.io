@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>XenzHost</title>
+  <title>XenzHost<title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
   <style>
@@ -32,6 +32,7 @@ const BIN_ID = "68cad7bd43b1c97be9463d0e";               // <-- replace
 
 let sites = {};
 let currentSite = null;
+let editor;
 
 function getQueryParam(name) {
   return new URLSearchParams(window.location.search).get(name);
@@ -41,9 +42,7 @@ async function loadSites() {
   const res = await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
     headers: { "X-Master-Key": JSONBIN_API_KEY }
   });
-  if (!res.ok) {
-    throw new Error("Failed to load sites from JSONBin: " + res.status);
-  }
+  if (!res.ok) throw new Error("Failed to load sites: " + res.status);
   const data = await res.json();
   sites = data.record.sites || {};
 }
@@ -51,15 +50,13 @@ async function loadSites() {
 async function saveSites() {
   const res = await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", "X-Master-Key": JSONBIN_API_KEY },
+    headers: { "Content-Type":"application/json", "X-Master-Key": JSONBIN_API_KEY },
     body: JSON.stringify({ sites })
   });
-  if (!res.ok) {
-    throw new Error("Failed to save sites to JSONBin: " + res.status);
-  }
+  if (!res.ok) throw new Error("Failed to save sites: " + res.status);
 }
 
-// Viewer mode: show only the site’s HTML
+// Viewer mode
 async function renderViewer(siteName) {
   try {
     await loadSites();
@@ -72,13 +69,12 @@ async function renderViewer(siteName) {
     document.body.innerHTML = `<h1 style='font-family:sans-serif;text-align:center;margin-top:40px'>Site not found: ${siteName}</h1>`;
     return;
   }
-  // Render just the site content
   document.open();
   document.write(code);
   document.close();
 }
 
-// Editor mode: editor + preview + AI
+// Editor mode
 async function renderEditor() {
   try {
     await loadSites();
@@ -100,12 +96,12 @@ async function renderEditor() {
     </div>
     <div class="ai-box">
       <h3>AI Coder (Puter.js)</h3>
-      <textarea id="aiPrompt" rows="2" placeholder="Describe static HTML you want..."></textarea><br>
-      <button id="aiBtn" class="btn">Generate HTML</button>
+      <textarea id="aiPrompt" rows="2" placeholder="Describe how to change or extend the site..."></textarea><br>
+      <button id="aiBtn" class="btn">Generate Update</button>
     </div>
   `;
-  const editor = CodeMirror(document.getElementById("editor"), {
-    value: "<!-- Create or load a site to begin -->",
+  editor = CodeMirror(document.getElementById("editor"), {
+    value: "<!-- Create or load a site -->",
     mode: "htmlmixed",
     lineNumbers: true
   });
@@ -115,59 +111,61 @@ async function renderEditor() {
 
   async function loadSite(name) {
     currentSite = name;
-    const code = sites[name] || "<!-- New site: start here -->";
+    const code = sites[name] || "<!-- New site -->";
     editor.setValue(code);
     document.getElementById("preview").srcdoc = code;
   }
 
   async function saveSite() {
     if (!currentSite) {
-      alert("Please enter a site name to load or create first.");
+      alert("Enter a site name first.");
       return;
     }
     sites[currentSite] = editor.getValue();
     try {
       await saveSites();
-      alert("Site saved: " + currentSite);
+      alert("Saved site: " + currentSite);
     } catch(e) {
-      alert("Error saving site: " + e.message);
+      alert("Save error: " + e.message);
     }
   }
 
   document.getElementById("loadBtn").onclick = () => {
     const name = document.getElementById("siteName").value.trim();
-    if (!name) {
-      alert("Enter a site name.");
-      return;
-    }
-    loadSite(name);
+    if (name) loadSite(name);
   };
   document.getElementById("saveBtn").onclick = saveSite;
 
+  // AI with memory of current code
   document.getElementById("aiBtn").onclick = async () => {
     const userPrompt = document.getElementById("aiPrompt").value.trim();
     if (!userPrompt) {
-      alert("Enter a description of what you want in static HTML.");
+      alert("Enter a description for the AI.");
       return;
     }
+    const currentCode = editor.getValue();
     try {
-      // Use non-streaming chat for simplicity
-      const systemPrompt = {
-        role: "system",
-        content: "You are an AI web developer. Only respond with static HTML code. Do not include any explanations, markdown, or text outside the HTML."
-      };
-      const userMessage = {
-        role: "user",
-        content: userPrompt
-      };
-      const response = await puter.ai.chat([systemPrompt, userMessage], { model: "gpt-5-nano", stream: false });
-      // When stream=false, Puter returns an object with `.message.content`
+      const response = await puter.ai.chat([
+        {
+          role: "system",
+          content: "You are an AI web developer. Always output ONLY static HTML code. No explanations, markdown, or text outside the <html> document."
+        },
+        {
+          role: "assistant",
+          content: "Here is the current code of the website:\n\n" + currentCode
+        },
+        {
+          role: "user",
+          content: "Update the site based on this request: " + userPrompt
+        }
+      ], { model: "gpt-5-nano", stream: false });
+
       const html = response.message && response.message.content;
       if (typeof html === "string") {
         editor.setValue(html);
         document.getElementById("preview").srcdoc = html;
       } else {
-        alert("AI did not return valid HTML string.");
+        alert("AI did not return valid HTML.");
       }
     } catch(e) {
       alert("AI Error: " + e.message);
