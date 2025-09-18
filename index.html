@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>JSONBin CMS + Viewer + AI</title>
+  <title>JSONBin CMS + Viewer + AI (Fixed)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
   <style>
@@ -10,7 +10,7 @@
     header { background:#0b84ff; color:#fff; padding:12px 20px; font-weight:bold; }
     main { padding:16px; }
     label { font-size:14px; font-weight:600; margin-bottom:4px; display:block; }
-    input, textarea { padding:8px; font-size:14px; border:1px solid #ccc; border-radius:6px; }
+    input, textarea { padding:8px; font-size:14px; border:1px solid #ccc; border-radius:6px; width:100%; box-sizing:border-box; }
     .btn { background:#0b84ff; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-size:14px; }
     .btn:hover { background:#066ad8; }
     .row { display:flex; gap:16px; margin-top:12px; }
@@ -20,59 +20,72 @@
   </style>
 </head>
 <body>
-<header id="header">JSONBin CMS</header>
+<header id="header">JSONBin CMS + AI (Fixed)</header>
 <main id="app">Loading…</main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
 <script src="https://js.puter.com/v2/"></script>
 <script>
-const JSONBIN_API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH."; 
+const JSONBIN_API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";  // <-- replace
 const BIN_ID = "68cad7bd43b1c97be9463d0e";               // <-- replace
 
 let sites = {};
 let currentSite = null;
 
-// ---- Helpers ----
 function getQueryParam(name) {
   return new URLSearchParams(window.location.search).get(name);
 }
 
-// ---- Load all sites ----
 async function loadSites() {
   const res = await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
     headers: { "X-Master-Key": JSONBIN_API_KEY }
   });
+  if (!res.ok) {
+    throw new Error("Failed to load sites from JSONBin: " + res.status);
+  }
   const data = await res.json();
   sites = data.record.sites || {};
 }
 
-// ---- Save all sites ----
 async function saveSites() {
-  await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
+  const res = await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
     method: "PUT",
-    headers: { "Content-Type":"application/json", "X-Master-Key": JSONBIN_API_KEY },
+    headers: { "Content-Type": "application/json", "X-Master-Key": JSONBIN_API_KEY },
     body: JSON.stringify({ sites })
   });
+  if (!res.ok) {
+    throw new Error("Failed to save sites to JSONBin: " + res.status);
+  }
 }
 
-// ---- Viewer Mode ----
+// Viewer mode: show only the site’s HTML
 async function renderViewer(siteName) {
-  await loadSites();
-  const code = sites[siteName];
-  if (!code) {
-    document.body.innerHTML = "<h1 style='font-family:sans-serif;text-align:center;margin-top:40px'>Site not found: " + siteName + "</h1>";
+  try {
+    await loadSites();
+  } catch(e) {
+    document.body.innerHTML = `<h1>Error: ${e.message}</h1>`;
     return;
   }
-  // Replace whole page with site HTML
+  const code = sites[siteName];
+  if (!code) {
+    document.body.innerHTML = `<h1 style='font-family:sans-serif;text-align:center;margin-top:40px'>Site not found: ${siteName}</h1>`;
+    return;
+  }
+  // Render just the site content
   document.open();
   document.write(code);
   document.close();
 }
 
-// ---- Editor Mode ----
+// Editor mode: editor + preview + AI
 async function renderEditor() {
-  await loadSites();
+  try {
+    await loadSites();
+  } catch(e) {
+    document.getElementById("app").innerHTML = `<h2>Error loading sites: ${e.message}</h2>`;
+    return;
+  }
   const app = document.getElementById("app");
   app.innerHTML = `
     <div>
@@ -87,60 +100,74 @@ async function renderEditor() {
     </div>
     <div class="ai-box">
       <h3>AI Coder (Puter.js)</h3>
-      <textarea id="aiPrompt" rows="2" style="width:100%" placeholder="Describe what you want to code..."></textarea><br>
-      <button id="aiBtn" class="btn">Generate Code</button>
+      <textarea id="aiPrompt" rows="2" placeholder="Describe static HTML you want..."></textarea><br>
+      <button id="aiBtn" class="btn">Generate HTML</button>
     </div>
   `;
   const editor = CodeMirror(document.getElementById("editor"), {
-    value: "<!-- choose or create a site -->",
+    value: "<!-- Create or load a site to begin -->",
     mode: "htmlmixed",
     lineNumbers: true
   });
-  editor.on("change", ()=> {
+  editor.on("change", () => {
     document.getElementById("preview").srcdoc = editor.getValue();
   });
 
   async function loadSite(name) {
-    await loadSites();
     currentSite = name;
-    const code = sites[name] || "<!-- new site -->";
+    const code = sites[name] || "<!-- New site: start here -->";
     editor.setValue(code);
     document.getElementById("preview").srcdoc = code;
   }
+
   async function saveSite() {
     if (!currentSite) {
-      alert("Enter a site name first.");
+      alert("Please enter a site name to load or create first.");
       return;
     }
     sites[currentSite] = editor.getValue();
-    await saveSites();
-    alert("Saved site: " + currentSite);
+    try {
+      await saveSites();
+      alert("Site saved: " + currentSite);
+    } catch(e) {
+      alert("Error saving site: " + e.message);
+    }
   }
 
-  // Buttons
   document.getElementById("loadBtn").onclick = () => {
     const name = document.getElementById("siteName").value.trim();
-    if (name) loadSite(name);
+    if (!name) {
+      alert("Enter a site name.");
+      return;
+    }
+    loadSite(name);
   };
   document.getElementById("saveBtn").onclick = saveSite;
 
-  // AI Button
   document.getElementById("aiBtn").onclick = async () => {
     const userPrompt = document.getElementById("aiPrompt").value.trim();
-    if (!userPrompt) return;
+    if (!userPrompt) {
+      alert("Enter a description of what you want in static HTML.");
+      return;
+    }
     try {
-      let output = "";
-      // Force AI to only return HTML
-      const systemPrompt = "You are an AI web developer. Always return only static HTML code. No explanations, no markdown, no text outside <html>...</html>. generate a website that: ";
-      const completion = await puter.ai.chat(systemPrompt + userPrompt, stream = true, { model: "gpt-5-nano" });
-      for await (const msg of completion) {
-        output += msg.message?.content || "";
-      }
-      if (output) {
-        editor.setValue(output);
-        document.getElementById("preview").srcdoc = output;
+      // Use non-streaming chat for simplicity
+      const systemPrompt = {
+        role: "system",
+        content: "You are an AI web developer. Only respond with static HTML code. Do not include any explanations, markdown, or text outside the HTML."
+      };
+      const userMessage = {
+        role: "user",
+        content: userPrompt
+      };
+      const response = await puter.ai.chat([systemPrompt, userMessage], { model: "gpt-5-nano", stream: false });
+      // When stream=false, Puter returns an object with `.message.content`
+      const html = response.message && response.message.content;
+      if (typeof html === "string") {
+        editor.setValue(html);
+        document.getElementById("preview").srcdoc = html;
       } else {
-        alert("AI returned no content.");
+        alert("AI did not return valid HTML string.");
       }
     } catch(e) {
       alert("AI Error: " + e.message);
@@ -148,7 +175,7 @@ async function renderEditor() {
   };
 }
 
-// ---- Router ----
+// Router
 const siteParam = getQueryParam("site");
 if (siteParam) {
   renderViewer(siteParam);
