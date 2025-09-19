@@ -31,7 +31,7 @@ const JSONBIN_API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmD
 const BIN_ID = "68cad7bd43b1c97be9463d0e";               // <-- replace
 
 let sites = {};
-let currentSite = e;
+let currentSite = ;
 let editor;
 
 function getQueryParam(name) {
@@ -39,11 +39,6 @@ function getQueryParam(name) {
 }
 
 async function loadSites() {
-  const res = await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
-    headers: { "X-Master-Key": JSONBIN_API_KEY }
-  });
-  if (!res.ok) throw new Error("Failed to load sites: " + res.status);
-  const data = await res.json();
   sites = data.record.sites || {};
 }
 
