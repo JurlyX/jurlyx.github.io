@@ -3,310 +3,275 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PuterJS Web Host + IDE — Live</title>
-  <!-- Puter.js (required) -->
+  <title>PuterJS — Modern Host & IDE</title>
   <script src="https://js.puter.com/v2/"></script>
-  <!-- CodeMirror 6 (simple, no build) from CDN -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@6.0.1/dist/codemirror.min.css">
   <style>
-    :root{--bg:#0f1724;--panel:#0b1220;--muted:#9aa4b2;--accent:#60a5fa}
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto;background:linear-gradient(180deg,#071025 0,#051126 100%);color:#e6eef8}
-    .app{display:grid;grid-template-columns:320px 1fr 420px;gap:12px;height:100vh;padding:12px;box-sizing:border-box}
-    .card{background:rgba(255,255,255,0.03);border-radius:12px;padding:12px;box-shadow:0 6px 20px rgba(2,6,23,0.6);overflow:auto}
-    header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-    .logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(90deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700}
-    .file-list{display:flex;flex-direction:column;gap:8px}
-    .file-item{padding:8px;border-radius:8px;background:transparent;cursor:pointer}
-    .file-item.active{background:rgba(255,255,255,0.04)}
-    .toolbar{display:flex;gap:8px;align-items:center}
-    button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--muted);cursor:pointer}
-    button.primary{background:var(--accent);border:none;color:#04233b}
-    .editor-wrap{display:flex;flex-direction:column;height:100%}
-    #preview{width:100%;height:100%;border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
-    .split{display:flex;flex-direction:column;height:100%}
-    .ai-chat{display:flex;flex-direction:column;gap:8px}
-    .chat-log{flex:1;overflow:auto;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01)}
-    .chat-message{margin:6px 0;padding:8px;border-radius:8px}
-    .chat-message.user{background:rgba(96,165,250,0.08);align-self:flex-end}
-    .chat-message.assistant{background:rgba(255,255,255,0.02)}
-    footer{display:flex;gap:8px}
-    input,textarea{background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit;padding:8px;border-radius:8px;width:100%}
+    :root{
+      --bg-1:#0b1220;--bg-2:#071025;--card:#071427;--muted:#94a3b8;--accent:#60a5fa;--glass:rgba(255,255,255,0.04);
+      --success:#10b981;--danger:#ef4444;--radius:12px;--mono:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue';background:linear-gradient(180deg,var(--bg-2),var(--bg-1));color:#e6eef8}
+    .container{max-width:1200px;margin:20px auto;padding:16px;display:grid;grid-template-columns:320px 1fr 380px;gap:16px;align-items:start}
+    @media(max-width:1100px){.container{grid-template-columns:1fr;max-width:940px}}
+
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:14px;box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+    header.app-header{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(90deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800}
+    h1{font-size:16px;margin:0}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* Left panel */
+    .projects{display:flex;flex-direction:column;gap:12px}
+    .projects .controls{display:flex;gap:8px}
+    .projects .project-list{display:flex;flex-direction:column;gap:8px;max-height:480px;overflow:auto;padding-right:6px}
+    .project-item{padding:10px;border-radius:10px;cursor:pointer;background:transparent;border:1px solid transparent}
+    .project-item.active{background:linear-gradient(90deg, rgba(96,165,250,0.06), rgba(124,58,237,0.03));border-color:rgba(255,255,255,0.03)}
+    input[type=text], select, textarea{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:10px;border-radius:8px;color:inherit}
+
+    /* Center editor */
+    .editor-split{display:flex;gap:12px;height:70vh;min-height:420px}
+    @media(max-width:1100px){.editor-split{flex-direction:column;height:auto}}
+    .pane{flex:1;display:flex;flex-direction:column;gap:8px}
+    .editor{flex:1;min-height:0;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    textarea#editor{width:100%;height:100%;resize:none;padding:14px;font-family:var(--mono);font-size:13px;background:transparent;color:inherit;border:none;outline:none}
+    .filebar{display:flex;gap:8px;align-items:center}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn.primary{background:var(--accent);color:#04233b;border:none}
     .small{font-size:12px;color:var(--muted)}
+
+    iframe#preview{width:100%;height:100%;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+
+    /* Right: AI */
+    .ai{display:flex;flex-direction:column;gap:8px;height:70vh;min-height:420px}
+    .chat-log{flex:1;overflow:auto;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
+    .msg{max-width:85%;padding:10px;border-radius:10px;margin:8px 0}
+    .msg.user{align-self:flex-end;background:linear-gradient(90deg, rgba(96,165,250,0.12), rgba(124,58,237,0.06));border:1px solid rgba(255,255,255,0.02)}
+    .msg.assistant{align-self:flex-start;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02)}
+    .console{height:150px;padding:8px;border-radius:8px;background:rgba(0,0,0,0.25);overflow:auto;font-family:var(--mono);font-size:13px}
+
+    /* footer */
+    .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    a.link{color:var(--accent);text-decoration:none}
+
   </style>
 </head>
 <body>
-  <div class="app">
-    <!-- Left: Projects & Files -->
-    <div class="card">
-      <header>
+  <div class="container">
+    <!-- Left: Projects -->
+    <div class="card projects" aria-label="Projects panel">
+      <div class="app-header">
         <div class="logo">PJ</div>
         <div>
-          <div style="font-weight:700">Puter Host & IDE</div>
-          <div class="small">Create, edit, publish — powered by Puter.js</div>
+          <h1>Puter Host & IDE</h1>
+          <div class="muted">Modern, fast, AI-assisted static web hosting</div>
         </div>
-      </header>
-
-      <div style="margin-top:8px" class="toolbar">
-        <button id="newProjectBtn">New Project</button>
-        <button id="saveLocalBtn" class="primary">Save</button>
       </div>
 
-      <hr style="opacity:0.06;margin:12px 0">
-
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <div class="controls">
         <input id="projectName" placeholder="Project name" />
-        <button id="loadShareBtn">Load URL</button>
+        <button id="newProjectBtn" class="btn">New</button>
+        <button id="saveLocalBtn" class="btn primary">Save</button>
       </div>
 
-      <div style="font-size:13px;margin-bottom:8px" class="small">Projects (saved in browser; sign-in to save to Puter cloud)</div>
-      <div id="projects" class="file-list"></div>
+      <div style="margin-top:8px" class="small">Projects (saved in browser)</div>
+      <div id="projectsList" class="project-list"></div>
 
-      <hr style="opacity:0.06;margin:12px 0">
-      <div style="display:flex;gap:8px">
-        <button id="signInBtn">Sign in</button>
-        <button id="savePuterBtn">Save to Puter</button>
-        <button id="publishBtn" class="primary">Publish Site</button>
+      <div style="margin-top:12px" class="meta">
+        <button id="signInBtn" class="btn">Sign in</button>
+        <button id="savePuterBtn" class="btn">Sync to Puter</button>
+        <button id="publishBtn" class="btn primary">Publish</button>
+        <div style="margin-left:auto" id="hostPreview" class="small">Not published</div>
       </div>
-
-      <div style="margin-top:12px;font-size:12px;color:var(--muted)">Host preview: <span id="hostPreview" class="small">(not published)</span></div>
     </div>
 
     <!-- Center: Editor + Preview -->
-    <div class="card split">
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-        <div style="font-weight:700">Editor</div>
-        <div class="small"> — Edit HTML/CSS/JS files, preview live</div>
-        <div style="margin-left:auto" class="small">Auto-save every 5s</div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:8px">
+        <div>
+          <div style="font-weight:700">Editor</div>
+          <div class="muted">Edit files, live preview, smart inlining</div>
+        </div>
+        <div class="small">Auto-save every 5s</div>
       </div>
 
-      <div style="display:flex;gap:8px;flex:1;min-height:0">
-        <div style="width:50%;display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;gap:8px;align-items:center">
-            <select id="fileTypeSelect">
-              <option value="index.html">index.html</option>
-              <option value="style.css">style.css</option>
-              <option value="script.js">script.js</option>
-            </select>
-            <button id="newFileBtn">+ File</button>
-            <button id="deleteFileBtn">Delete</button>
-            <div style="margin-left:auto" class="small">Files are virtual until saved</div>
+      <div class="editor-split">
+        <div class="pane">
+          <div class="filebar">
+            <select id="fileTypeSelect"></select>
+            <button id="newFileBtn" class="btn">+ File</button>
+            <button id="deleteFileBtn" class="btn">Delete</button>
+            <div style="margin-left:auto" class="small">Files virtual until saved</div>
           </div>
-          <textarea id="editor" style="flex:1;min-height:0;border-radius:8px;padding:12px;font-family:monospace;" spellcheck="false"><!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Your site</title>
-    <link rel="stylesheet" href="/style.css">
-  </head>
-  <body>
-    <h1>Hello from Puter Host!</h1>
-    <script src="/script.js"></script>
-  </body>
-</html></textarea>
+          <div class="editor" id="editorWrap">
+            <textarea id="editor" spellcheck="false"></textarea>
+          </div>
         </div>
 
-        <div style="width:50%;display:flex;flex-direction:column;gap:8px">
-          <div style="display:flex;align-items:center;gap:8px">
+        <div class="pane">
+          <div style="display:flex;align-items:center;gap:8px;justify-content:space-between">
             <div style="font-weight:700">Live Preview</div>
-            <div style="margin-left:auto" class="small">Press Refresh to reload iframe</div>
-            <button id="refreshPreviewBtn">Refresh</button>
+            <div class="small">Sandboxed iframe</div>
+            <div>
+              <button id="refreshPreviewBtn" class="btn">Refresh</button>
+            </div>
           </div>
-          <iframe id="preview" sandbox="allow-scripts allow-modals allow-forms" srcdoc="" ></iframe>
+          <iframe id="preview" sandbox="allow-scripts allow-modals allow-forms"></iframe>
         </div>
+      </div>
+
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;justify-content:flex-end">
+        <div class="small">Share: <input id="shareToken" style="width:260px" placeholder="Paste ?site= token or click Share"></div>
+        <button id="shareBtn" class="btn">Share</button>
       </div>
     </div>
 
     <!-- Right: AI Assistant & Console -->
-    <div class="card split">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="card ai">
+      <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="font-weight:700">Puter AI Assistant</div>
-        <div class="small">Uses puter.ai.chat</div>
+        <div class="small">Powered by Puter.ai</div>
       </div>
 
-      <div class="ai-chat">
-        <div id="chatLog" class="chat-log"></div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="promptInput" placeholder="Ask the assistant to help edit or generate code (e.g. 'add a navbar')" />
-          <button id="askBtn">Ask</button>
-        </div>
-        <div style="margin-top:8px;font-size:12px;color:var(--muted)">Console</div>
-        <pre id="console" style="height:160px;overflow:auto;padding:8px;border-radius:8px;background:rgba(0,0,0,0.25)"></pre>
+      <div id="chatLog" class="chat-log"></div>
+
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="promptInput" placeholder="Ask assistant (e.g. 'add a navbar')" />
+        <button id="askBtn" class="btn primary">Ask</button>
       </div>
+
+      <div style="margin-top:8px;font-weight:700">Console</div>
+      <pre id="console" class="console"></pre>
     </div>
   </div>
 
   <script>
-    // --- Basic in-memory project model ---
+    // ---------- Utilities ----------
     const DEFAULT_FILES = {
-      'index.html': document.getElementById('editor').value,
-      'style.css': 'body{font-family:Inter, system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}\nh1{color:#0b1220}',
-      'script.js': "console.log('hello from script.js')"
+      'index.html': `<!doctype html>\n<html>\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width,initial-scale=1">\n  <title>My Puter Site</title>\n  <link rel="stylesheet" href="/style.css">\n</head>\n<body>\n  <h1>Hello from Puter</h1>\n  <script src="/script.js"></script>\n</body>\n</html>`,
+      'style.css': `:root{--accent:#60a5fa}body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:0;padding:40px;background:linear-gradient(180deg,#f8fafc,#eef2ff);color:#071427}h1{color:var(--accent)}`,
+      'script.js': `console.log('hello from puter site')`
     };
 
-    let projects = JSON.parse(localStorage.getItem('pj_projects') || '{}');
+    const logEl = document.getElementById('console');
+    function log(msg){ logEl.textContent += msg + '\n'; logEl.scrollTop = logEl.scrollHeight; }
+
+    // Projects store
+    let projects = JSON.parse(localStorage.getItem('pj_projects')||'{}');
     let current = null;
 
-    const projectsEl = document.getElementById('projects');
+    // Elements
+    const projectsList = document.getElementById('projectsList');
     const projectNameInput = document.getElementById('projectName');
     const editor = document.getElementById('editor');
     const fileTypeSelect = document.getElementById('fileTypeSelect');
     const preview = document.getElementById('preview');
-    const consoleEl = document.getElementById('console');
     const chatLog = document.getElementById('chatLog');
+    const hostPreview = document.getElementById('hostPreview');
 
-    function log(s){ consoleEl.textContent += s + '\n'; consoleEl.scrollTop = consoleEl.scrollHeight; }
-
+    // Render project list
     function renderProjects(){
-      projectsEl.innerHTML = '';
+      projectsList.innerHTML = '';
       for(const name of Object.keys(projects)){
-        const div = document.createElement('div');
-        div.className = 'file-item' + (current===name? ' active':'');
-        div.textContent = name;
-        div.addEventListener('click', ()=>{ loadProject(name); });
-        projectsEl.appendChild(div);
+        const el = document.createElement('div'); el.className = 'project-item' + (current===name? ' active':''); el.textContent = name;
+        el.addEventListener('click', ()=> loadProject(name));
+        projectsList.appendChild(el);
       }
     }
 
-    function newProject(name){
-      if(!name) name = 'project-' + Math.random().toString(36).slice(2,8);
-      projects[name] = JSON.parse(JSON.stringify(DEFAULT_FILES));
-      localStorage.setItem('pj_projects', JSON.stringify(projects));
-      renderProjects();
-      loadProject(name);
-    }
+    function newProject(name){ if(!name) name = 'project-'+Math.random().toString(36).slice(2,8); projects[name]=JSON.parse(JSON.stringify(DEFAULT_FILES)); localStorage.setItem('pj_projects', JSON.stringify(projects)); renderProjects(); loadProject(name); }
 
-    function loadProject(name){
-      current = name;
-      projectNameInput.value = name;
-      const files = projects[name];
-      fileTypeSelect.value = 'index.html';
-      editor.value = files['index.html'] || '';
-      renderProjects();
-      updatePreview();
-    }
+    function loadProject(name){ current = name; projectNameInput.value = name; populateFileSelect(); fileTypeSelect.value = 'index.html'; editor.value = projects[name]['index.html']||''; renderProjects(); updatePreview(); }
 
-    function saveCurrent(){
-      if(!current) return; projects[current][fileTypeSelect.value] = editor.value; localStorage.setItem('pj_projects', JSON.stringify(projects)); log('Saved locally: '+current);
-    }
+    function populateFileSelect(){ fileTypeSelect.innerHTML=''; const files = projects[current]; for(const f of Object.keys(files)){ const o = document.createElement('option'); o.value = f; o.textContent = f; fileTypeSelect.appendChild(o); } }
 
-    // auto-save and UI hooks
-    document.getElementById('newProjectBtn').addEventListener('click', ()=>newProject());
-    document.getElementById('saveLocalBtn').addEventListener('click', ()=>{ saveCurrent(); });
-    document.getElementById('fileTypeSelect').addEventListener('change', (e)=>{
-      const f = e.target.value; editor.value = projects[current][f] || '';
-    });
-    document.getElementById('newFileBtn').addEventListener('click', ()=>{
-      const fname = prompt('File name (e.g. about.html)'); if(!fname) return; projects[current][fname] = ''; localStorage.setItem('pj_projects', JSON.stringify(projects)); renderProjects(); document.getElementById('fileTypeSelect').innerHTML += `<option value="${fname}">${fname}</option>`;
-    });
-    document.getElementById('deleteFileBtn').addEventListener('click', ()=>{
-      const f = fileTypeSelect.value; if(!confirm('Delete '+f+'?')) return; delete projects[current][f]; localStorage.setItem('pj_projects', JSON.stringify(projects)); fileTypeSelect.remove(fileTypeSelect.selectedIndex); const remaining = fileTypeSelect.value; editor.value = projects[current][remaining] || '';
-    });
+    function saveCurrent(){ if(!current) return; projects[current][fileTypeSelect.value] = editor.value; localStorage.setItem('pj_projects', JSON.stringify(projects)); log('Saved locally: '+current); }
 
-    // Editor change -> update model
-    editor.addEventListener('input', ()=>{ projects[current][fileTypeSelect.value] = editor.value; });
+    document.getElementById('newProjectBtn').addEventListener('click', ()=> newProject());
+    document.getElementById('saveLocalBtn').addEventListener('click', ()=> saveCurrent());
+    fileTypeSelect.addEventListener('change', e=>{ editor.value = projects[current][e.target.value]||''; });
 
-    // Preview: compose files into a single HTML for sandboxed iframe
+    document.getElementById('newFileBtn').addEventListener('click', ()=>{ const fname = prompt('New file name (e.g. about.html)'); if(!fname) return; projects[current][fname]=''; populateFileSelect(); fileTypeSelect.value = fname; editor.value=''; localStorage.setItem('pj_projects', JSON.stringify(projects)); });
+    document.getElementById('deleteFileBtn').addEventListener('click', ()=>{ const f = fileTypeSelect.value; if(!confirm('Delete '+f+'?')) return; delete projects[current][f]; populateFileSelect(); fileTypeSelect.selectedIndex = 0; editor.value = projects[current][fileTypeSelect.value]||''; localStorage.setItem('pj_projects', JSON.stringify(projects)); });
+
+    editor.addEventListener('input', ()=>{ if(!current) return; projects[current][fileTypeSelect.value]=editor.value; });
+
+    // Build preview: inline local /style.css and /script.js referenced via /path
     function buildPreviewHtml(files){
-      const html = (files['index.html'] || '').replace(/<link\s+rel="stylesheet"\s+href="\/(.*?)">/g, (m, p1)=>{
-        const css = files[p1] || ''; return `<style>/* inlined: ${p1} */\n${css}</style>`;
-      }).replace(/<script\s+src="\/(.*?)"><\/script>/g, (m,p1)=>{
-        const js = files[p1] || ''; return `<script>/* inlined: ${p1} */\n${js}</script>`;
-      });
+      let html = files['index.html'] || '';
+      // inline styles
+      html = html.replace(/<link\s+rel="stylesheet"\s+href="\/(.*?)">/g, (m,p1)=>{ const css = files[p1]||''; return `<style>/* inlined: ${p1} */\n${css}</style>`; });
+      // inline scripts
+      html = html.replace(/<script\s+src="\/(.*?)"><\/script>/g, (m,p1)=>{ const js = files[p1]||''; return `<script>/* inlined: ${p1} */\n${js}</script>`; });
       return html;
     }
 
-    function updatePreview(){
-      if(!current) return; const html = buildPreviewHtml(projects[current]); preview.srcdoc = html; document.getElementById('hostPreview').textContent = '(not published)';
-    }
+    function updatePreview(){ if(!current) return; preview.srcdoc = buildPreviewHtml(projects[current]); hostPreview.textContent='(not published)'; }
     document.getElementById('refreshPreviewBtn').addEventListener('click', updatePreview);
 
-    // quick load shared project from URL (data param)
-    function loadFromURL(){
-      try{
-        const params = new URLSearchParams(location.search);
-        if(params.has('site')){
-          // if ?site=data (base64 JSON) load it
-          const raw = params.get('site');
-          const decoded = JSON.parse(atob(raw));
-          const name = decoded.name || 'shared-site';
-          projects[name] = decoded.files; localStorage.setItem('pj_projects', JSON.stringify(projects)); renderProjects(); loadProject(name);
-        }
-      }catch(e){ console.warn('failed to load site from url', e); }
-    }
+    // Load from ?site=base64
+    function loadFromURL(){ try{ const params = new URLSearchParams(location.search); if(params.has('site')){ const raw = params.get('site'); const decoded = JSON.parse(atob(raw)); const name = decoded.name||'shared-site'; projects[name]=decoded.files; localStorage.setItem('pj_projects', JSON.stringify(projects)); renderProjects(); loadProject(name); } }catch(e){ console.warn('Failed to load site from url', e); } }
+    document.getElementById('shareBtn').addEventListener('click', ()=>{ const token = prompt('Copy this token and share the base64 to others:', btoa(JSON.stringify({name:current,files:projects[current]}))); if(token) { navigator.clipboard?.writeText(token).then(()=>alert('Copied token to clipboard')); } });
 
-    document.getElementById('loadShareBtn').addEventListener('click', ()=>{
-      const raw = prompt('Paste a share token or site param (base64)'); if(!raw) return; try{ const decoded = JSON.parse(atob(raw)); const name = decoded.name || 'shared-site'; projects[name] = decoded.files; localStorage.setItem('pj_projects', JSON.stringify(projects)); renderProjects(); loadProject(name); }catch(e){ alert('Invalid token'); }
-    });
-
-    // Save to Puter cloud (uses puter.fs API)
+    // Puter cloud operations (follow docs: puter.hosting.create(subdomain, dirPath), puter.fs.write, puter.auth.signIn)
     document.getElementById('savePuterBtn').addEventListener('click', async ()=>{
       try{
-        if(!current) return alert('Open or create a project first');
-        if(!puter){ alert('Puter.js not loaded'); return; }
-        // optional: ensure user signed in
+        if(!current) return alert('Open a project first');
+        if(!window.puter) return alert('Puter.js not loaded');
         try{ await puter.auth.signIn(); }catch(e){ log('Sign-in skipped or failed: '+e.message); }
         const dir = '/projects/'+current;
-        await puter.fs.mkdir(dir).catch(()=>{});
+        try{ await puter.fs.mkdir(dir); }catch(e){}
         for(const [fname,content] of Object.entries(projects[current])){
           await puter.fs.write(`${dir}/${fname}`, content);
         }
-        log('Saved project to Puter cloud at '+dir);
+        log('Synced project to Puter cloud: '+dir);
       }catch(e){ log('Error saving to Puter: '+(e.message||e)); }
     });
 
-    // Publish: create directory and call puter.hosting.create(subdomain, dir)
     document.getElementById('publishBtn').addEventListener('click', async ()=>{
       try{
         if(!current) return alert('Open a project first');
         await puter.auth.signIn();
         const dir = '/projects/'+current;
-        // ensure dir exists and files are written
-        await puter.fs.mkdir(dir).catch(()=>{});
+        try{ await puter.fs.mkdir(dir); }catch(e){}
         for(const [fname,content] of Object.entries(projects[current])){
           await puter.fs.write(`${dir}/${fname}`, content);
         }
-        // create a friendly subdomain
-        const sub = (projectNameInput.value || current).toLowerCase().replace(/[^a-z0-9-]/g,'-').slice(0,30) + '-' + Math.random().toString(36).slice(2,6);
-        const site = await puter.hosting.create(sub, dir);
+        const safe = (projectNameInput.value||current).toLowerCase().replace(/[^a-z0-9-]/g,'-').slice(0,30) + '-' + Math.random().toString(36).slice(2,6);
+        const site = await puter.hosting.create(safe, dir);
         const url = `https://${site.subdomain}.puter.site`;
-        document.getElementById('hostPreview').innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
-        log('Published site at '+url);
+        hostPreview.innerHTML = `<a class=\"link\" href=\"${url}\" target=\"_blank\">${url}</a>`;
+        log('Published at '+url);
       }catch(e){ log('Publish failed: '+(e.message||e)); }
     });
 
-    // Sign-in (explicit)
-    document.getElementById('signInBtn').addEventListener('click', async ()=>{ try{ await puter.auth.signIn(); alert('Signed in'); }catch(e){ alert('Sign in failed: '+e.message); } });
+    document.getElementById('signInBtn').addEventListener('click', async ()=>{ try{ await puter.auth.signIn(); alert('Signed in'); }catch(e){ alert('Sign in failed: '+(e.message||e)); } });
 
-    // Simple Puter AI chat integration
+    // Puter AI assistant integration (use messages array per docs). We provide project files as context and ask for JSON patch responses.
     document.getElementById('askBtn').addEventListener('click', async ()=>{
       const prompt = document.getElementById('promptInput').value.trim(); if(!prompt) return;
-      // append user message
-      const um = document.createElement('div'); um.className='chat-message user'; um.textContent = prompt; chatLog.appendChild(um); chatLog.scrollTop = chatLog.scrollHeight;
-      document.getElementById('promptInput').value='';
-      // construct context: provide index.html and files
+      // append to chat
+      const um = document.createElement('div'); um.className='msg user'; um.textContent = prompt; chatLog.appendChild(um); chatLog.scrollTop = chatLog.scrollHeight;
       const context = Object.entries(projects[current]||{}).map(([k,v])=>`FILE: ${k}\n${v}`).join('\n\n');
-      const fullPrompt = `You are a helpful web coding assistant. The user project files are below. When you produce code, return only the file patched and the contents in a JSON object like {\"file\":\"filename\",\"content\":\"...contents...\"}.\n\nUSER REQUEST: ${prompt}\n\nPROJECT FILES:\n${context}`;
-      const assistEl = document.createElement('div'); assistEl.className='chat-message assistant'; assistEl.textContent = 'Loading…'; chatLog.appendChild(assistEl); chatLog.scrollTop = chatLog.scrollHeight;
+      const system = `You are a concise and safe web coding assistant. When you produce code to modify the project, return a single JSON object with {\\"file\\":\\"<filename>\\",\\"content\\":\\"...escaped content...\\"}. Do NOT include any extra explanation.`;
+      const user = `User request: ${prompt}\n\nProject files:\n${context}`;
+      const assistEl = document.createElement('div'); assistEl.className='msg assistant'; assistEl.textContent = 'Thinking...'; chatLog.appendChild(assistEl); chatLog.scrollTop = chatLog.scrollHeight;
       try{
-        const res = await puter.ai.chat({model:'gpt-5-nano',messages:[{role:'user',content:fullPrompt}]});
-        const text = res.choices?.[0]?.message?.content || JSON.stringify(res);
+        const res = await puter.ai.chat({messages:[{role:'system',content:system},{role:'user',content:user}],model:'gpt-5-nano'});
+        const text = res?.choices?.[0]?.message?.content || JSON.stringify(res);
         assistEl.textContent = text;
-        // Try to parse JSON response and apply patch
-        try{
-          const parsed = JSON.parse(text);
-          if(parsed.file && parsed.content!==undefined){
-            projects[current][parsed.file] = parsed.content;
-            if(fileTypeSelect.value===parsed.file) editor.value = parsed.content;
-            updatePreview(); log('Applied assistant patch to '+parsed.file);
-          }
-        }catch(e){ log('Assistant reply not in JSON patch format — see chat'); }
+        // Try parse
+        try{ const parsed = JSON.parse(text); if(parsed.file && parsed.content!==undefined){ projects[current][parsed.file]=parsed.content; if(fileTypeSelect.value===parsed.file) editor.value = parsed.content; populateFileSelect(); updatePreview(); log('Assistant applied patch to '+parsed.file); } }
+        catch(e){ log('Assistant reply not JSON patch — see chat'); }
       }catch(e){ assistEl.textContent = 'Assistant error: '+(e.message||e); }
     });
 
-    // initial boot
+    // Boot
     if(Object.keys(projects).length===0) newProject('demo-project'); else { renderProjects(); loadFromURL(); if(!current) loadProject(Object.keys(projects)[0]); }
-    setInterval(()=>{ saveCurrent(); },5000);
+    setInterval(()=> saveCurrent(),5000);
+
+    // Accessibility: keyboard shortcuts
+    window.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey)&&e.key==='s'){ e.preventDefault(); saveCurrent(); alert('Saved'); } });
   </script>
 </body>
 </html>
