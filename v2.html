@@ -39,6 +39,11 @@ function getQueryParam(name) {
 }
 
 async function loadSites() {
+  const res = await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
+    headers: { "X-Master-Key": JSONBIN_API_KEY }
+  });
+  if (!res.ok) throw new Error("Failed to load sites: " + res.status);
+  const data = await res.json();
   sites = data.record.sites || {};
 }
 
@@ -83,7 +88,7 @@ async function renderEditor() {
       <label for="siteName">Site Name</label>
       <input id="siteName" placeholder="Enter site name">
       <button id="loadBtn" class="btn">Load</button>
-      <button id="saveBtn" class="btn">Save</button>
+      <button id="saveBtn" onclick=v2() class="btn">Save</button>
     </div>
     <div class="row">
       <div class="editor" id="editor"></div>
@@ -92,7 +97,7 @@ async function renderEditor() {
     <div class="ai-box">
       <h3>AI Coder (Puter.js)</h3>
       <textarea id="aiPrompt" rows="2" placeholder="Describe how to change or extend the site..."></textarea><br>
-      <button id="aiBtn" class="btn">Generate</button>
+      <button id="aiBtn" class="btn">Generate Update</button>
     </div>
   `;
   editor = CodeMirror(document.getElementById("editor"), {
@@ -129,7 +134,7 @@ async function renderEditor() {
     const name = document.getElementById("siteName").value.trim();
     if (name) loadSite(name);
   };
-  document.getElementById("saveBtn").onclick = saveV2();
+  document.getElementById("saveBtn").onclick = saveSite;
 
   // AI with memory of current code
   document.getElementById("aiBtn").onclick = async () => {
@@ -177,7 +182,7 @@ if (siteParam) {
 }
 </script>
       <script>
-        function saveV2() {
+          function v2() {
           (async () => {
               // (1) Create a random directory
               let dirName = puter.randName();
