@@ -3,300 +3,229 @@
 <head>
   <meta charset="UTF-8">
   <title>PuterJS Web Studio</title>
+  <script src="https://js.puter.com/v2/"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-:root {
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-hover: rgba(255, 255, 255, 0.1);
-  --accent: #60a5fa;
-  --accent-glow: 0 0 18px rgba(96,165,250,0.6);
-  --text: #f8fafc;
-  --text-dim: #94a3b8;
-  --radius: 16px;
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  background: radial-gradient(circle at 20% 20%, #0f172a, #1e293b 60%, #0f172a 100%);
-  color: var(--text);
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  overflow: hidden;
-}
-
-/* subtle animated gradient overlay */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(120deg, rgba(96,165,250,0.15), rgba(139,92,246,0.15), rgba(236,72,153,0.15));
-  background-size: 200% 200%;
-  animation: gradientShift 15s ease infinite;
-  z-index: 0;
-}
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-header {
-  padding: 1rem 2rem;
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--accent);
-  backdrop-filter: blur(16px);
-  background: var(--glass-bg);
-  border-bottom: 1px solid var(--glass-border);
-  box-shadow: var(--accent-glow);
-  z-index: 10;
-}
-
-main {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 240px 1fr 1fr;
-  gap: 1.2rem;
-  padding: 1.2rem;
-  position: relative;
-  z-index: 1;
-}
-
-/* Panels */
-.panel {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  padding: 1rem;
-  backdrop-filter: blur(20px) saturate(120%);
-  box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.panel:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 40px rgba(0,0,0,0.5), var(--accent-glow);
-}
-
-/* Project list */
-#projects { overflow-y: auto; }
-.project-item {
-  padding: 0.6rem 0.8rem;
-  margin-bottom: 0.3rem;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
-  font-weight: 500;
-  color: var(--text-dim);
-}
-.project-item:hover {
-  background: var(--glass-hover);
-  color: var(--text);
-  transform: translateX(4px);
-}
-.project-item.active {
-  background: var(--accent);
-  color: #fff;
-  box-shadow: var(--accent-glow);
-}
-
-/* Inputs + Buttons */
-select, input, button, textarea {
-  margin-top: 0.6rem;
-  width: 100%;
-  padding: 0.6rem 0.8rem;
-  border-radius: 10px;
-  border: 1px solid var(--glass-border);
-  background: rgba(255,255,255,0.07);
-  color: var(--text);
-  font-size: 0.9rem;
-  transition: all 0.25s ease;
-}
-select:focus, input:focus, textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: var(--accent-glow);
-}
-button {
-  cursor: pointer;
-  background: var(--accent);
-  color: #fff;
-  font-weight: 600;
-  border: none;
-  letter-spacing: 0.3px;
-}
-button:hover { opacity: 0.9; transform: translateY(-1px); }
-
-/* Editor */
-textarea {
-  flex: 1;
-  resize: none;
-  font-family: 'Fira Code', monospace;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  background: rgba(15,23,42,0.7);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 1rem;
-  color: var(--text);
-}
-
-/* Preview */
-iframe {
-  flex: 1;
-  border: none;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
-}
-
-/* Console */
-#console {
-  font-family: monospace;
-  font-size: 0.85rem;
-  margin-top: 0.6rem;
-  background: rgba(0,0,0,0.45);
-  border-radius: 10px;
-  padding: 0.6rem;
-  height: 100px;
-  overflow-y: auto;
-  line-height: 1.4;
-}
-
-/* Responsive */
-@media(max-width: 1000px){
-  main { grid-template-columns: 1fr; grid-template-rows: auto auto auto; }
-}
-
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --accent: #60a5fa;
+      --accent-glow: 0 0 20px rgba(96,165,250,0.6);
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+      --radius: 16px;
+    }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: radial-gradient(circle at 20% 20%, #0f172a, #1e293b 60%, #0f172a 100%);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      padding: 1rem 2rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--accent);
+      backdrop-filter: blur(16px);
+      background: var(--glass-bg);
+      border-bottom: 1px solid var(--glass-border);
+      box-shadow: var(--accent-glow);
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header button {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 240px 1fr 1fr;
+      grid-template-rows: auto 220px;
+      gap: 1rem;
+      padding: 1rem;
+      grid-template-areas:
+        "projects editor preview"
+        "assistant assistant assistant";
+    }
+    .panel {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      backdrop-filter: blur(20px) saturate(120%);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #projects { grid-area: projects; }
+    #editorPanel { grid-area: editor; }
+    #previewPanel { grid-area: preview; }
+    #assistantPanel { grid-area: assistant; flex-direction: row; }
+    #editor { flex: 1; border-radius: 8px; overflow: hidden; }
+    #preview { flex: 1; border: none; border-radius: 8px; background: #fff; }
+    #console { flex: 0.3; font-family: monospace; font-size: 0.8rem; margin-left: 1rem; background: rgba(0,0,0,0.45); border-radius: 10px; padding: 0.6rem; overflow-y: auto; }
+    #chatLog { flex: 1; overflow-y: auto; padding: 0.5rem; }
+    .msg { margin: 0.3rem 0; padding: 0.6rem 0.9rem; border-radius: 12px; max-width: 80%; }
+    .msg.user { background: var(--accent); color: #fff; align-self: flex-end; }
+    .msg.assistant { background: rgba(255,255,255,0.1); color: var(--text); align-self: flex-start; }
+    #promptRow { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    #promptInput { flex: 1; }
+    button, input, select {
+      margin-top: 0.5rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    button:hover { opacity: 0.9; }
   </style>
 </head>
 <body>
-  <header>PuterJS Web Studio</header>
+  <header>
+    <div><i class="fa-solid fa-code"></i> PuterJS Web Studio</div>
+    <button id="publishBtn">Publish</button>
+  </header>
+
   <main>
-    <div class="panel">
+    <div class="panel" id="projects">
       <h3>Projects</h3>
-      <div id="projects"></div>
+      <div id="projectsList"></div>
       <input id="projectName" placeholder="Project name">
-      <button id="newProject">New Project</button>
+      <button id="newProjectBtn">New Project</button>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="editorPanel">
       <h3>Editor</h3>
       <select id="fileSelect"></select>
-      <textarea id="editor"></textarea>
+      <div id="editor"></div>
       <div>
-        <button id="newFile">New File</button>
-        <button id="deleteFile">Delete</button>
-        <button id="saveLocal">💾 Save</button>
-        <button id="refresh">🔄 Preview</button>
+        <button id="newFileBtn">New File</button>
+        <button id="deleteFileBtn">Delete</button>
+        <button id="saveLocalBtn">Save</button>
+        <button id="refreshBtn">Preview</button>
       </div>
-      <div id="console"></div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="previewPanel">
       <h3>Preview</h3>
       <iframe id="preview"></iframe>
     </div>
+
+    <div class="panel" id="assistantPanel">
+      <div style="flex:2; display:flex; flex-direction:column;">
+        <h3>AI Assistant</h3>
+        <div id="chatLog"></div>
+        <div id="promptRow">
+          <input id="promptInput" placeholder="Ask AI to modify or create code...">
+          <button id="askBtn">Ask</button>
+        </div>
+      </div>
+      <div id="console"></div>
+    </div>
   </main>
 
+  <!-- Monaco Editor -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
   <script>
     const DEFAULT_FILES = {
-      "index.html": "<!DOCTYPE html><html><head><title>New Site</title><link rel='stylesheet' href='style.css'></head><body><h1>Hello World</h1><script src='script.js'></scr"+"ipt></body></html>",
-      "style.css": "body{font-family:sans-serif;text-align:center;padding-top:20vh;background:#f1f5f9;}",
-      "script.js": "console.log('Hello from PuterJS');"
+      "index.html": "<!DOCTYPE html><html><head><title>Site</title><link rel='stylesheet' href='style.css'></head><body><h1>Hello</h1><script src='script.js'></scr"+"ipt></body></html>",
+      "style.css": "body{font-family:sans-serif;text-align:center;padding-top:20vh;}",
+      "script.js": "console.log('Hello from JS');"
     };
 
     let projects = JSON.parse(localStorage.getItem('pj_projects') || '{}');
     let current = null;
-
-    const projectsEl = document.getElementById('projects');
-    const projectNameEl = document.getElementById('projectName');
+    const projectsList = document.getElementById('projectsList');
     const fileSelect = document.getElementById('fileSelect');
+    const preview = document.getElementById('preview');
     const editorEl = document.getElementById('editor');
-    const previewEl = document.getElementById('preview');
+    const chatLog = document.getElementById('chatLog');
     const consoleEl = document.getElementById('console');
+    let editor;
 
-    function log(msg){ consoleEl.textContent += msg + "\\n"; consoleEl.scrollTop = consoleEl.scrollHeight; }
+    const log = msg => { consoleEl.textContent += msg+"\\n"; consoleEl.scrollTop = consoleEl.scrollHeight; };
 
-    function renderProjects(){
-      projectsEl.innerHTML = '';
-      for(const name of Object.keys(projects)){
-        const d = document.createElement('div');
-        d.className = 'project-item' + (name === current ? ' active' : '');
-        d.textContent = name;
-        d.onclick = ()=> loadProject(name);
-        projectsEl.appendChild(d);
-      }
+    function renderProjects(){ projectsList.innerHTML=''; for(const name of Object.keys(projects)){ const d=document.createElement('div'); d.className='project-item'+(current===name?' active':''); d.textContent=name; d.onclick=()=>loadProject(name); projectsList.appendChild(d);} }
+    function newProject(name){ if(!name) name='proj-'+Math.random().toString(36).slice(2,7); projects[name]=JSON.parse(JSON.stringify(DEFAULT_FILES)); saveLocal(); renderProjects(); loadProject(name); }
+    function loadProject(name){ current=name; document.getElementById('projectName').value=name; populateFileSelect(); fileSelect.value='index.html'; editor.setValue(projects[name]['index.html']); renderProjects(); updatePreview(); }
+    function populateFileSelect(){ fileSelect.innerHTML=''; for(const f of Object.keys(projects[current]||{})){ const o=document.createElement('option'); o.value=f; o.textContent=f; fileSelect.appendChild(o); } }
+    function saveLocal(){ if(!current) return; projects[current][fileSelect.value]=editor.getValue(); localStorage.setItem('pj_projects',JSON.stringify(projects)); log('Saved '+current); }
+    function buildPreviewHtml(files){ let html=files['index.html']||''; html=html.replace(/<link[^>]+href=["']([^"']+)["'][^>]*>/gi,(m,p1)=>`<style>${files[p1]||''}</style>`); html=html.replace(/<script[^>]+src=["']([^"']+)["'][^>]*><\\/script>/gi,(m,p1)=>`<script>${files[p1]||''}<\\/script>`); return html; }`
+    function updatePreview(){ if(!current) return; preview.srcdoc=buildPreviewHtml(projects[current]); }
+
+    // Monaco init
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+      editor = monaco.editor.create(editorEl, {
+        value: "",
+        language: "html",
+        theme: "vs-dark",
+        automaticLayout: true,
+        fontSize: 14,
+        minimap: { enabled: false }
+      });
+      if(Object.keys(projects).length===0) newProject('welcome-project'); else { renderProjects(); loadProject(Object.keys(projects)[0]); }
+      editor.onDidChangeModelContent(()=>{ if(current) projects[current][fileSelect.value]=editor.getValue(); });
+    });
+
+    fileSelect.onchange = e => editor.setValue(projects[current][e.target.value]||"");
+    document.getElementById('newProjectBtn').onclick = ()=>newProject();
+    document.getElementById('saveLocalBtn').onclick = saveLocal;
+    document.getElementById('refreshBtn').onclick = updatePreview;
+    document.getElementById('newFileBtn').onclick = ()=>{ const fname=prompt('New file:'); if(!fname) return; projects[current][fname]=''; populateFileSelect(); fileSelect.value=fname; editor.setValue(''); saveLocal(); };
+    document.getElementById('deleteFileBtn').onclick = ()=>{ const f=fileSelect.value; if(!f||!confirm('Delete '+f+'?')) return; delete projects[current][f]; populateFileSelect(); fileSelect.selectedIndex=0; editor.setValue(projects[current][fileSelect.value]||""); saveLocal(); };
+
+    // ================== AI Assistant ==================
+    async function askAI(prompt){
+      const um=document.createElement('div'); um.className='msg user'; um.textContent=prompt; chatLog.appendChild(um);
+      const am=document.createElement('div'); am.className='msg assistant'; am.textContent='Thinking...'; chatLog.appendChild(am); chatLog.scrollTop=chatLog.scrollHeight;
+      try {
+        const context = Object.entries(projects[current]).map(([name,content])=>({name,content}));
+        const reply = await puter.ai.chat({
+          model: "gpt-4o-mini",
+          messages: [
+            {role:"system", content:"You are a coding assistant inside a web IDE. You can return full new code or patches. Reply in plain text."},
+            {role:"user", content:`Project files:\n${JSON.stringify(context)}\n\nTask: ${prompt}`}
+          ]
+        });
+        const text = reply.output_text || "[No response]";
+        am.textContent=text;
+        try {
+          const parsed = JSON.parse(text);
+          if(parsed && typeof parsed==="object"){
+            for(const f in parsed){ projects[current][f]=parsed[f]; if(fileSelect.value===f) editor.setValue(parsed[f]); }
+            updatePreview();
+            log("AI applied changes.");
+          }
+        } catch(e){ /* not JSON */ }
+      } catch(e){ am.textContent="Error: "+e.message; }
     }
+    document.getElementById('askBtn').onclick=()=>askAI(document.getElementById('promptInput').value.trim());
 
-    function newProject(name){
-      if(!name) name = 'proj-' + Math.random().toString(36).slice(2,7);
-      projects[name] = JSON.parse(JSON.stringify(DEFAULT_FILES));
-      saveLocal();
-      renderProjects();
-      loadProject(name);
-    }
-
-    function loadProject(name){
-      current = name;
-      projectNameEl.value = name;
-      populateFileSelect();
-      fileSelect.value = 'index.html';
-      editorEl.value = projects[name]['index.html'];
-      renderProjects();
-      updatePreview();
-    }
-
-    function populateFileSelect(){
-      fileSelect.innerHTML = '';
-      for(const f of Object.keys(projects[current]||{})){
-        const opt = document.createElement('option');
-        opt.value = f; opt.textContent = f;
-        fileSelect.appendChild(opt);
-      }
-    }
-
-    function saveLocal(){
+    // ================== Publish ==================
+    document.getElementById('publishBtn').onclick = async ()=>{
       if(!current) return;
-      projects[current][fileSelect.value] = editorEl.value;
-      localStorage.setItem('pj_projects', JSON.stringify(projects));
-      log('Saved '+current);
-    }
-
-    function buildPreviewHtml(files){
-      let html = files['index.html'] || '';
-      // inline CSS
-      html = html.replace(/<link[^>]+href=["']([^"']+)["'][^>]*>/gi,(m,p1)=> `<style>${files[p1]||''}</style>`);
-      // inline JS
-      html = html.replace(/<script[^>]+src=["']([^"']+)["'][^>]*><\\/script>/gi,(m,p1)=> `<script>${files[p1]||''}<\\/script>`);
-      return html;
-    }
-
-    function updatePreview(){
-      if(!current) return;
-      try{ previewEl.srcdoc = buildPreviewHtml(projects[current]); }
-      catch(e){ log('Preview error: '+e.message); }
-    }
-
-    // Events
-    editorEl.addEventListener('input', ()=>{ if(current) projects[current][fileSelect.value] = editorEl.value; });
-    document.getElementById('newProject').onclick = ()=> newProject();
-    document.getElementById('saveLocal').onclick = saveLocal;
-    fileSelect.onchange = e=> editorEl.value = projects[current][e.target.value] || '';
-    document.getElementById('newFile').onclick = ()=>{ const fname = prompt('New file name:'); if(!fname) return; projects[current][fname] = ''; populateFileSelect(); fileSelect.value=fname; editorEl.value=''; saveLocal(); };
-    document.getElementById('deleteFile').onclick = ()=>{ const f = fileSelect.value; if(!f) return; if(!confirm('Delete '+f+'?')) return; delete projects[current][f]; populateFileSelect(); fileSelect.selectedIndex=0; editorEl.value = projects[current][fileSelect.value]||''; saveLocal(); };
-    document.getElementById('refresh').onclick = updatePreview;
-
-    if(Object.keys(projects).length===0){ newProject('welcome-project'); }
-    else { renderProjects(); loadProject(Object.keys(projects)[0]); }
-
-    setInterval(saveLocal,5000);
-    window.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){ e.preventDefault(); saveLocal(); alert('Saved'); }});
+      const bundle = projects[current];
+      try {
+        const url = await puter.host.publish({ files: bundle, name: current });
+        alert("Published! Visit: "+url);
+        window.open(url,"_blank");
+      } catch(e){ alert("Publish failed: "+e.message); }
+    };
   </script>
 </body>
 </html>
