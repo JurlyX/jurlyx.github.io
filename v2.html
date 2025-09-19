@@ -3,275 +3,154 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PuterJS — Modern Host & IDE</title>
+  <title>PuterJS Web Host + IDE</title>
   <script src="https://js.puter.com/v2/"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@vscode/codicons/dist/codicon.css">
   <style>
     :root{
-      --bg-1:#0b1220;--bg-2:#071025;--card:#071427;--muted:#94a3b8;--accent:#60a5fa;--glass:rgba(255,255,255,0.04);
-      --success:#10b981;--danger:#ef4444;--radius:12px;--mono:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+      --bg:#071025;
+      --panel:#0f1724;
+      --muted:#98a2b3;
+      --accent:#60a5fa;
+      --glass:rgba(255,255,255,0.03);
+      --radius:12px;
+      --mono:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue';background:linear-gradient(180deg,var(--bg-2),var(--bg-1));color:#e6eef8}
-    .container{max-width:1200px;margin:20px auto;padding:16px;display:grid;grid-template-columns:320px 1fr 380px;gap:16px;align-items:start}
-    @media(max-width:1100px){.container{grid-template-columns:1fr;max-width:940px}}
 
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:14px;box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
-    header.app-header{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#061022);color:#e6eef8;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial}
+
+    .layout{display:grid;grid-template-columns:280px 1fr 360px;gap:16px;padding:18px;height:100vh}
+    @media (max-width:1100px){.layout{grid-template-columns:1fr;grid-auto-rows:min-content;padding:12px}}
+
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:14px;box-shadow:0 10px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+
+    .header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
     .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(90deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800}
-    h1{font-size:16px;margin:0}
+    h1{font-size:15px;margin:0}
     .muted{color:var(--muted);font-size:13px}
 
-    /* Left panel */
-    .projects{display:flex;flex-direction:column;gap:12px}
-    .projects .controls{display:flex;gap:8px}
-    .projects .project-list{display:flex;flex-direction:column;gap:8px;max-height:480px;overflow:auto;padding-right:6px}
-    .project-item{padding:10px;border-radius:10px;cursor:pointer;background:transparent;border:1px solid transparent}
-    .project-item.active{background:linear-gradient(90deg, rgba(96,165,250,0.06), rgba(124,58,237,0.03));border-color:rgba(255,255,255,0.03)}
-    input[type=text], select, textarea{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:10px;border-radius:8px;color:inherit}
+    input[type=text],select,button{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:10px;border-radius:10px;color:inherit}
+    button{cursor:pointer}
+    button.primary{background:var(--accent);border:none;color:#04172b}
 
-    /* Center editor */
-    .editor-split{display:flex;gap:12px;height:70vh;min-height:420px}
-    @media(max-width:1100px){.editor-split{flex-direction:column;height:auto}}
+    .project-list{display:flex;flex-direction:column;gap:6px;overflow:auto;max-height:56vh;padding-right:6px}
+    .project-item{padding:10px;border-radius:10px;cursor:pointer;border:1px solid transparent}
+    .project-item:hover{background:rgba(255,255,255,0.02)}
+    .project-item.active{background:linear-gradient(90deg, rgba(91,140,255,0.06), rgba(124,58,237,0.03));border-color:rgba(255,255,255,0.02)}
+
+    .editor-top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+    .editor-area{display:flex;gap:12px;height:68vh;min-height:420px}
+    @media (max-width:1100px){.editor-area{flex-direction:column;height:auto}}
+
     .pane{flex:1;display:flex;flex-direction:column;gap:8px}
-    .editor{flex:1;min-height:0;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
-    textarea#editor{width:100%;height:100%;resize:none;padding:14px;font-family:var(--mono);font-size:13px;background:transparent;color:inherit;border:none;outline:none}
     .filebar{display:flex;gap:8px;align-items:center}
-    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;cursor:pointer}
-    .btn.primary{background:var(--accent);color:#04233b;border:none}
+
+    .editor{flex:1;min-height:0;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.03);display:flex}
+    textarea#editor{flex:1;border:none;padding:14px;font-family:var(--mono);font-size:13px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);color:inherit;outline:none;resize:none}
+
+    .preview{flex:1;border-radius:10px;border:1px solid rgba(255,255,255,0.03);overflow:hidden}
+    iframe#preview{width:100%;height:100%;border:0;background:white}
+
+    .ai-header{display:flex;justify-content:space-between;align-items:center}
+    .chat{display:flex;flex-direction:column;gap:8px;height:68vh;min-height:420px}
+    .chat-log{flex:1;overflow:auto;padding:8px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
+    .msg{max-width:80%;padding:10px;border-radius:10px;margin:6px 0}
+    .msg.user{margin-left:auto;background:linear-gradient(90deg,#6ea8ff,#7c3aed);color:#041027}
+    .msg.assistant{background:rgba(255,255,255,0.02)}
+
+    .console{height:140px;padding:8px;border-radius:8px;background:rgba(0,0,0,0.25);font-family:var(--mono);font-size:13px;overflow:auto}
+
     .small{font-size:12px;color:var(--muted)}
-
-    iframe#preview{width:100%;height:100%;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
-
-    /* Right: AI */
-    .ai{display:flex;flex-direction:column;gap:8px;height:70vh;min-height:420px}
-    .chat-log{flex:1;overflow:auto;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
-    .msg{max-width:85%;padding:10px;border-radius:10px;margin:8px 0}
-    .msg.user{align-self:flex-end;background:linear-gradient(90deg, rgba(96,165,250,0.12), rgba(124,58,237,0.06));border:1px solid rgba(255,255,255,0.02)}
-    .msg.assistant{align-self:flex-start;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02)}
-    .console{height:150px;padding:8px;border-radius:8px;background:rgba(0,0,0,0.25);overflow:auto;font-family:var(--mono);font-size:13px}
-
-    /* footer */
-    .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     a.link{color:var(--accent);text-decoration:none}
-
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Left: Projects -->
-    <div class="card projects" aria-label="Projects panel">
-      <div class="app-header">
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="panel">
+      <div class="header">
         <div class="logo">PJ</div>
         <div>
-          <h1>Puter Host & IDE</h1>
-          <div class="muted">Modern, fast, AI-assisted static web hosting</div>
+          <div style="font-weight:600">Puter Host</div>
+          <div style="font-size:12px;color:var(--muted)">Projects</div>
         </div>
       </div>
-
-      <div class="controls">
-        <input id="projectName" placeholder="Project name" />
-        <button id="newProjectBtn" class="btn">New</button>
-        <button id="saveLocalBtn" class="btn primary">Save</button>
-      </div>
-
-      <div style="margin-top:8px" class="small">Projects (saved in browser)</div>
-      <div id="projectsList" class="project-list"></div>
-
-      <div style="margin-top:12px" class="meta">
-        <button id="signInBtn" class="btn">Sign in</button>
-        <button id="savePuterBtn" class="btn">Sync to Puter</button>
-        <button id="publishBtn" class="btn primary">Publish</button>
-        <div style="margin-left:auto" id="hostPreview" class="small">Not published</div>
-      </div>
+      <button id="newProject">New Project</button>
+      <input id="projectName" placeholder="Project name"/>
+      <div class="files" id="projects"></div>
+      <button id="saveCloud">Save to Puter</button>
+      <button id="publish" class="primary">Publish</button>
+      <div style="font-size:12px;color:var(--muted)">Host URL: <span id="hostUrl">—</span></div>
     </div>
 
-    <!-- Center: Editor + Preview -->
-    <div class="card">
-      <div style="display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:8px">
-        <div>
-          <div style="font-weight:700">Editor</div>
-          <div class="muted">Edit files, live preview, smart inlining</div>
-        </div>
-        <div class="small">Auto-save every 5s</div>
-      </div>
-
-      <div class="editor-split">
-        <div class="pane">
-          <div class="filebar">
-            <select id="fileTypeSelect"></select>
-            <button id="newFileBtn" class="btn">+ File</button>
-            <button id="deleteFileBtn" class="btn">Delete</button>
-            <div style="margin-left:auto" class="small">Files virtual until saved</div>
-          </div>
-          <div class="editor" id="editorWrap">
-            <textarea id="editor" spellcheck="false"></textarea>
-          </div>
-        </div>
-
-        <div class="pane">
-          <div style="display:flex;align-items:center;gap:8px;justify-content:space-between">
-            <div style="font-weight:700">Live Preview</div>
-            <div class="small">Sandboxed iframe</div>
-            <div>
-              <button id="refreshPreviewBtn" class="btn">Refresh</button>
-            </div>
-          </div>
-          <iframe id="preview" sandbox="allow-scripts allow-modals allow-forms"></iframe>
-        </div>
-      </div>
-
-      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;justify-content:flex-end">
-        <div class="small">Share: <input id="shareToken" style="width:260px" placeholder="Paste ?site= token or click Share"></div>
-        <button id="shareBtn" class="btn">Share</button>
-      </div>
-    </div>
-
-    <!-- Right: AI Assistant & Console -->
-    <div class="card ai">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-weight:700">Puter AI Assistant</div>
-        <div class="small">Powered by Puter.ai</div>
-      </div>
-
-      <div id="chatLog" class="chat-log"></div>
-
+    <!-- Editor -->
+    <div class="panel editor-panel">
       <div style="display:flex;gap:8px;align-items:center">
-        <input id="promptInput" placeholder="Ask assistant (e.g. 'add a navbar')" />
-        <button id="askBtn" class="btn primary">Ask</button>
+        <select id="fileSelect"></select>
+        <button id="newFile">+ File</button>
+        <button id="deleteFile">Delete</button>
+        <button id="refresh">Refresh Preview</button>
       </div>
+      <div class="editor-area">
+        <textarea id="editor"></textarea>
+        <iframe id="preview"></iframe>
+      </div>
+    </div>
 
-      <div style="margin-top:8px;font-weight:700">Console</div>
-      <pre id="console" class="console"></pre>
+    <!-- Assistant -->
+    <div class="panel">
+      <div class="header">
+        <span style="font-weight:600">AI Assistant</span>
+      </div>
+      <div class="chat">
+        <div id="chatLog" class="chat-log"></div>
+        <div style="display:flex;gap:8px">
+          <input id="prompt" placeholder="Ask AI..."/>
+          <button id="ask">Ask</button>
+        </div>
+        <div class="console" id="console"></div>
+      </div>
     </div>
   </div>
 
-  <script>
-    // ---------- Utilities ----------
-    const DEFAULT_FILES = {
-      'index.html': `<!doctype html>\n<html>\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width,initial-scale=1">\n  <title>My Puter Site</title>\n  <link rel="stylesheet" href="/style.css">\n</head>\n<body>\n  <h1>Hello from Puter</h1>\n  <script src="/script.js"></script>\n</body>\n</html>`,
-      'style.css': `:root{--accent:#60a5fa}body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:0;padding:40px;background:linear-gradient(180deg,#f8fafc,#eef2ff);color:#071427}h1{color:var(--accent)}`,
-      'script.js': `console.log('hello from puter site')`
-    };
+<script>
+const DEFAULT_FILES={"index.html":"<!doctype html><html><head><meta charset='utf-8'><title>New Site</title><link rel='stylesheet' href='/style.css'></head><body><h1>Hello</h1><script src='/script.js'></script></body></html>","style.css":"body{font-family:sans-serif;text-align:center;padding-top:20vh}" ,"script.js":"console.log('Hello from JS')"};
+let projects=JSON.parse(localStorage.getItem('pj_projects')||'{}');
+let current=null;
+const editor=document.getElementById('editor');
+const fileSelect=document.getElementById('fileSelect');
+const preview=document.getElementById('preview');
+const log=(msg)=>{const c=document.getElementById('console');c.textContent+=msg+"\n";c.scrollTop=c.scrollHeight;};
 
-    const logEl = document.getElementById('console');
-    function log(msg){ logEl.textContent += msg + '\n'; logEl.scrollTop = logEl.scrollHeight; }
+function renderProjects(){const el=document.getElementById('projects');el.innerHTML='';for(const name of Object.keys(projects)){const d=document.createElement('div');d.textContent=name;d.className='file-item'+(current===name?' active':'');d.onclick=()=>loadProject(name);el.appendChild(d)}}
+function newProject(name){if(!name)name='proj-'+Math.random().toString(36).slice(2,7);projects[name]=JSON.parse(JSON.stringify(DEFAULT_FILES));saveLocal();renderProjects();loadProject(name)}
+function loadProject(name){current=name;document.getElementById('projectName').value=name;updateFileSelect();fileSelect.value='index.html';editor.value=projects[name]['index.html'];updatePreview();renderProjects()}
+function saveLocal(){if(current){projects[current][fileSelect.value]=editor.value;localStorage.setItem('pj_projects',JSON.stringify(projects));log('Saved '+current)}}
+function updateFileSelect(){fileSelect.innerHTML='';for(const f of Object.keys(projects[current])){const o=document.createElement('option');o.value=f;o.textContent=f;fileSelect.appendChild(o)}}
+function buildPreview(files){let html=files['index.html']||'';html=html.replace(/<link rel='stylesheet' href='\/(.*?)'>/g,(m,p1)=>`<style>${files[p1]||''}</style>`).replace(/<script src='\/(.*?)'><\\/script>/g,(m,p1)=>`<script>${files[p1]||''}<\\/script>`);return html}
+function updatePreview(){if(!current)return;preview.srcdoc=buildPreview(projects[current])}
 
-    // Projects store
-    let projects = JSON.parse(localStorage.getItem('pj_projects')||'{}');
-    let current = null;
+// Events
+document.getElementById('newProject').onclick=()=>newProject();
+fileSelect.onchange=()=>editor.value=projects[current][fileSelect.value]||'';
+editor.oninput=()=>{projects[current][fileSelect.value]=editor.value};
+document.getElementById('newFile').onclick=()=>{const fn=prompt('File name?');if(fn){projects[current][fn]='';updateFileSelect();fileSelect.value=fn;editor.value=''}};
+document.getElementById('deleteFile').onclick=()=>{const f=fileSelect.value;if(confirm('Delete '+f+'?')){delete projects[current][f];updateFileSelect();editor.value=projects[current][fileSelect.value]||''}};
+document.getElementById('refresh').onclick=updatePreview;
 
-    // Elements
-    const projectsList = document.getElementById('projectsList');
-    const projectNameInput = document.getElementById('projectName');
-    const editor = document.getElementById('editor');
-    const fileTypeSelect = document.getElementById('fileTypeSelect');
-    const preview = document.getElementById('preview');
-    const chatLog = document.getElementById('chatLog');
-    const hostPreview = document.getElementById('hostPreview');
+// Save to cloud
+document.getElementById('saveCloud').onclick=async()=>{try{await puter.auth.signIn();const dir='/projects/'+current;await puter.fs.mkdir(dir).catch(()=>{});for(const [f,c] of Object.entries(projects[current]))await puter.fs.write(dir+'/'+f,c);log('Saved to Puter cloud')}catch(e){log('Cloud save error: '+e.message)}}
 
-    // Render project list
-    function renderProjects(){
-      projectsList.innerHTML = '';
-      for(const name of Object.keys(projects)){
-        const el = document.createElement('div'); el.className = 'project-item' + (current===name? ' active':''); el.textContent = name;
-        el.addEventListener('click', ()=> loadProject(name));
-        projectsList.appendChild(el);
-      }
-    }
+// Publish
+document.getElementById('publish').onclick=async()=>{try{await puter.auth.signIn();const dir='/projects/'+current;await puter.fs.mkdir(dir).catch(()=>{});for(const [f,c] of Object.entries(projects[current]))await puter.fs.write(dir+'/'+f,c);const sub=current.toLowerCase().replace(/[^a-z0-9-]/g,'-').slice(0,20)+'-'+Math.random().toString(36).slice(2,6);const site=await puter.hosting.create(sub,dir);const url='https://'+site.subdomain+'.puter.site';document.getElementById('hostUrl').innerHTML='<a href="'+url+'" target="_blank">'+url+'</a>';log('Published: '+url)}catch(e){log('Publish error: '+e.message)}}
 
-    function newProject(name){ if(!name) name = 'project-'+Math.random().toString(36).slice(2,8); projects[name]=JSON.parse(JSON.stringify(DEFAULT_FILES)); localStorage.setItem('pj_projects', JSON.stringify(projects)); renderProjects(); loadProject(name); }
+// AI assistant
+document.getElementById('ask').onclick=async()=>{const q=document.getElementById('prompt').value.trim();if(!q)return;document.getElementById('prompt').value='';const user=document.createElement('div');user.className='msg user';user.textContent=q;chatLog.appendChild(user);chatLog.scrollTop=chatLog.scrollHeight;const ai=document.createElement('div');ai.className='msg assistant';ai.textContent='…';chatLog.appendChild(ai);try{const context=Object.entries(projects[current]||{}).map(([k,v])=>`FILE:${k}\n${v}`).join('\n');const res=await puter.ai.chat({model:'gpt-5-nano',messages:[{role:'user',content:`User request: ${q}\nFiles:\n${context}`} ]});const text=res.choices?.[0]?.message?.content||'';ai.textContent=text;try{const parsed=JSON.parse(text);if(parsed.file&&parsed.content!==undefined){projects[current][parsed.file]=parsed.content;if(fileSelect.value===parsed.file)editor.value=parsed.content;updatePreview();log('Patched '+parsed.file)}}catch{}}catch(e){ai.textContent='Error: '+e.message}}
 
-    function loadProject(name){ current = name; projectNameInput.value = name; populateFileSelect(); fileTypeSelect.value = 'index.html'; editor.value = projects[name]['index.html']||''; renderProjects(); updatePreview(); }
-
-    function populateFileSelect(){ fileTypeSelect.innerHTML=''; const files = projects[current]; for(const f of Object.keys(files)){ const o = document.createElement('option'); o.value = f; o.textContent = f; fileTypeSelect.appendChild(o); } }
-
-    function saveCurrent(){ if(!current) return; projects[current][fileTypeSelect.value] = editor.value; localStorage.setItem('pj_projects', JSON.stringify(projects)); log('Saved locally: '+current); }
-
-    document.getElementById('newProjectBtn').addEventListener('click', ()=> newProject());
-    document.getElementById('saveLocalBtn').addEventListener('click', ()=> saveCurrent());
-    fileTypeSelect.addEventListener('change', e=>{ editor.value = projects[current][e.target.value]||''; });
-
-    document.getElementById('newFileBtn').addEventListener('click', ()=>{ const fname = prompt('New file name (e.g. about.html)'); if(!fname) return; projects[current][fname]=''; populateFileSelect(); fileTypeSelect.value = fname; editor.value=''; localStorage.setItem('pj_projects', JSON.stringify(projects)); });
-    document.getElementById('deleteFileBtn').addEventListener('click', ()=>{ const f = fileTypeSelect.value; if(!confirm('Delete '+f+'?')) return; delete projects[current][f]; populateFileSelect(); fileTypeSelect.selectedIndex = 0; editor.value = projects[current][fileTypeSelect.value]||''; localStorage.setItem('pj_projects', JSON.stringify(projects)); });
-
-    editor.addEventListener('input', ()=>{ if(!current) return; projects[current][fileTypeSelect.value]=editor.value; });
-
-    // Build preview: inline local /style.css and /script.js referenced via /path
-    function buildPreviewHtml(files){
-      let html = files['index.html'] || '';
-      // inline styles
-      html = html.replace(/<link\s+rel="stylesheet"\s+href="\/(.*?)">/g, (m,p1)=>{ const css = files[p1]||''; return `<style>/* inlined: ${p1} */\n${css}</style>`; });
-      // inline scripts
-      html = html.replace(/<script\s+src="\/(.*?)"><\/script>/g, (m,p1)=>{ const js = files[p1]||''; return `<script>/* inlined: ${p1} */\n${js}</script>`; });
-      return html;
-    }
-
-    function updatePreview(){ if(!current) return; preview.srcdoc = buildPreviewHtml(projects[current]); hostPreview.textContent='(not published)'; }
-    document.getElementById('refreshPreviewBtn').addEventListener('click', updatePreview);
-
-    // Load from ?site=base64
-    function loadFromURL(){ try{ const params = new URLSearchParams(location.search); if(params.has('site')){ const raw = params.get('site'); const decoded = JSON.parse(atob(raw)); const name = decoded.name||'shared-site'; projects[name]=decoded.files; localStorage.setItem('pj_projects', JSON.stringify(projects)); renderProjects(); loadProject(name); } }catch(e){ console.warn('Failed to load site from url', e); } }
-    document.getElementById('shareBtn').addEventListener('click', ()=>{ const token = prompt('Copy this token and share the base64 to others:', btoa(JSON.stringify({name:current,files:projects[current]}))); if(token) { navigator.clipboard?.writeText(token).then(()=>alert('Copied token to clipboard')); } });
-
-    // Puter cloud operations (follow docs: puter.hosting.create(subdomain, dirPath), puter.fs.write, puter.auth.signIn)
-    document.getElementById('savePuterBtn').addEventListener('click', async ()=>{
-      try{
-        if(!current) return alert('Open a project first');
-        if(!window.puter) return alert('Puter.js not loaded');
-        try{ await puter.auth.signIn(); }catch(e){ log('Sign-in skipped or failed: '+e.message); }
-        const dir = '/projects/'+current;
-        try{ await puter.fs.mkdir(dir); }catch(e){}
-        for(const [fname,content] of Object.entries(projects[current])){
-          await puter.fs.write(`${dir}/${fname}`, content);
-        }
-        log('Synced project to Puter cloud: '+dir);
-      }catch(e){ log('Error saving to Puter: '+(e.message||e)); }
-    });
-
-    document.getElementById('publishBtn').addEventListener('click', async ()=>{
-      try{
-        if(!current) return alert('Open a project first');
-        await puter.auth.signIn();
-        const dir = '/projects/'+current;
-        try{ await puter.fs.mkdir(dir); }catch(e){}
-        for(const [fname,content] of Object.entries(projects[current])){
-          await puter.fs.write(`${dir}/${fname}`, content);
-        }
-        const safe = (projectNameInput.value||current).toLowerCase().replace(/[^a-z0-9-]/g,'-').slice(0,30) + '-' + Math.random().toString(36).slice(2,6);
-        const site = await puter.hosting.create(safe, dir);
-        const url = `https://${site.subdomain}.puter.site`;
-        hostPreview.innerHTML = `<a class=\"link\" href=\"${url}\" target=\"_blank\">${url}</a>`;
-        log('Published at '+url);
-      }catch(e){ log('Publish failed: '+(e.message||e)); }
-    });
-
-    document.getElementById('signInBtn').addEventListener('click', async ()=>{ try{ await puter.auth.signIn(); alert('Signed in'); }catch(e){ alert('Sign in failed: '+(e.message||e)); } });
-
-    // Puter AI assistant integration (use messages array per docs). We provide project files as context and ask for JSON patch responses.
-    document.getElementById('askBtn').addEventListener('click', async ()=>{
-      const prompt = document.getElementById('promptInput').value.trim(); if(!prompt) return;
-      // append to chat
-      const um = document.createElement('div'); um.className='msg user'; um.textContent = prompt; chatLog.appendChild(um); chatLog.scrollTop = chatLog.scrollHeight;
-      const context = Object.entries(projects[current]||{}).map(([k,v])=>`FILE: ${k}\n${v}`).join('\n\n');
-      const system = `You are a concise and safe web coding assistant. When you produce code to modify the project, return a single JSON object with {\\"file\\":\\"<filename>\\",\\"content\\":\\"...escaped content...\\"}. Do NOT include any extra explanation.`;
-      const user = `User request: ${prompt}\n\nProject files:\n${context}`;
-      const assistEl = document.createElement('div'); assistEl.className='msg assistant'; assistEl.textContent = 'Thinking...'; chatLog.appendChild(assistEl); chatLog.scrollTop = chatLog.scrollHeight;
-      try{
-        const res = await puter.ai.chat({messages:[{role:'system',content:system},{role:'user',content:user}],model:'gpt-5-nano'});
-        const text = res?.choices?.[0]?.message?.content || JSON.stringify(res);
-        assistEl.textContent = text;
-        // Try parse
-        try{ const parsed = JSON.parse(text); if(parsed.file && parsed.content!==undefined){ projects[current][parsed.file]=parsed.content; if(fileTypeSelect.value===parsed.file) editor.value = parsed.content; populateFileSelect(); updatePreview(); log('Assistant applied patch to '+parsed.file); } }
-        catch(e){ log('Assistant reply not JSON patch — see chat'); }
-      }catch(e){ assistEl.textContent = 'Assistant error: '+(e.message||e); }
-    });
-
-    // Boot
-    if(Object.keys(projects).length===0) newProject('demo-project'); else { renderProjects(); loadFromURL(); if(!current) loadProject(Object.keys(projects)[0]); }
-    setInterval(()=> saveCurrent(),5000);
-
-    // Accessibility: keyboard shortcuts
-    window.addEventListener('keydown', (e)=>{ if((e.ctrlKey||e.metaKey)&&e.key==='s'){ e.preventDefault(); saveCurrent(); alert('Saved'); } });
-  </script>
+// Init
+if(Object.keys(projects).length===0)newProject('demo');else{renderProjects();loadProject(Object.keys(projects)[0])}
+setInterval(saveLocal,4000);
+</script>
 </body>
 </html>
