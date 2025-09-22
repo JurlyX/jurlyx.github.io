@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>XenzHost</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+  <style>
+    body { margin:0; font-family:system-ui, sans-serif; background:#f5f7fb; }
+    header { background:#0b84ff; color:#fff; padding:12px 20px; font-weight:bold; }
+    main { padding:16px; }
+    label { font-size:14px; font-weight:600; margin-bottom:4px; display:block; }
+    input, textarea { padding:8px; font-size:14px; border:1px solid #ccc; border-radius:6px; width:100%; box-sizing:border-box; }
+    .btn { background:#0b84ff; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-size:14px; }
+    .btn:hover { background:#066ad8; }
+    .row { display:flex; gap:16px; margin-top:12px; }
+    .editor { flex:1; border:1px solid #ccc; border-radius:6px; overflow:hidden; height:400px; }
+    iframe { flex:1; border:1px solid #ccc; border-radius:6px; height:400px; }
+    .ai-box { margin-top:12px; padding:10px; border:1px solid #ccc; border-radius:6px; background:#fff; }
+  </style>
+</head>
+<body>
+<header id="header">XenzHost</header>
+<main id="app">Loading…</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://js.puter.com/v2/"></script>
+<script>
+const JSONBIN_API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";  // <-- replace
+const BIN_ID = "68cad7bd43b1c97be9463d0e";               // <-- replace
+
+let sites = {};
+let currentSite = null;
+let editor;
+
+function getQueryParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+async function loadSites() {
+  const res = await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
+    headers: { "X-Master-Key": JSONBIN_API_KEY }
+  });
+  if (!res.ok) throw new Error("Failed to load sites: " + res.status);
+  const data = await res.json();
+  sites = data.record.sites || {};
+}
+
+async function saveSites() {
+  const res = await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
+    method: "PUT",
+    headers: { "Content-Type":"application/json", "X-Master-Key": JSONBIN_API_KEY },
+    body: JSON.stringify({ sites })
+  });
+  if (!res.ok) throw new Error("Failed to save sites: " + res.status);
+}
+
+// Viewer mode
+async function renderViewer(siteName) {
+  try {
+    await loadSites();
+  } catch(e) {
+    document.body.innerHTML = `<h1>Error: ${e.message}</h1>`;
+    return;
+  }
+  const code = sites[siteName];
+  if (!code) {
+    document.body.innerHTML = `<h1 style='font-family:sans-serif;text-align:center;margin-top:40px'>Site not found: ${siteName}</h1>`;
+    return;
+  }
+  document.open();
+  document.write(code);
+  document.close();
+}
+
+// Editor mode
+async function renderEditor() {
+  try {
+    await loadSites();
+  } catch(e) {
+    document.getElementById("app").innerHTML = `<h2>Error loading sites: ${e.message}</h2>`;
+    return;
+  }
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div>
+      <label for="siteName">Site Name</label>
+      <input id="siteName" placeholder="Enter site name">
+      <button id="loadBtn" class="btn">Load</button>
+      <button id="saveBtn" onclick=v2() class="btn">Save</button>
+    </div>
+    <div class="row">
+      <div class="editor" id="editor"></div>
+      <iframe id="preview"></iframe>
+    </div>
+    <div class="ai-box">
+      <h3>AI Coder (Puter.js)</h3>
+      <textarea id="aiPrompt" rows="2" placeholder="Describe how to change or extend the site..."></textarea><br>
+      <button id="aiBtn" class="btn">Generate Update</button>
+    </div>
+  `;
+  editor = CodeMirror(document.getElementById("editor"), {
+    value: "<!-- Create or load a site -->",
+    mode: "htmlmixed",
+    lineNumbers: true
+  });
+  editor.on("change", () => {
+    document.getElementById("preview").srcdoc = editor.getValue();
+  });
+
+  async function loadSite(name) {
+    currentSite = name;
+    const code = sites[name] || "<!-- New site -->";
+    editor.setValue(code);
+    document.getElementById("preview").srcdoc = code;
+  }
+
+  async function saveSite() {
+    if (!currentSite) {
+      alert("Enter a site name first.");
+      return;
+    }
+    sites[currentSite] = editor.getValue();
+    try {
+      await saveSites();
+      alert("Saved site: " + currentSite);
+    } catch(e) {
+      alert("Save error: " + e.message);
+    }
+  }
+
+  document.getElementById("loadBtn").onclick = () => {
+    const name = document.getElementById("siteName").value.trim();
+    if (name) loadSite(name);
+  };
+  document.getElementById("saveBtn").onclick = saveSite;
+
+  // AI with memory of current code
+  document.getElementById("aiBtn").onclick = async () => {
+    const userPrompt = document.getElementById("aiPrompt").value.trim();
+    if (!userPrompt) {
+      alert("Enter a description for the AI.");
+      return;
+    }
+    const currentCode = editor.getValue();
+    try {
+      const response = await puter.ai.chat([
+        {
+          role: "system",
+          content: "You are an AI Robloz developer. Always output ONLY Luau code. No explanations, markdown, or text outside the luau document."
+        },
+        {
+          role: "assistant",
+          content: "Here is the current code of the luau:\n\n" + currentCode
+        },
+        {
+          role: "user",
+          content: "Update the luau based on this request: " + userPrompt
+        }
+      ], { model: "gpt-5-nano", stream: false });
+
+      const html = response.message && response.message.content;
+      if (typeof html === "string") {
+        editor.setValue(html);
+        document.getElementById("preview").srcdoc = html;
+      } else {
+        alert("AI did not return valid HTML.");
+      }
+    } catch(e) {
+      alert("AI Error: " + e.message);
+    }
+  };
+}
+
+// Router
+const siteParam = getQueryParam("site");
+if (siteParam) {
+  renderViewer(siteParam);
+} else {
+  renderEditor();
+}
+</script>
+</body>
+</html>
