@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Orders</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  ul { list-style: none; padding: 0; }
+  li { margin-bottom: 10px; }
+  button { margin-left: 10px; }
+  .complete { text-decoration: line-through; color: green; }
+</style>
+</head>
+<body>
+<h1>Order Management</h1>
+<ul id="ordersList"></ul>
+
+<script>
+const BIN_ID = "YOUR_BIN_ID";
+const API_KEY = "YOUR_JSONBIN_API_KEY";
+
+async function loadOrders() {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+        headers: { "X-Master-Key": API_KEY }
+    });
+    const data = await res.json();
+    const orders = data.record || [];
+    const list = document.getElementById('ordersList');
+    list.innerHTML = '';
+
+    orders.forEach(order => {
+        const li = document.createElement('li');
+        li.textContent = `${order.name}: ${order.order}`;
+        if (order.complete) li.classList.add('complete');
+
+        const completeBtn = document.createElement('button');
+        completeBtn.textContent = 'Complete';
+        completeBtn.onclick = () => toggleComplete(order.id);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = () => deleteOrder(order.id);
+
+        li.appendChild(completeBtn);
+        li.appendChild(deleteBtn);
+        list.appendChild(li);
+    });
+}
+
+async function updateOrders(newOrders) {
+    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": API_KEY,
+        },
+        body: JSON.stringify(newOrders)
+    });
+    loadOrders();
+}
+
+async function toggleComplete(id) {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+        headers: { "X-Master-Key": API_KEY }
+    });
+    const orders = (await res.json()).record || [];
+    const updated = orders.map(o => o.id === id ? { ...o, complete: !o.complete } : o);
+    updateOrders(updated);
+}
+
+async function deleteOrder(id) {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+        headers: { "X-Master-Key": API_KEY }
+    });
+    const orders = (await res.json()).record || [];
+    const updated = orders.filter(o => o.id !== id);
+    updateOrders(updated);
+}
+
+// Initial load
+loadOrders();
+</script>
+</body>
+</html>
