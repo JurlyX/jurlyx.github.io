@@ -3,61 +3,139 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Place Order</title>
+<title>MaddoxJ Kitchen</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; }
-  input, textarea, button { display: block; margin: 10px 0; width: 300px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+  body { background: #fff5f0; color: #333; padding: 20px; }
+  header { text-align: center; margin-bottom: 30px; }
+  header h1 { font-size: 3em; color: #ff5722; }
+  .menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+  .item { background: #fff; border-radius: 15px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; cursor: pointer; transition: transform 0.2s; }
+  .item:hover { transform: scale(1.05); }
+  .item img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
+  .item h3 { margin-bottom: 5px; }
+  .item p { font-size: 0.9em; color: #555; }
+  .cart { position: fixed; bottom: 20px; right: 20px; background: #ff5722; color: #fff; border-radius: 50px; padding: 15px 25px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-weight: bold; }
+  #cartModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+  #cartModalContent { background: #fff; border-radius: 15px; padding: 30px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative; }
+  #cartModalContent h2 { margin-bottom: 20px; color: #ff5722; }
+  #cartModalContent ul { list-style: none; }
+  #cartModalContent li { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  #cartModalContent button { background: #ff5722; color: #fff; border: none; border-radius: 10px; padding: 5px 10px; cursor: pointer; }
+  #closeCart { position: absolute; top: 15px; right: 15px; background: #ff5722; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; }
 </style>
 </head>
 <body>
-<h1>Place Your Order</h1>
-<input type="text" id="name" placeholder="Your Name">
-<textarea id="order" placeholder="Your Order"></textarea>
-<button onclick="submitOrder()">Submit Order</button>
-<p id="status"></p>
+
+<header>
+  <h1>MaddoxJ Kitchen</h1>
+  <p>Click on items to add to your order</p>
+</header>
+
+<div class="menu" id="menu"></div>
+
+<div class="cart" id="cartBtn">View Cart (0)</div>
+
+<div id="cartModal">
+  <div id="cartModalContent">
+    <button id="closeCart">×</button>
+    <h2>Your Cart</h2>
+    <ul id="cartList"></ul>
+    <button id="submitOrderBtn">Submit Order</button>
+    <p id="status" style="margin-top:10px;"></p>
+  </div>
+</div>
 
 <script>
 const BIN_ID = "68e6739e43b1c97be95ee60e";
 const API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
 
-async function submitOrder() {
-    const name = document.getElementById('name').value;
-    const orderText = document.getElementById('order').value;
+const menuItems = [
+  {id: 1, name: "Cheeseburger", price: 8.99, img: "https://i.imgur.com/7jv3CwQ.jpg"},
+  {id: 2, name: "Veggie Pizza", price: 12.50, img: "https://i.imgur.com/dzJXj4S.jpg"},
+  {id: 3, name: "Caesar Salad", price: 7.25, img: "https://i.imgur.com/fU8VgkC.jpg"},
+  {id: 4, name: "French Fries", price: 3.50, img: "https://i.imgur.com/xBv6F3m.jpg"},
+  {id: 5, name: "Soda", price: 1.99, img: "https://i.imgur.com/mI1nFzD.jpg"}
+];
 
-    if (!name || !orderText) {
-        alert('Please fill both fields.');
-        return;
-    }
+let cart = [];
 
-    try {
-        // Fetch existing orders
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-            headers: { "X-Master-Key": API_KEY }
-        });
-        const data = await res.json();
-        const orders = data.record || [];
-
-        // Add new order
-        orders.push({ id: Date.now(), name, order: orderText, complete: false });
-
-        // Update bin
-        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-            method: 'PUT',
-            headers: {
-                "Content-Type": "application/json",
-                "X-Master-Key": API_KEY,
-            },
-            body: JSON.stringify(orders)
-        });
-
-        document.getElementById('status').textContent = "Order submitted!";
-        document.getElementById('name').value = '';
-        document.getElementById('order').value = '';
-    } catch (err) {
-        console.error(err);
-        alert('Error submitting order.');
-    }
+function renderMenu() {
+  const menuDiv = document.getElementById('menu');
+  menuItems.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+      <img src="${item.img}" alt="${item.name}">
+      <h3>${item.name}</h3>
+      <p>$${item.price.toFixed(2)}</p>
+    `;
+    div.onclick = () => addToCart(item);
+    menuDiv.appendChild(div);
+  });
 }
+
+function addToCart(item) {
+  cart.push(item);
+  updateCartCount();
+}
+
+function updateCartCount() {
+  document.getElementById('cartBtn').textContent = `View Cart (${cart.length})`;
+}
+
+function renderCart() {
+  const cartList = document.getElementById('cartList');
+  cartList.innerHTML = '';
+  cart.forEach((item, idx) => {
+    const li = document.createElement('li');
+    li.textContent = `${item.name} - $${item.price.toFixed(2)}`;
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = "Remove";
+    removeBtn.onclick = () => { cart.splice(idx,1); renderCart(); updateCartCount(); };
+    li.appendChild(removeBtn);
+    cartList.appendChild(li);
+  });
+}
+
+document.getElementById('cartBtn').onclick = () => {
+  document.getElementById('cartModal').style.display = 'flex';
+  renderCart();
+};
+
+document.getElementById('closeCart').onclick = () => {
+  document.getElementById('cartModal').style.display = 'none';
+};
+
+document.getElementById('submitOrderBtn').onclick = async () => {
+  const name = prompt("Enter your name:");
+  if(!name) return alert("Name is required!");
+  if(cart.length === 0) return alert("Cart is empty!");
+
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY }});
+    const data = await res.json();
+    const orders = data.record || [];
+
+    orders.push({ id: Date.now(), name, order: cart.map(i => i.name), complete: false });
+    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method: 'PUT',
+      headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+      body: JSON.stringify(orders)
+    });
+    cart = [];
+    updateCartCount();
+    renderCart();
+    document.getElementById('status').textContent = "Order submitted successfully!";
+  } catch (err) {
+    console.error(err);
+    alert("Error submitting order.");
+  }
+};
+
+renderMenu();
 </script>
+
 </body>
 </html>
