@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Place Order</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  input, textarea, button { display: block; margin: 10px 0; width: 300px; }
+</style>
+</head>
+<body>
+<h1>Place Your Order</h1>
+<input type="text" id="name" placeholder="Your Name">
+<textarea id="order" placeholder="Your Order"></textarea>
+<button onclick="submitOrder()">Submit Order</button>
+<p id="status"></p>
+
+<script>
+const BIN_ID = "68e6739e43b1c97be95ee60e";
+const API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
+
+async function submitOrder() {
+    const name = document.getElementById('name').value;
+    const orderText = document.getElementById('order').value;
+
+    if (!name || !orderText) {
+        alert('Please fill both fields.');
+        return;
+    }
+
+    try {
+        // Fetch existing orders
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+            headers: { "X-Master-Key": API_KEY }
+        });
+        const data = await res.json();
+        const orders = data.record || [];
+
+        // Add new order
+        orders.push({ id: Date.now(), name, order: orderText, complete: false });
+
+        // Update bin
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+                "X-Master-Key": API_KEY,
+            },
+            body: JSON.stringify(orders)
+        });
+
+        document.getElementById('status').textContent = "Order submitted!";
+        document.getElementById('name').value = '';
+        document.getElementById('order').value = '';
+    } catch (err) {
+        console.error(err);
+        alert('Error submitting order.');
+    }
+}
+</script>
+</body>
+</html>
