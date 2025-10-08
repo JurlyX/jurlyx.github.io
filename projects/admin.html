@@ -36,84 +36,94 @@ button + button { margin-left: 10px; }
 const BIN_ID = "68e6739e43b1c97be95ee60e";
 const API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
 
-// fetch orders from JSONBin
+// Fetch the orders from JSONBin
 async function fetchOrders() {
+  try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: { "X-Master-Key": API_KEY }
+      headers: { "X-Master-Key": API_KEY }
     });
     const data = await res.json();
-    return Array.isArray(data.record) ? data.record : [];
+    // Make sure we always get an array
+    if (!data.record) return [];
+    return Array.isArray(data.record) ? data.record : [data.record];
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+    return [];
+  }
 }
 
-// render orders as cards
+// Render the orders as cards
 async function loadOrders() {
-    const orders = await fetchOrders();
-    const container = document.getElementById('ordersList');
-    container.innerHTML = '';
+  const orders = await fetchOrders();
+  const container = document.getElementById('ordersList');
+  container.innerHTML = '';
 
-    if (orders.length === 0) {
-        container.innerHTML = '<p>No orders yet.</p>';
-        return;
+  if (orders.length === 0) {
+    container.innerHTML = '<p>No orders yet.</p>';
+    return;
+  }
+
+  orders.forEach(order => {
+    const card = document.createElement('div');
+    card.className = 'order-card' + (order.complete ? ' complete' : '');
+
+    const title = document.createElement('h3');
+    title.textContent = order.name || "Unnamed";
+    card.appendChild(title);
+
+    const ul = document.createElement('ul');
+    if (Array.isArray(order.order)) {
+      order.order.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        ul.appendChild(li);
+      });
     }
+    card.appendChild(ul);
 
-    orders.forEach(order => {
-        const card = document.createElement('div');
-        card.className = 'order-card' + (order.complete ? ' complete' : '');
+    const completeBtn = document.createElement('button');
+    completeBtn.textContent = order.complete ? 'Mark Incomplete' : 'Mark Complete';
+    completeBtn.onclick = () => toggleComplete(order.id);
+    card.appendChild(completeBtn);
 
-        const title = document.createElement('h3');
-        title.textContent = order.name;
-        card.appendChild(title);
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = () => deleteOrder(order.id);
+    card.appendChild(deleteBtn);
 
-        const ul = document.createElement('ul');
-        order.order.forEach(item => {
-            const li = document.createElement('li');
-            li.textContent = item;
-            ul.appendChild(li);
-        });
-        card.appendChild(ul);
-
-        const completeBtn = document.createElement('button');
-        completeBtn.textContent = order.complete ? 'Mark Incomplete' : 'Mark Complete';
-        completeBtn.onclick = () => toggleComplete(order.id);
-        card.appendChild(completeBtn);
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.onclick = () => deleteOrder(order.id);
-        card.appendChild(deleteBtn);
-
-        container.appendChild(card);
-    });
+    container.appendChild(card);
+  });
 }
 
-// update bin
+// Update JSONBin
 async function updateOrders(newOrders) {
+  try {
     await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        method: 'PUT',
-        headers: {
-            "Content-Type": "application/json",
-            "X-Master-Key": API_KEY
-        },
-        body: JSON.stringify(newOrders)
+      method: 'PUT',
+      headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+      body: JSON.stringify(newOrders)
     });
     loadOrders();
+  } catch (err) {
+    console.error("Error updating orders:", err);
+  }
 }
 
-// toggle complete
+// Toggle complete
 async function toggleComplete(id) {
-    const orders = await fetchOrders();
-    const updated = orders.map(o => o.id === id ? {...o, complete: !o.complete} : o);
-    updateOrders(updated);
+  const orders = await fetchOrders();
+  const updated = orders.map(o => o.id === id ? {...o, complete: !o.complete} : o);
+  updateOrders(updated);
 }
 
-// delete order
+// Delete order
 async function deleteOrder(id) {
-    const orders = await fetchOrders();
-    const updated = orders.filter(o => o.id !== id);
-    updateOrders(updated);
+  const orders = await fetchOrders();
+  const updated = orders.filter(o => o.id !== id);
+  updateOrders(updated);
 }
 
-// initial load + auto refresh
+// Initial load + refresh every 5s
 loadOrders();
 setInterval(loadOrders, 5000);
 </script>
