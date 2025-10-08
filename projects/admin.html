@@ -36,28 +36,37 @@ header p { font-size: 1.2em; color: #555; }
 const BIN_ID = "68e6739e43b1c97be95ee60e";
 const API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
 
-async function loadOrders() {
+// Helper: fetch the current orders
+async function fetchOrders() {
   const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
     headers: { "X-Master-Key": API_KEY }
   });
   const data = await res.json();
-  const orders = data.record || [];
+  // Ensure it returns an array
+  return Array.isArray(data.record) ? data.record : [];
+}
 
+// Load and display orders
+async function loadOrders() {
+  const orders = await fetchOrders();
   const container = document.getElementById('ordersList');
   container.innerHTML = '';
+
+  if (orders.length === 0) {
+    container.innerHTML = '<p>No orders yet.</p>';
+    return;
+  }
 
   orders.forEach(order => {
     const card = document.createElement('div');
     card.className = 'order-card' + (order.complete ? ' complete' : '');
-    
+
     const title = document.createElement('h3');
     title.textContent = `${order.name}`;
     card.appendChild(title);
 
     const list = document.createElement('ul');
-    let subtotal = 0;
     order.order.forEach(itemName => {
-      // We can optionally calculate subtotal by looking at the menu if desired, for simplicity we'll ignore exact price
       const li = document.createElement('li');
       li.textContent = itemName;
       list.appendChild(li);
@@ -81,34 +90,34 @@ async function loadOrders() {
   });
 }
 
+// Update orders in JSONBin
 async function updateOrders(newOrders) {
   await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
     method: 'PUT',
-    headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+    headers: {
+      "Content-Type": "application/json",
+      "X-Master-Key": API_KEY
+    },
     body: JSON.stringify(newOrders)
   });
   loadOrders();
 }
 
+// Toggle complete status
 async function toggleComplete(id) {
-  const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-    headers: { "X-Master-Key": API_KEY }
-  });
-  const orders = (await res.json()).record || [];
+  const orders = await fetchOrders();
   const updated = orders.map(o => o.id === id ? { ...o, complete: !o.complete } : o);
   updateOrders(updated);
 }
 
+// Delete order
 async function deleteOrder(id) {
-  const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-    headers: { "X-Master-Key": API_KEY }
-  });
-  const orders = (await res.json()).record || [];
+  const orders = await fetchOrders();
   const updated = orders.filter(o => o.id !== id);
   updateOrders(updated);
 }
 
-// Auto refresh every 5 seconds
+// Auto refresh
 loadOrders();
 setInterval(loadOrders, 5000);
 </script>
