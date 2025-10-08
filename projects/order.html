@@ -6,24 +6,33 @@
 <title>MaddoxJ Kitchen</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
-  body { background: #fff5f0; color: #333; padding: 20px; }
-  header { text-align: center; margin-bottom: 30px; }
-  header h1 { font-size: 3em; color: #ff5722; }
-  .menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-  .item { background: #fff; border-radius: 15px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; cursor: pointer; transition: transform 0.2s; }
-  .item:hover { transform: scale(1.05); }
-  .item img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
-  .item h3 { margin-bottom: 5px; }
-  .item p { font-size: 0.9em; color: #555; }
-  .cart { position: fixed; bottom: 20px; right: 20px; background: #ff5722; color: #fff; border-radius: 50px; padding: 15px 25px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-weight: bold; }
-  #cartModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-  #cartModalContent { background: #fff; border-radius: 15px; padding: 30px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative; }
-  #cartModalContent h2 { margin-bottom: 20px; color: #ff5722; }
-  #cartModalContent ul { list-style: none; }
-  #cartModalContent li { display: flex; justify-content: space-between; margin-bottom: 10px; }
-  #cartModalContent button { background: #ff5722; color: #fff; border: none; border-radius: 10px; padding: 5px 10px; cursor: pointer; }
-  #closeCart { position: absolute; top: 15px; right: 15px; background: #ff5722; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+body { background: #fff5f0; color: #333; padding: 20px; }
+header { text-align: center; margin-bottom: 30px; }
+header h1 { font-size: 3em; color: #ff5722; }
+header p { font-size: 1.2em; color: #555; }
+
+.menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+.item { background: #fff; border-radius: 15px; padding: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; }
+.item:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+.item img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
+.item h3 { margin-bottom: 5px; font-size: 1.2em; color: #ff5722; }
+.item p { font-size: 1em; color: #555; }
+
+.cart { position: fixed; bottom: 20px; right: 20px; background: #ff5722; color: #fff; border-radius: 50px; padding: 15px 25px; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.3); font-weight: bold; transition: transform 0.2s; }
+.cart:hover { transform: scale(1.05); }
+
+#cartModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+#cartModalContent { background: #fff; border-radius: 15px; padding: 30px; width: 90%; max-width: 500px; max-height: 80%; overflow-y: auto; position: relative; }
+#cartModalContent h2 { margin-bottom: 20px; color: #ff5722; }
+#cartModalContent ul { list-style: none; padding: 0; }
+#cartModalContent li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px solid #eee; }
+#cartModalContent button { background: #ff5722; color: #fff; border: none; border-radius: 10px; padding: 5px 10px; cursor: pointer; transition: background 0.2s; }
+#cartModalContent button:hover { background: #e64a19; }
+#closeCart { position: absolute; top: 15px; right: 15px; background: #ff5722; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer; }
+#closeCart:hover { background: #e64a19; }
+.subtotal { margin-top: 15px; font-weight: bold; color: #333; }
+#submitOrderBtn { width: 100%; margin-top: 10px; padding: 10px; font-size: 1.1em; }
 </style>
 </head>
 <body>
@@ -42,6 +51,7 @@
     <button id="closeCart">×</button>
     <h2>Your Cart</h2>
     <ul id="cartList"></ul>
+    <div class="subtotal" id="subtotal"></div>
     <button id="submitOrderBtn">Submit Order</button>
     <p id="status" style="margin-top:10px;"></p>
   </div>
@@ -52,17 +62,19 @@ const BIN_ID = "68e6739e43b1c97be95ee60e";
 const API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
 
 const menuItems = [
-  {id: 1, name: "Cheeseburger", price: 8.99, img: "https://i.imgur.com/7jv3CwQ.jpg"},
-  {id: 2, name: "Veggie Pizza", price: 12.50, img: "https://i.imgur.com/dzJXj4S.jpg"},
-  {id: 3, name: "Caesar Salad", price: 7.25, img: "https://i.imgur.com/fU8VgkC.jpg"},
-  {id: 4, name: "French Fries", price: 3.50, img: "https://i.imgur.com/xBv6F3m.jpg"},
-  {id: 5, name: "Soda", price: 1.99, img: "https://i.imgur.com/mI1nFzD.jpg"}
+  {id: 1, name: "Cheeseburger", category: "Burgers", price: 8.99, img: "https://i.imgur.com/7jv3CwQ.jpg"},
+  {id: 2, name: "Veggie Pizza", category: "Pizza", price: 12.50, img: "https://i.imgur.com/dzJXj4S.jpg"},
+  {id: 3, name: "Caesar Salad", category: "Salads", price: 7.25, img: "https://i.imgur.com/fU8VgkC.jpg"},
+  {id: 4, name: "French Fries", category: "Sides", price: 3.50, img: "https://i.imgur.com/xBv6F3m.jpg"},
+  {id: 5, name: "Soda", category: "Drinks", price: 1.99, img: "https://i.imgur.com/mI1nFzD.jpg"},
+  {id: 6, name: "Chocolate Cake", category: "Desserts", price: 5.00, img: "https://i.imgur.com/x0sKwMi.jpg"}
 ];
 
 let cart = [];
 
 function renderMenu() {
   const menuDiv = document.getElementById('menu');
+  menuDiv.innerHTML = "";
   menuItems.forEach(item => {
     const div = document.createElement('div');
     div.className = 'item';
@@ -70,6 +82,7 @@ function renderMenu() {
       <img src="${item.img}" alt="${item.name}">
       <h3>${item.name}</h3>
       <p>$${item.price.toFixed(2)}</p>
+      <small>${item.category}</small>
     `;
     div.onclick = () => addToCart(item);
     menuDiv.appendChild(div);
@@ -88,7 +101,9 @@ function updateCartCount() {
 function renderCart() {
   const cartList = document.getElementById('cartList');
   cartList.innerHTML = '';
+  let subtotal = 0;
   cart.forEach((item, idx) => {
+    subtotal += item.price;
     const li = document.createElement('li');
     li.textContent = `${item.name} - $${item.price.toFixed(2)}`;
     const removeBtn = document.createElement('button');
@@ -97,6 +112,7 @@ function renderCart() {
     li.appendChild(removeBtn);
     cartList.appendChild(li);
   });
+  document.getElementById('subtotal').textContent = `Subtotal: $${subtotal.toFixed(2)}`;
 }
 
 document.getElementById('cartBtn').onclick = () => {
@@ -124,10 +140,11 @@ document.getElementById('submitOrderBtn').onclick = async () => {
       headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
       body: JSON.stringify(orders)
     });
+
     cart = [];
     updateCartCount();
     renderCart();
-    document.getElementById('status').textContent = "Order submitted successfully!";
+    document.getElementById('status').textContent = "✅ Order submitted successfully!";
   } catch (err) {
     console.error(err);
     alert("Error submitting order.");
