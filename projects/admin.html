@@ -17,9 +17,10 @@ header p { font-size: 1.2em; color: #555; }
 .order-card.complete { border-left: 5px solid green; transform: scale(1.02); }
 .order-card h3 { color: #ff5722; margin-bottom: 10px; }
 .order-card ul { list-style: none; padding: 0; margin-bottom: 10px; }
-.order-card li { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.order-card li { margin-bottom: 5px; }
 .order-card button { margin-top: 10px; padding: 8px; border: none; border-radius: 10px; background: #ff5722; color: #fff; cursor: pointer; transition: background 0.2s; }
 .order-card button:hover { background: #e64a19; }
+button + button { margin-left: 10px; }
 </style>
 </head>
 <body>
@@ -35,79 +36,84 @@ header p { font-size: 1.2em; color: #555; }
 const BIN_ID = "68e6739e43b1c97be95ee60e";
 const API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
 
+// fetch orders from JSONBin
 async function fetchOrders() {
-  const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-    headers: { "X-Master-Key": API_KEY }
-  });
-  const data = await res.json();
-  return Array.isArray(data.record) ? data.record : [];
-}
-
-async function loadOrders() {
-  const orders = await fetchOrders();
-  const container = document.getElementById('ordersList');
-  container.innerHTML = '';
-
-  if (orders.length === 0) {
-    container.innerHTML = '<p>No orders yet.</p>';
-    return;
-  }
-
-  orders.forEach(order => {
-    const card = document.createElement('div');
-    card.className = 'order-card' + (order.complete ? ' complete' : '');
-
-    const title = document.createElement('h3');
-    title.textContent = order.name;
-    card.appendChild(title);
-
-    const list = document.createElement('ul');
-    order.order.forEach(itemName => {
-      const li = document.createElement('li');
-      li.textContent = itemName;
-      list.appendChild(li);
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+        headers: { "X-Master-Key": API_KEY }
     });
-    card.appendChild(list);
-
-    const completeBtn = document.createElement('button');
-    completeBtn.textContent = order.complete ? 'Mark Incomplete' : 'Mark Complete';
-    completeBtn.onclick = () => toggleComplete(order.id);
-    card.appendChild(completeBtn);
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.style.marginLeft = '10px';
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.onclick = () => deleteOrder(order.id);
-    card.appendChild(deleteBtn);
-
-    container.appendChild(card);
-  });
+    const data = await res.json();
+    return Array.isArray(data.record) ? data.record : [];
 }
 
+// render orders as cards
+async function loadOrders() {
+    const orders = await fetchOrders();
+    const container = document.getElementById('ordersList');
+    container.innerHTML = '';
+
+    if (orders.length === 0) {
+        container.innerHTML = '<p>No orders yet.</p>';
+        return;
+    }
+
+    orders.forEach(order => {
+        const card = document.createElement('div');
+        card.className = 'order-card' + (order.complete ? ' complete' : '');
+
+        const title = document.createElement('h3');
+        title.textContent = order.name;
+        card.appendChild(title);
+
+        const ul = document.createElement('ul');
+        order.order.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            ul.appendChild(li);
+        });
+        card.appendChild(ul);
+
+        const completeBtn = document.createElement('button');
+        completeBtn.textContent = order.complete ? 'Mark Incomplete' : 'Mark Complete';
+        completeBtn.onclick = () => toggleComplete(order.id);
+        card.appendChild(completeBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = () => deleteOrder(order.id);
+        card.appendChild(deleteBtn);
+
+        container.appendChild(card);
+    });
+}
+
+// update bin
 async function updateOrders(newOrders) {
-  await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-    method: 'PUT',
-    headers: {
-      "Content-Type": "application/json",
-      "X-Master-Key": API_KEY
-    },
-    body: JSON.stringify(newOrders)
-  });
-  loadOrders();
+    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": API_KEY
+        },
+        body: JSON.stringify(newOrders)
+    });
+    loadOrders();
 }
 
+// toggle complete
 async function toggleComplete(id) {
-  const orders = await fetchOrders();
-  const updated = orders.map(o => o.id === id ? { ...o, complete: !o.complete } : o);
-  updateOrders(updated);
+    const orders = await fetchOrders();
+    const updated = orders.map(o => o.id === id ? {...o, complete: !o.complete} : o);
+    updateOrders(updated);
 }
 
+// delete order
 async function deleteOrder(id) {
-  const orders = await fetchOrders();
-  const updated = orders.filter(o => o.id !== id);
-  updateOrders(updated);
+    const orders = await fetchOrders();
+    const updated = orders.filter(o => o.id !== id);
+    updateOrders(updated);
 }
 
+// initial load + auto refresh
 loadOrders();
 setInterval(loadOrders, 5000);
 </script>
