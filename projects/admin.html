@@ -3,83 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manage Orders</title>
+<title>MaddoxJ Kitchen - Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; }
-  ul { list-style: none; padding: 0; }
-  li { margin-bottom: 10px; }
-  button { margin-left: 10px; }
-  .complete { text-decoration: line-through; color: green; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+body { background: #fff5f0; color: #333; padding: 20px; }
+header { text-align: center; margin-bottom: 30px; }
+header h1 { font-size: 3em; color: #ff5722; }
+header p { font-size: 1.2em; color: #555; }
+
+.orders { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.order-card { background: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; transition: transform 0.3s; }
+.order-card.complete { border-left: 5px solid green; transform: scale(1.02); }
+.order-card h3 { color: #ff5722; margin-bottom: 10px; }
+.order-card ul { list-style: none; padding: 0; margin-bottom: 10px; }
+.order-card li { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.order-card .subtotal { font-weight: bold; margin-top: 10px; }
+.order-card button { margin-top: 10px; padding: 8px; border: none; border-radius: 10px; background: #ff5722; color: #fff; cursor: pointer; transition: background 0.2s; }
+.order-card button:hover { background: #e64a19; }
 </style>
 </head>
 <body>
-<h1>Order Management</h1>
-<ul id="ordersList"></ul>
+
+<header>
+  <h1>MaddoxJ Kitchen - Admin</h1>
+  <p>Manage incoming orders</p>
+</header>
+
+<div class="orders" id="ordersList"></div>
 
 <script>
 const BIN_ID = "68e6739e43b1c97be95ee60e";
 const API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
 
 async function loadOrders() {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: { "X-Master-Key": API_KEY }
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+    headers: { "X-Master-Key": API_KEY }
+  });
+  const data = await res.json();
+  const orders = data.record || [];
+
+  const container = document.getElementById('ordersList');
+  container.innerHTML = '';
+
+  orders.forEach(order => {
+    const card = document.createElement('div');
+    card.className = 'order-card' + (order.complete ? ' complete' : '');
+    
+    const title = document.createElement('h3');
+    title.textContent = `${order.name}`;
+    card.appendChild(title);
+
+    const list = document.createElement('ul');
+    let subtotal = 0;
+    order.order.forEach(itemName => {
+      // We can optionally calculate subtotal by looking at the menu if desired, for simplicity we'll ignore exact price
+      const li = document.createElement('li');
+      li.textContent = itemName;
+      list.appendChild(li);
     });
-    const data = await res.json();
-    const orders = data.record || [];
-    const list = document.getElementById('ordersList');
-    list.innerHTML = '';
+    card.appendChild(list);
 
-    orders.forEach(order => {
-        const li = document.createElement('li');
-        li.textContent = `${order.name}: ${order.order}`;
-        if (order.complete) li.classList.add('complete');
+    const buttonsDiv = document.createElement('div');
 
-        const completeBtn = document.createElement('button');
-        completeBtn.textContent = 'Complete';
-        completeBtn.onclick = () => toggleComplete(order.id);
+    const completeBtn = document.createElement('button');
+    completeBtn.textContent = order.complete ? 'Mark Incomplete' : 'Mark Complete';
+    completeBtn.onclick = () => toggleComplete(order.id);
+    card.appendChild(completeBtn);
 
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.onclick = () => deleteOrder(order.id);
+    const deleteBtn = document.createElement('button');
+    deleteBtn.style.marginLeft = '10px';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = () => deleteOrder(order.id);
+    card.appendChild(deleteBtn);
 
-        li.appendChild(completeBtn);
-        li.appendChild(deleteBtn);
-        list.appendChild(li);
-    });
+    container.appendChild(card);
+  });
 }
 
 async function updateOrders(newOrders) {
-    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        method: 'PUT',
-        headers: {
-            "Content-Type": "application/json",
-            "X-Master-Key": API_KEY,
-        },
-        body: JSON.stringify(newOrders)
-    });
-    loadOrders();
+  await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+    method: 'PUT',
+    headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+    body: JSON.stringify(newOrders)
+  });
+  loadOrders();
 }
 
 async function toggleComplete(id) {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: { "X-Master-Key": API_KEY }
-    });
-    const orders = (await res.json()).record || [];
-    const updated = orders.map(o => o.id === id ? { ...o, complete: !o.complete } : o);
-    updateOrders(updated);
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+    headers: { "X-Master-Key": API_KEY }
+  });
+  const orders = (await res.json()).record || [];
+  const updated = orders.map(o => o.id === id ? { ...o, complete: !o.complete } : o);
+  updateOrders(updated);
 }
 
 async function deleteOrder(id) {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: { "X-Master-Key": API_KEY }
-    });
-    const orders = (await res.json()).record || [];
-    const updated = orders.filter(o => o.id !== id);
-    updateOrders(updated);
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+    headers: { "X-Master-Key": API_KEY }
+  });
+  const orders = (await res.json()).record || [];
+  const updated = orders.filter(o => o.id !== id);
+  updateOrders(updated);
 }
 
-// Initial load
+// Auto refresh every 5 seconds
 loadOrders();
+setInterval(loadOrders, 5000);
 </script>
+
 </body>
 </html>
