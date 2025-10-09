@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Spend Bill Gates' Money — Static HTML</title>
+<style>
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --muted:#9aa4b2;
+    --accent:#4f46e5;
+    --glass: rgba(255,255,255,0.03);
+  }
+  html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  body{
+    background:
+      radial-gradient(circle at 10% 10%, rgba(79,70,229,0.06), transparent 10%),
+      linear-gradient(180deg,#071023 0%, #06121b 100%);
+    color:#e6eef6;
+    padding:24px;
+    box-sizing:border-box;
+  }
+  header{display:flex;align-items:center;gap:18px;margin-bottom:18px;flex-wrap:wrap}
+  h1{font-size:20px;margin:0}
+  p.lead{margin:0;color:var(--muted);font-size:13px}
+
+  .top {
+    display:flex;
+    gap:12px;
+    margin-left:auto;
+    align-items:center;
+  }
+
+  .stat {
+    background:var(--glass);
+    padding:12px 14px;border-radius:12px;
+    min-width:170px;
+    text-align:center;
+    box-shadow: 0 6px 20px rgba(2,6,23,0.6);
+  }
+  .stat .num{font-size:18px;font-weight:700}
+  .stat .label{color:var(--muted);font-size:12px;margin-top:4px}
+
+  .progressWrap{margin:18px 0}
+  .progressBar{background:rgba(255,255,255,0.05);height:16px;border-radius:999px;overflow:hidden}
+  .progressFill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#06b6d4);transition:width .6s cubic-bezier(.2,.9,.25,1)}
+  .goalText{font-size:13px;color:var(--muted);margin-top:8px}
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+    gap:14px;
+    margin-top:14px;
+  }
+
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:14px;padding:14px;
+    cursor:pointer;
+    transition:transform .14s ease, box-shadow .14s ease;
+    border:1px solid rgba(255,255,255,0.03);
+    display:flex;gap:12px;align-items:center;
+  }
+  .card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(2,6,23,0.6)}
+  .emoji{
+    width:64px;height:64px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    display:flex;align-items:center;justify-content:center;font-size:34px;
+    box-shadow: inset 0 -6px 12px rgba(0,0,0,0.25);
+  }
+  .meta{flex:1}
+  .title{font-weight:700;font-size:15px;margin:0}
+  .desc{font-size:12px;color:var(--muted);margin-top:6px}
+  .price{font-weight:800;margin-left:auto;font-size:15px}
+
+  .controls{display:flex;gap:8px;align-items:center;margin-top:12px}
+  .btn{
+    background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:10px;color:inherit;cursor:pointer;font-weight:600;
+  }
+  .btn.primary{background:linear-gradient(90deg,var(--accent),#06b6d4);border:0;color:#041226}
+  .small{font-size:13px;padding:6px 9px;border-radius:8px}
+
+  .purchases{margin-top:18px;color:var(--muted);font-size:13px}
+  .purchase-list{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:rgba(255,255,255,0.03);padding:8px 10px;border-radius:999px;font-size:13px;border:1px solid rgba(255,255,255,0.02)}
+
+  /* flying amount */
+  .float {
+    position:fixed;pointer-events:none;z-index:9999;font-weight:800;font-size:15px;
+    transform:translate(-50%,-50%) scale(1);
+    transition: transform .9s ease, opacity .9s ease;
+    opacity:1;
+  }
+
+  footer{margin-top:26px;color:var(--muted);font-size:12px}
+  @media (max-width:600px){
+    .stat{min-width:unset}
+    .top{width:100%;margin-left:0}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Spend Bill Gates' Money</h1>
+    <p class="lead">Click stuff to spend. Reach the goal to celebrate 🎉</p>
+  </div>
+
+  <div class="top">
+    <div class="stat">
+      <div class="num" id="spentDisplay">$0</div>
+      <div class="label">Spent</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="remainingDisplay">$0</div>
+      <div class="label">Remaining</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="btn small" id="undoBtn" title="Undo last purchase">Undo</button>
+      <button class="btn small" id="resetBtn" title="Reset">Reset</button>
+    </div>
+  </div>
+</header>
+
+<section class="progressWrap">
+  <div class="progressBar" aria-hidden="true"><div class="progressFill" id="progressFill"></div></div>
+  <div class="goalText" id="goalText">Goal: $124,000,000,000</div>
+</section>
+
+<section>
+  <div class="grid" id="itemsGrid"></div>
+
+  <div class="controls" style="justify-content:space-between;flex-wrap:wrap">
+    <div>
+      <button class="btn primary" id="spendAllBtn">Spend Randomly</button>
+      <button class="btn" id="fillCartBtn">Buy top 5</button>
+    </div>
+    <div class="purchases" id="purchasesArea">
+      <div style="font-weight:700">Purchases</div>
+      <div class="purchase-list" id="purchaseList"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  This is a static recreation for personal use. Built with HTML/CSS/JS. Your browser stores progress locally.
+</footer>
+
+<canvas id="confettiCanvas" style="position:fixed;left:0;top:0;pointer-events:none;z-index:9998"></canvas>
+
+<script>
+(() => {
+  // Goal - Bill Gates' (approx historical) fortune
+  const GOAL = 124_000_000_000;
+
+  // Items list: name, price (number), emoji, description
+  const ITEMS = [
+    {id:'island', name:'Private Island', price: 80_000_000, emoji:'🏝️', desc:'Secluded paradise with staff.'},
+    {id:'yacht', name:'Luxury Superyacht', price: 300_000_000, emoji:'🛥️', desc:'With helipad and crew.'},
+    {id:'jet', name:'Private Jet', price: 65_000_000, emoji:'✈️', desc:'Fly anywhere, anytime.'},
+    {id:'mansion', name:'Mega Mansion', price: 150_000_000, emoji:'🏰', desc:'Multiple bedrooms & pool.'},
+    {id:'cars', name:'Car Collection', price: 23_000_000, emoji:'🚗', desc:'Rare and expensive cars.'},
+    {id:'donation', name:'Global Philanthropy', price: 5_000_000_000, emoji:'🤲', desc:'Fund education & health.'},
+    {id:'space', name:'Space Trip', price: 250_000_000, emoji:'🚀', desc:'Suborbital tourist flight.'},
+    {id:'stadium', name:'Buy A Stadium', price: 1_000_000_000, emoji:'🏟️', desc:'Name it whatever you like.'},
+    {id:'football_team', name:'Buy A Sports Team', price: 2_500_000_000, emoji:'⚽', desc:'Be the owner.'},
+    {id:'island_chain', name:'Island Chain', price: 1_800_000_000, emoji:'🏝️🏝️', desc:'Private archipelago.'},
+    {id:'research', name:'Medical Research Fund', price: 10_000_000_000, emoji:'🧬', desc:'Cure diseases.'},
+    {id:'tech_startup', name:'Buy Tech Startups', price: 15_000_000_000, emoji:'💻', desc:'Invest in innovation.'},
+    {id:'museum', name:'Build a Museum', price: 600_000_000, emoji:'🏛️', desc:'A cultural landmark.'},
+    {id:'foundation', name:'Create New Foundation', price: 20_000_000_000, emoji:'🏦', desc:'Long-term giving.'},
+    {id:'education', name:'Fund Education Worldwide', price: 30_000_000_000, emoji:'🎓', desc:'Scholarships and schools.'},
+    {id:'nasa', name:'Fund Space Program', price: 50_000_000_000, emoji:'🛰️', desc:'Launch missions.'},
+    {id:'island_resort', name:'Luxury Resort Chain', price: 5_800_000_000, emoji:'🏖️', desc:'Worldwide resorts.'},
+    {id:'orchestra', name:'Endow an Orchestra', price: 120_000_000, emoji:'🎻', desc:'Arts & music funding.'},
+    {id:'robots', name:'Robotics Lab', price: 900_000_000, emoji:'🤖', desc:'Next-gen robots.'},
+    {id:'cleantech', name:'Clean Energy Deployment', price: 40_000_000_000, emoji:'⚡', desc:'Fix energy infrastructure.'},
+    {id:'benevolent', name:'Small Things (coffee etc)', price: 20_000, emoji:'☕', desc:'Tiny luxuries.'},
+    {id:'bitcoin', name:'Crypto Speculation', price: 2_200_000_000, emoji:'₿', desc:'Risky bet.'},
+    {id:'art', name:'Buy Masterpieces', price: 450_000_000, emoji:'🖼️', desc:'Iconic paintings.'},
+    {id:'college', name:'Endow College', price: 3_600_000_000, emoji:'🏫', desc:'Free tuition for many.'},
+  ];
+
+  // state
+  let spent = 0;
+  let purchases = []; // array of {id, item}
+  const nf = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', maximumFractionDigits:0});
+
+  // elements
+  const itemsGrid = document.getElementById('itemsGrid');
+  const spentDisplay = document.getElementById('spentDisplay');
+  const remainingDisplay = document.getElementById('remainingDisplay');
+  const progressFill = document.getElementById('progressFill');
+  const goalText = document.getElementById('goalText');
+  const purchaseList = document.getElementById('purchaseList');
+  const undoBtn = document.getElementById('undoBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const spendAllBtn = document.getElementById('spendAllBtn');
+  const fillCartBtn = document.getElementById('fillCartBtn');
+  const confettiCanvas = document.getElementById('confettiCanvas');
+
+  // local storage keys
+  const STORAGE_KEY = 'spend_gates_v1';
+
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({spent, purchases}));
+  }
+  function load() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed?.spent) spent = parsed.spent;
+      if (Array.isArray(parsed.purchases)) purchases = parsed.purchases;
+    } catch(e){ console.warn('load fail', e); }
+  }
+
+  function renderItems() {
+    itemsGrid.innerHTML = '';
+    ITEMS.forEach(it => {
+      const card = document.createElement('button');
+      card.className = 'card';
+      card.dataset.id = it.id;
+      card.setAttribute('aria-label', `${it.name} — ${nf.format(it.price)}`);
+      card.innerHTML = `
+        <div class="emoji">${it.emoji}</div>
+        <div class="meta">
+          <div class="title">${it.name}</div>
+          <div class="desc">${it.desc}</div>
+        </div>
+        <div class="price">${nf.format(it.price)}</div>
+      `;
+      card.addEventListener('click', (e) => buyItem(it, e));
+      itemsGrid.appendChild(card);
+    });
+  }
+
+  function updateDisplays() {
+    spentDisplay.textContent = nf.format(spent);
+    const remaining = Math.max(0, GOAL - spent);
+    remainingDisplay.textContent = nf.format(remaining);
+    const pct = Math.min(100, (spent / GOAL) * 100);
+    progressFill.style.width = pct + '%';
+    goalText.textContent = `Goal: ${nf.format(GOAL)} — ${(pct).toFixed(2)}%`;
+    renderPurchases();
+    save();
+
+    if (spent >= GOAL) celebrate();
+  }
+
+  function renderPurchases() {
+    purchaseList.innerHTML = '';
+    purchases.slice().reverse().forEach(p => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.textContent = `${p.item.emoji} ${p.item.name} · ${nf.format(p.item.price)}`;
+      purchaseList.appendChild(chip);
+    });
+  }
+
+  function buyItem(item, event=null) {
+    // Add purchase
+    spent += item.price;
+    purchases.push({id:item.id, item});
+    spawnFloatingAmount(item.price, event);
+    updateDisplays();
+  }
+
+  function undo() {
+    if (!purchases.length) return;
+    const last = purchases.pop();
+    spent = Math.max(0, spent - last.item.price);
+    updateDisplays();
+  }
+
+  function resetAll() {
+    if (!confirm('Reset all progress?')) return;
+    spent = 0;
+    purchases = [];
+    updateDisplays();
+  }
+
+  // A little flying "+$X" animation to the spent display
+  function spawnFloatingAmount(amount, clickEvent) {
+    const el = document.createElement('div');
+    el.className = 'float';
+    el.textContent = `-${nf.format(amount)}`;
+    document.body.appendChild(el);
+
+    // start position: mouse or center of clicked card
+    let x = window.innerWidth/2, y = window.innerHeight/2;
+    if (clickEvent && clickEvent.clientX) {
+      x = clickEvent.clientX;
+      y = clickEvent.clientY;
+    }
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.opacity = 1;
+    el.style.transform = 'translate(-50%,-50%) scale(1)';
+
+    // compute target (spentDisplay center)
+    const target = spentDisplay.getBoundingClientRect();
+    const tx = target.left + target.width/2;
+    const ty = target.top + target.height/2;
+
+    // animate manually
+    requestAnimationFrame(() => {
+      el.style.transition = 'transform 900ms cubic-bezier(.2,.9,.25,1), left 900ms linear, top 900ms linear, opacity 900ms ease';
+      el.style.left = tx + 'px';
+      el.style.top = ty + 'px';
+      el.style.opacity = 0;
+      el.style.transform = 'translate(-50%,-50%) scale(0.6)';
+    });
+
+    setTimeout(()=>el.remove(), 1000);
+  }
+
+  // Spend randomly by picking random items until you spend at least a chunk
+  function spendRandomly() {
+    // buy some random items until spent increases by between 1% and 3% of GOAL (so it's fun)
+    const start = spent;
+    const targetDelta = GOAL * (0.01 + Math.random() * 0.02);
+    while (spent - start < targetDelta) {
+      const r = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+      purchases.push({id:r.id, item:r});
+      spent += r.price;
+      if (Math.random() < 0.12) break; // occasionally stop
+    }
+    updateDisplays();
+  }
+
+  // Buy top 5 priciest items (useful for big jumps)
+  function buyTopN(n=5) {
+    const sorted = ITEMS.slice().sort((a,b)=>b.price-a.price);
+    for (let i=0;i<n;i++){
+      purchases.push({id:sorted[i].id, item:sorted[i]});
+      spent += sorted[i].price;
+    }
+    updateDisplays();
+  }
+
+  // CONFETTI (small, light-weight)
+  const confetti = (() => {
+    const canvas = confettiCanvas;
+    const ctx = canvas.getContext('2d');
+    let W=0,H=0, particles=[];
+    function resize(){
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function random(min, max){ return Math.random()*(max-min)+min; }
+    function createBurst(count=120){
+      particles = [];
+      for (let i=0;i<count;i++){
+        particles.push({
+          x: W/2 + random(-200,200),
+          y: H/2 + random(-80,80),
+          vx: random(-6,6),
+          vy: random(-12,-3),
+          r: random(6,12),
+          color: ['#4f46e5','#06b6d4','#f97316','#f43f5e','#10b981'][Math.floor(Math.random()*5)],
+          life: random(60,140)
+        });
+      }
+      if (!animating) requestAnimationFrame(loop);
+    }
+
+    let animating=false;
+    function loop(){
+      animating=true;
+      ctx.clearRect(0,0,W,H);
+      for (let p of particles){
+        if (p.life <= 0) continue;
+        ctx.beginPath();
+        ctx.fillStyle = p.color;
+        ctx.save();
+        ctx.translate(p.x,p.y);
+        ctx.rotate(p.vx * 0.2);
+        ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r);
+        ctx.restore();
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.35; // gravity
+        p.vx *= 0.995;
+        p.life -= 1;
+      }
+      particles = particles.filter(p => p.life > 0 && p.y < H + 50);
+      if (particles.length) requestAnimationFrame(loop);
+      else animating=false;
+    }
+
+    return {burst:createBurst};
+  })();
+
+  function celebrate() {
+    confetti.burst(180);
+    // also flash progress bar
+    progressFill.style.boxShadow = '0 8px 40px rgba(99,102,241,0.6)';
+    setTimeout(()=>progressFill.style.boxShadow = '', 2000);
+    alert('🎉 You reached the goal! You spent Bill Gates\' money!');
+  }
+
+  // initialize
+  function init() {
+    load();
+    renderItems();
+    updateDisplays();
+
+    undoBtn.addEventListener('click', undo);
+    resetBtn.addEventListener('click', resetAll);
+    spendAllBtn.addEventListener('click', spendRandomly);
+    fillCartBtn.addEventListener('click', ()=>buyTopN(5));
+
+    // keyboard shortcuts
+    window.addEventListener('keydown', (e)=>{
+      if (e.key === 'z' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); undo(); }
+      if (e.key === 'r' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); resetAll(); }
+    });
+
+    // accessibility: announce updates
+    const live = document.createElement('div');
+    live.setAttribute('aria-live','polite');
+    live.style.position='absolute';
+    live.style.left='-9999px';
+    document.body.appendChild(live);
+    setInterval(()=> {
+      live.textContent = `Spent ${nf.format(spent)} of ${nf.format(GOAL)}`;
+    }, 1500);
+  }
+
+  // run it
+  init();
+})();
+</script>
+</body>
+</html>
