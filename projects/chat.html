@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Friends Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      background: #d2d5db;
+    }
+    #app {
+      max-width: 600px;
+      margin: 0 auto;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #fdfdfd;
+      border-left: 1px solid #aaa;
+      border-right: 1px solid #aaa;
+    }
+    header {
+      padding: 12px;
+      text-align: center;
+      font-weight: 600;
+      background: #f7f7f7;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header button {
+      font-size: 13px;
+      padding: 4px 8px;
+      border: none;
+      border-radius: 6px;
+      background: #007aff;
+      color: white;
+      cursor: pointer;
+    }
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      background: #e5ddd5;
+    }
+    .group { margin-bottom: 10px; display: flex; flex-direction: column; }
+    .name {
+      font-size: 11px;
+      color: #555;
+      margin: 0 8px 4px;
+    }
+    .bubble {
+      display: inline-block;
+      max-width: 75%;
+      margin: 2px 0;
+      padding: 8px 12px;
+      border-radius: 18px;
+      line-height: 1.3;
+      word-wrap: break-word;
+      font-size: 15px;
+    }
+    .me {
+      align-items: flex-end;
+    }
+    .me .bubble {
+      background: #0b93f6;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .other {
+      align-items: flex-start;
+    }
+    .other .bubble {
+      background: #e5e5ea;
+      color: black;
+      border-bottom-left-radius: 4px;
+    }
+    .media img, .media video {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 6px;
+    }
+    #status, #error {
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+    #status.ok { color: #248a4d; }
+    #status.bad { color: #c0392b; }
+    #error { color: #c0392b; white-space: pre-wrap; }
+    form {
+      display: flex;
+      padding: 8px;
+      border-top: 1px solid #ccc;
+      background: #f9f9f9;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+      font-size: 14px;
+    }
+    button.send {
+      margin-left: 8px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 20px;
+      background: #0b93f6;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    @media (max-width: 600px) {
+      .bubble { max-width: 85%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <span>Friends Chat</span>
+      <button id="changeName">Change Name</button>
+    </header>
+
+    <div id="status">Connecting…</div>
+    <div id="error"></div>
+
+    <div id="messages"></div>
+
+    <form id="chatForm" autocomplete="off">
+      <input id="input" type="text" placeholder="iMessage…" maxlength="500" />
+      <button class="send" id="sendBtn" type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    // ====== CONFIG: replace with your JSONBin info ======
+    const BIN_ID  = "68b86b85ae596e708fe1653e";
+    const API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
+    // ====================================================
+    const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+    const statusEl = document.getElementById("status");
+    const errorEl  = document.getElementById("error");
+    const msgsEl   = document.getElementById("messages");
+    const formEl   = document.getElementById("chatForm");
+    const inputEl  = document.getElementById("input");
+    const sendBtn  = document.getElementById("sendBtn");
+    const changeNameBtn = document.getElementById("changeName");
+
+    let displayName = localStorage.getItem("displayName");
+    if (!displayName) {
+      displayName = prompt("Enter your name:") || "Me";
+      localStorage.setItem("displayName", displayName);
+    }
+    changeNameBtn.addEventListener("click", () => {
+      displayName = prompt("Enter your name:") || displayName;
+      localStorage.setItem("displayName", displayName);
+    });
+
+    function setStatus(text, ok) {
+      statusEl.textContent = text;
+      statusEl.className = ok ? "ok" : "bad";
+    }
+    function showError(text) {
+      errorEl.textContent = text || "";
+    }
+
+    function escapeHtml(s) {
+      return (s || "").replace(/[&<>\"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    function extractMessages(record) {
+      if (Array.isArray(record)) return record;
+      if (record && Array.isArray(record.messages)) return record.messages;
+      return [];
+    }
+
+    function render(messages) {
+      msgsEl.innerHTML = "";
+      let lastName = "";
+      for (const m of messages) {
+        const group = document.createElement("div");
+        group.className = "group " + (m.name === displayName ? "me" : "other");
+        
+        if (m.name !== lastName) {
+          const nameEl = document.createElement("div");
+          nameEl.className = "name";
+          nameEl.textContent = m.name || "Anon";
+          group.appendChild(nameEl);
+          lastName = m.name;
+        }
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        
+        const text = m.text || "";
+        if (/\.(jpg|jpeg|png|gif)$/i.test(text)) {
+          bubble.innerHTML = `<div class="media"><img src="${escapeHtml(text)}" alt="image" /></div>`;
+        } else if (/\.(mp4|webm)$/i.test(text)) {
+          bubble.innerHTML = `<div class="media"><video controls src="${escapeHtml(text)}"></video></div>`;
+        } else if (/^https?:\/\//i.test(text)) {
+          bubble.innerHTML = `<a href="${escapeHtml(text)}" target="_blank">${escapeHtml(text)}</a>`;
+        } else {
+          bubble.textContent = text;
+        }
+
+        group.appendChild(bubble);
+        msgsEl.appendChild(group);
+      }
+
+      // Only auto-scroll if user is near bottom
+      const atBottom = msgsEl.scrollTop + msgsEl.clientHeight >= msgsEl.scrollHeight - 40;
+      if (atBottom) {
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+      }
+    }
+
+    async function fetchLatest() {
+      const res = await fetch(API_URL + "/latest", {
+        headers: { "X-Master-Key": API_KEY, "X-Bin-Meta": "false" }
+      });
+      if (!res.ok) throw new Error(`GET ${res.status}`);
+      return res.json();
+    }
+
+    async function putArray(messages) {
+      const res = await fetch(API_URL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": API_KEY,
+          "X-Bin-Meta": "false"
+        },
+        body: JSON.stringify(messages)
+      });
+      if (!res.ok) throw new Error(`PUT ${res.status}`);
+      return res.json();
+    }
+
+    async function loadMessages() {
+      showError("");
+      try {
+        const data = await fetchLatest();
+        const messages = extractMessages(data);
+        render(messages);
+        setStatus("Connected ✔", true);
+      } catch (err) {
+        setStatus("Error ❌", false);
+        showError(err.message);
+      }
+    }
+
+    async function sendMessage(text) {
+      showError("");
+      sendBtn.disabled = true;
+      try {
+        const current = await fetchLatest();
+        const messages = extractMessages(current);
+        messages.push({ name: displayName, text, ts: Date.now() });
+        await putArray(messages);
+        await loadMessages();
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    formEl.addEventListener("submit", e => {
+      e.preventDefault();
+      const text = (inputEl.value || "").trim();
+      if (!text) return;
+      inputEl.value = "";
+      sendMessage(text);
+    });
+
+    loadMessages();
+    setInterval(loadMessages, 2000);
+  </script>
+</body>
+</html>
