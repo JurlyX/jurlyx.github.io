@@ -8,7 +8,10 @@
 <script>
   function ai() {
         const prompt = document.getElementById("ipt").value
-        puter.ai.txt2img(`${prompt}`, false).then((image)=>{
+        puter.ai.txt2img(`${prompt}, { 
+            model: "dall-e-3", 
+            quality: "high" 
+        }).then((image)=>{
             document.body.appendChild(image);
         });
   }
