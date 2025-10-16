@@ -5,7 +5,7 @@
 </div>
 <script>
   function ai() {
-    const prompt = document.getElementById("grok-beta").value
+    const prompt = document.getElementById("ipt").value
     puter.ai.chat(`${prompt}`, {
         model: 'claude-sonnet-4.5',
     }).then(puter.print);
