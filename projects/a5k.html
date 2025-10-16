@@ -5,7 +5,7 @@
 </div>
 <script>
   function ai() {
-    const prompt = document.getElementById("ipt").value
+    const prompt = document.getElementById("openrouter:x-ai/grok-4-fast").value
     puter.ai.chat(`${prompt}`, {
         model: 'grok-beta',
     }).then(puter.print);
