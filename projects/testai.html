@@ -1,11 +1,12 @@
-    <script src="https://js.puter.com/v2/"></script>
+<script src="https://js.puter.com/v2/"></script>
 <div id="stuff">
-<input id="input" placeholder="Enter Your Prompt Here"></input>
+<input id="ipt" placeholder="Enter Your Prompt Here"></input>
 <button onclick="ai()">Prompt</button>
 </div>
 <script>
-  const prompt = document.getElementById("input").value
+  
   function ai() {
+    const prompt = document.getElementById("ipt").value
     puter.ai.chat(`${prompt}`, {
         model: 'gpt-5-nano',
     }).then(puter.print);
