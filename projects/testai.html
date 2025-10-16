@@ -19,7 +19,7 @@
     .ai-box { margin-top:12px; padding:10px; border:1px solid #ccc; border-radius:6px; background:#fff; }
   </style>
 </head>
-<body>
+<body onload="setSite()">
 <header id="header">XenzHost</header>
 <main id="app">Loading…</main>
 
@@ -29,7 +29,9 @@
 <script>
 const JSONBIN_API_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";  // <-- replace
 const BIN_ID = "68cad7bd43b1c97be9463d0e";               // <-- replace
-
+function setSite() {
+  currentSite = xvsg;
+}
 let sites = {};
 let currentSite = null;
 let editor;
@@ -85,17 +87,13 @@ async function renderEditor() {
   const app = document.getElementById("app");
   app.innerHTML = `
     <div>
-      <label for="siteName">Site Name</label>
-      <input id="siteName" placeholder="Enter site name">
-      <button id="loadBtn" class="btn">Load</button>
-      <button id="saveBtn" class="btn">Save</button>
     </div>
     <div class="row">
       <div class="editor" id="editor"></div>
       <iframe id="preview"></iframe>
     </div>
     <div class="ai-box">
-      <h3>AI Coder (Puter.js)</h3>
+      <h3>AI</h3>
       <textarea id="aiPrompt" rows="2" placeholder="Describe how to change or extend the site..."></textarea><br>
       <button id="aiBtn" class="btn">Generate Update</button>
     </div>
@@ -108,13 +106,6 @@ async function renderEditor() {
   editor.on("change", () => {
     document.getElementById("preview").srcdoc = editor.getValue();
   });
-
-  async function loadSite(name) {
-    currentSite = name;
-    const code = sites[name] || "<!-- New site -->";
-    editor.setValue(code);
-    document.getElementById("preview").srcdoc = code;
-  }
 
   async function saveSite() {
     if (!currentSite) {
