@@ -7,7 +7,7 @@
   function ai() {
     const prompt = document.getElementById("ipt").value
     puter.ai.chat(`${prompt}`, {
-        model: 'claude-sonnet-4-5',
+        model: 'gemini-2.5-flash',
     }).then(puter.print);
   }
 </script>
