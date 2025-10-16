@@ -83,7 +83,7 @@ async function renderEditor() {
       <label for="siteName">Site Name</label>
       <input id="siteName" placeholder="Enter site name">
       <button id="loadBtn" class="btn">Load</button>
-      <button id="saveBtn" onclick=v2() class="btn">Save</button>
+      <button id="saveBtn" onclick="v2()" class="btn">Save</button>
     </div>
     <div class="row">
       <div class="editor" id="editor"></div>
@@ -129,7 +129,7 @@ async function renderEditor() {
     const name = document.getElementById("siteName").value.trim();
     if (name) loadSite(name);
   };
-  document.getElementById("saveBtn").onclick = saveSite;
+  document.getElementById("saveBtn").onclick = v2();
 
   // AI with memory of current code
   document.getElementById("aiBtn").onclick = async () => {
