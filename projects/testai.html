@@ -6,7 +6,7 @@
 <script>
   const prompt = document.getElementById("input").value
   function ai() {
-    puter.ai.chat(`{$prompt}`, {
+    puter.ai.chat(`${prompt}`, {
         model: 'gpt-5-nano',
     }).then(puter.print);
   }
