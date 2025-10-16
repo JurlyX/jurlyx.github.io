@@ -86,14 +86,7 @@ async function renderEditor() {
   }
   const app = document.getElementById("app");
   app.innerHTML = `
-    <div>
-    </div>
-    <div class="row">
-      <div class="editor" id="editor"></div>
-      <iframe id="preview"></iframe>
-    </div>
-    <div class="ai-box">
-      <h3>AI</h3>
+      <p id=text></p>
       <textarea id="aiPrompt" rows="2" placeholder="Describe how to change or extend the site..."></textarea><br>
       <button id="aiBtn" class="btn">Generate Update</button>
     </div>
@@ -149,11 +142,9 @@ async function renderEditor() {
 
       const html = response.message && response.message.content;
       if (typeof html === "string") {
-        editor.setValue(html);
-        document.getElementById("preview").srcdoc = html;
+        document.getElementById("text").srcdoc = html;
       } else {
-        editor.setValue(html);
-        document.getElementById("preview").srcdoc = html;
+        document.getElementById("text").srcdoc = html;
       }
     } catch(e) {
       alert("AI Error: " + e.message);
