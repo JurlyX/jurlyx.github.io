@@ -49,12 +49,6 @@ async function loadSites() {
 
 async function saveSites() {
   v2();
-  const res = await fetch("https://api.jsonbin.io/v3/b/" + BIN_ID, {
-    method: "PUT",
-    headers: { "Content-Type":"application/json", "X-Master-Key": JSONBIN_API_KEY },
-    body: JSON.stringify({ sites })
-  });
-  if (!res.ok) throw new Error("Failed to save sites: " + res.status);
 }
 
 // Viewer mode
@@ -193,10 +187,11 @@ if (siteParam) {
               await puter.fs.write(`${dirName}/index.html`, editor.getValue());
   
               // (3) Host the directory under a random subdomain
-              let subdomain = puter.randName();
+              let subdomain = siteName
               const site = await puter.hosting.create(subdomain, dirName)
   
               puter.print(`Website hosted at: <a href="https://${site.subdomain}.puter.site" target="_blank">https://${site.subdomain}.puter.site</a>`);
+              alert("Website hosted at: https://${site.subdomain}.puter.site")
           })();
         }
     </script>
