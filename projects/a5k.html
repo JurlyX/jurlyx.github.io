@@ -8,7 +8,7 @@
 <script>
   function ai() {
         const prompt = document.getElementById("ipt").value
-        puter.ai.txt2img(`${prompt}`, true).then((image)=>{
+        puter.ai.txt2img(`${prompt}`, false).then((image)=>{
             document.body.appendChild(image);
         });
   }
