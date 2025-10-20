@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Discord Clone with Voice</title>
+<title>Discord Clone Full</title>
 <style>
   body { margin:0; font-family:Arial,sans-serif; display:flex; height:100vh; background:#36393f; color:white; }
   #server-sidebar { width:70px; background:#2f3136; display:flex; flex-direction:column; align-items:center; padding:10px 0; gap:10px; }
@@ -13,7 +13,7 @@
   #channel-sidebar h2 { font-size:18px; margin:10px 0; }
   .channel { padding:8px; cursor:pointer; border-radius:4px; }
   .channel:hover { background:#40444b; }
-  #main { flex:1; display:flex; flex-direction:column; background:#36393f; }
+  #main { flex:1; display:flex; flex-direction:column; background:#36393f; position:relative; }
   #messages { flex:1; padding:10px; overflow-y:auto; }
   #messages div { margin-bottom:10px; }
   #input-area { display:flex; padding:10px; background:#40444b; }
@@ -21,19 +21,18 @@
   #input-area button { padding:8px 12px; border:none; border-radius:4px; background:#7289da; color:white; cursor:pointer; }
   #voice-area { padding:10px; background:#2f3136; display:flex; gap:10px; align-items:center; }
   #voice-area button { background:#43b581; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; color:white; }
+  #login { position:absolute; top:0; left:0; width:100%; height:100%; background:#2f3136; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  #login input { padding:8px; margin:5px; border-radius:4px; border:none; }
+  #dm-panel { position:absolute; right:0; top:0; width:250px; height:100%; background-color:#2f3136; display:flex; flex-direction:column; padding:10px; overflow-y:auto; }
+  #dm-panel h2 { margin-top:0; }
+  .dm-user { padding:8px; cursor:pointer; border-radius:4px; }
+  .dm-user:hover { background-color:#40444b; }
 </style>
 </head>
 <body>
 
-<div id="server-sidebar">
-  <div class="server" onclick="switchServer('default')">D</div>
-</div>
-
-<div id="channel-sidebar">
-  <h2 id="server-name">Default Server</h2>
-  <div class="channel" onclick="switchChannel('general')"># general</div>
-</div>
-
+<div id="server-sidebar"></div>
+<div id="channel-sidebar"><h2 id="server-name">Default Server</h2></div>
 <div id="main">
   <div id="messages"></div>
   <div id="input-area">
@@ -46,148 +45,169 @@
   </div>
 </div>
 
+<div id="dm-panel">
+  <h2>Direct Messages</h2>
+  <div id="dm-users"></div>
+</div>
+
+<div id="login">
+  <h2>Login / Register</h2>
+  <input type="text" id="loginUser" placeholder="Username"><br>
+  <input type="password" id="loginPass" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
+</div>
+
 <script>
 /*** CONFIG ***/
-const JSONBIN_KEY = '$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.';
-const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b';
-const VOICE_BIN = '68f664cdd0ea881f40aec645'; // a dedicated bin for signaling
+const JSONBIN_KEY="$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
+const VOICE_BIN="68f664cdd0ea881f40aec645";
+const LOGIN_BIN="68f665aad0ea881f40aec7bf";
+const JSONBIN_BASE='https://api.jsonbin.io/v3/b';
 
 /*** STATE ***/
-let currentServer = 'default';
-let currentChannel = 'general';
-let messages = [];
+let currentUser='';
+let currentServer='default';
+let currentChannel='general';
+let messages=[];
+let users=[];
 let localStream;
-let peers = {}; // { userId: RTCPeerConnection }
+let peers={};
 
-/*** MESSAGES (same as before) ***/
-async function fetchBin(binId) {
-  const res = await fetch(`${JSONBIN_BASE}/${binId}/latest`, { headers: { 'X-Master-Key': JSONBIN_KEY } });
-  return res.json();
+/*** UTILS ***/
+async function fetchBin(binId){ const res=await fetch(`${JSONBIN_BASE}/${binId}/latest`, { headers:{ 'X-Master-Key':JSONBIN_KEY }}); return res.json(); }
+async function updateBin(binId,data){ const res=await fetch(`${JSONBIN_BASE}/${binId}`, { method:'PUT', headers:{ 'Content-Type':'application/json','X-Master-Key':JSONBIN_KEY}, body:JSON.stringify(data)}); return res.json(); }
+
+/*** LOGIN / REGISTER ***/
+async function loadUsersBin(){ try{ const bin=await fetchBin(LOGIN_BIN); users=bin.record||[]; }catch{ users=[]; } }
+async function saveUsersBin(){ await updateBin(LOGIN_BIN,users); }
+
+async function login(){
+  await loadUsersBin();
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const found=users.find(x=>x.username===u && x.password===p);
+  if(found){ currentUser=u; document.getElementById('login').style.display='none'; loadUI(); } else { alert('Invalid login'); }
 }
 
-async function updateBin(binId, data) {
-  const res = await fetch(`${JSONBIN_BASE}/${binId}`, { method:'PUT', headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_KEY}, body:JSON.stringify(data)});
-  return res.json();
+async function register(){
+  await loadUsersBin();
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(users.find(x=>x.username===u)){ alert('Username exists'); return; }
+  users.push({username:u,password:p, dms:{}}); currentUser=u; await saveUsersBin(); document.getElementById('login').style.display='none'; loadUI();
 }
 
-async function loadMessages() {
-  try {
-    const data = await fetchBin(currentServer);
-    messages = data.record?.[currentChannel] || [];
-    renderMessages();
-  } catch { messages=[]; renderMessages(); }
+/*** UI INIT ***/
+function loadUI(){
+  initServers(); loadMessages(); loadDMUsers();
 }
 
-function renderMessages() {
-  const container = document.getElementById('messages');
-  container.innerHTML = '';
-  messages.forEach(m => { const div = document.createElement('div'); div.textContent = `${m.user}: ${m.text}`; container.appendChild(div); });
-  container.scrollTop = container.scrollHeight;
-}
-
-async function sendMessage() {
-  const input = document.getElementById('messageInput');
-  if(!input.value.trim()) return;
-  const msg={user:'Me', text:input.value};
-  messages.push(msg);
-  renderMessages();
-  input.value='';
+/*** MESSAGES ***/
+async function loadMessages(){
   try{
-    const data = await fetchBin(currentServer);
-    data.record = data.record || {};
-    data.record[currentChannel]=messages;
-    await updateBin(currentServer, data.record);
-  }catch(e){console.error(e);}
+    const data=await fetchBin(currentServer);
+    messages=data.record?.[currentChannel]||[];
+    renderMessages();
+  }catch{ messages=[]; renderMessages(); }
+}
+function renderMessages(){
+  const container=document.getElementById('messages'); container.innerHTML='';
+  messages.forEach(m=>{ const div=document.createElement('div'); div.textContent=`${m.user}: ${m.text}`; container.appendChild(div); });
+  container.scrollTop=container.scrollHeight;
+}
+async function sendMessage(){
+  const input=document.getElementById('messageInput');
+  if(!input.value.trim()) return;
+  const msg={user:currentUser,text:input.value};
+  messages.push(msg); renderMessages(); input.value='';
+  try{
+    const data=await fetchBin(currentServer);
+    data.record=data.record||{}; data.record[currentChannel]=messages;
+    await updateBin(currentServer,data.record);
+  }catch(e){ console.error(e); }
 }
 
+/*** CHANNELS ***/
 function switchChannel(channel){ currentChannel=channel; loadMessages(); }
-function switchServer(serverId){ currentServer=serverId; currentChannel='general'; loadMessages(); }
+
+/*** SERVERS ***/
+function initServers(){
+  const sidebar=document.getElementById('server-sidebar');
+  sidebar.innerHTML='';
+  const defaultServer=document.createElement('div'); defaultServer.className='server'; defaultServer.textContent='D';
+  defaultServer.onclick=()=>switchServer('default'); sidebar.appendChild(defaultServer);
+}
+function switchServer(serverId){ currentServer=serverId; currentChannel='general'; document.getElementById('server-name').textContent=serverId+' Server'; loadMessages(); }
+
+/*** DMS ***/
+function loadDMUsers(){
+  const dmContainer=document.getElementById('dm-users'); dmContainer.innerHTML='';
+  users.filter(u=>u.username!==currentUser).forEach(u=>{
+    const div=document.createElement('div'); div.className='dm-user'; div.textContent=u.username;
+    div.onclick=()=>openDM(u.username); dmContainer.appendChild(div);
+  });
+}
+function openDM(username){
+  alert('DM with '+username+' not implemented yet (placeholder)');
+}
 
 /*** VOICE CHAT ***/
-async function joinVoice() {
+async function joinVoice(){
   if(localStream) return;
-  localStream = await navigator.mediaDevices.getUserMedia({ audio:true });
-
-  pollSignals(); // start polling signaling bin
-  addMessage('You joined voice chat 🎤', 'system');
+  localStream=await navigator.mediaDevices.getUserMedia({audio:true});
+  pollSignals();
+  addMessage('You joined voice chat 🎤','system');
+}
+function leaveVoice(){
+  if(localStream){ localStream.getTracks().forEach(t=>t.stop()); localStream=null; for(let p in peers) peers[p].close(); peers={}; addMessage('You left voice chat ⛔','system'); }
 }
 
-function leaveVoice() {
-  if(localStream) {
-    localStream.getTracks().forEach(t=>t.stop());
-    localStream=null;
-    for(let p in peers) peers[p].close();
-    peers={};
-    addMessage('You left voice chat ⛔','system');
-  }
-}
-
-/*** WEBRTC SIGNALING USING JSONBIN ***/
-async function pollSignals() {
+async function pollSignals(){
   while(localStream){
-    try {
-      const bin = await fetchBin(VOICE_BIN);
-      const signals = bin.record || [];
+    try{
+      const bin=await fetchBin(VOICE_BIN); const signals=bin.record||[];
       for(const s of signals){
-        if(s.user==='Me') continue; // skip our own
-        if(!peers[s.user]){
-          createPeer(s.user, s);
-        } else {
-          handleSignal(s);
-        }
+        if(s.user===currentUser) continue;
+        if(!peers[s.user]) createPeer(s.user,s);
+        else handleSignal(s);
       }
-    } catch(e){ console.error(e); }
+    }catch(e){ console.error(e); }
     await new Promise(r=>setTimeout(r,2000));
   }
 }
 
 async function sendSignal(signal){
-  const bin = await fetchBin(VOICE_BIN);
-  const signals = bin.record || [];
-  signals.push(signal);
-  await updateBin(VOICE_BIN, signals);
+  const bin=await fetchBin(VOICE_BIN); const signals=bin.record||[]; signals.push(signal);
+  await updateBin(VOICE_BIN,signals);
 }
 
-function createPeer(userId, signal){
-  const pc = new RTCPeerConnection();
+function createPeer(userId,signal){
+  const pc=new RTCPeerConnection();
   localStream.getTracks().forEach(track=>pc.addTrack(track,localStream));
-  pc.ontrack = e=>{
-    let audio = document.getElementById('audio_'+userId);
-    if(!audio){
-      audio=document.createElement('audio');
-      audio.id='audio_'+userId;
-      audio.autoplay=true;
-      document.body.appendChild(audio);
-    }
+  pc.ontrack=e=>{
+    let audio=document.getElementById('audio_'+userId);
+    if(!audio){ audio=document.createElement('audio'); audio.id='audio_'+userId; audio.autoplay=true; document.body.appendChild(audio);}
     audio.srcObject=e.streams[0];
   }
-  pc.onicecandidate = e=>{
-    if(e.candidate) sendSignal({user:'Me', target:userId, candidate:e.candidate});
-  }
+  pc.onicecandidate=e=>{ if(e.candidate) sendSignal({user:currentUser,target:userId,candidate:e.candidate}); }
   peers[userId]=pc;
   pc.setRemoteDescription(new RTCSessionDescription(signal.offer)).then(async()=>{
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    sendSignal({user:'Me', target:userId, answer});
+    const answer=await pc.createAnswer(); await pc.setLocalDescription(answer);
+    sendSignal({user:currentUser,target:userId,answer});
   });
 }
 
 async function handleSignal(signal){
-  if(signal.target !== 'Me') return;
-  const pc = peers[signal.user];
+  if(signal.target!==currentUser) return;
+  const pc=peers[signal.user];
   if(signal.answer) pc.setRemoteDescription(new RTCSessionDescription(signal.answer));
   if(signal.candidate) pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
 }
 
 /*** HELPER ***/
-function addMessage(text,user='system'){
-  const container=document.getElementById('messages');
-  const div=document.createElement('div');
-  div.textContent=`${user}: ${text}`;
-  container.appendChild(div);
-  container.scrollTop=container.scrollHeight;
-}
-</script>
+function addMessage(text,user='system'){ const container=document.getElementById('messages'); const div=document.createElement('div'); div.textContent=`${user}: ${text}`; container.appendChild(div); container.scrollTop=container.scrollHeight; }
 
+</script>
 </body>
 </html>
