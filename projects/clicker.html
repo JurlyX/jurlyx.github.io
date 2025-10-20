@@ -7,11 +7,11 @@
     <h1 id="count">0</h1>
     <button onclick="Click()">click</button>
     <script>
-      let clicks = 0;
-      const count = document.getElementById("Count")
       function Click()  {
-        clicks = clicks + 1;
-        document.getElementById("count").innerHtml = clicks;
+        clicks += 1;
+        let clicks = 0;
+        const count = document.getElementById("count")
+        count.innerHtml = clicks;
       }
     </script>
   </body>
