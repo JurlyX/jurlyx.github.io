@@ -6,10 +6,11 @@
   <body onclick=Click()>
     <h1 id="count">0</h1>
     <script>
-      var clicks = 0
+      let clicks = 0;
       const count = document.getElementById("Count")
       function Click()  {
-        
+        clicks = clicks + 1;
+        document.getElementById("count").innerHtml = clicks;
       }
     </script>
   </body>
