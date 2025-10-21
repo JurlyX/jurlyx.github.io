@@ -3,29 +3,20 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Discord Clone — High Fidelity (Static + JSONBin)</title>
-
-<!-- Use Inter font (close to Discord) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>Discord Clone — Invites + Extended</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-
 <style>
   :root{
     --bg:#202225; --sidebar:#2f3136; --muted:#72767d; --brand:#5865f2;
-    --channel-bg:#2b2f33; --panel:#1f2124; --msg-bg:#2f3336;
-    --surface:#2b2f33;
+    --channel-bg:#2b2f33; --panel:#1f2124; --msg-bg:#2f3336; --surface:#2b2f33;
   }
   *{box-sizing:border-box}
   html,body{height:100%; margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial; background:var(--bg); color:#dcddde}
-  /* Layout */
   .app{display:flex; height:100vh; width:100vw; overflow:hidden}
-  /* Server column */
   .col-servers{width:72px;padding:8px;background:var(--sidebar);display:flex;flex-direction:column;gap:8px;align-items:center;overflow:auto}
   .server-btn{width:48px;height:48px;border-radius:50%;background:#36393f;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;cursor:pointer}
   .server-btn.add{background:var(--brand);font-size:20px}
   .server-btn:hover{filter:brightness(1.15)}
-  /* left panel channels */
   .col-channels{width:260px;background:var(--channel-bg);padding:12px;display:flex;flex-direction:column;gap:12px;overflow:auto}
   .server-header{display:flex;justify-content:space-between;align-items:center}
   .server-title{font-weight:700;font-size:16px}
@@ -34,11 +25,8 @@
   .section-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
   .channel-item{padding:6px 8px;border-radius:6px;display:flex;align-items:center;gap:8px;color:#b9bbbe;cursor:pointer}
   .channel-item.active{background:#393c40;color:#fff}
-  .channel-item .name{font-weight:500}
   .category{margin-top:8px}
-  .cat-title{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
   .add-channel{margin-top:8px;padding:6px;background:#3a3d41;border-radius:6px;color:#fff;cursor:pointer}
-  /* center chat */
   .col-chat{flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#2b2f33, #252628)}
   .chat-top{height:64px;background:var(--panel);display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid rgba(0,0,0,0.25)}
   .chat-title{font-weight:700}
@@ -47,7 +35,6 @@
   .composer{height:84px;background:var(--panel);display:flex;gap:10px;align-items:center;padding:12px;border-top:1px solid rgba(0,0,0,0.25)}
   .composer .input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:#232427;color:#ddd}
   .composer .btn{background:var(--brand);color:white;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
-  /* message */
   .msg-row{display:flex;gap:12px;margin-bottom:12px}
   .avatar{width:44px;height:44px;border-radius:8px;background:#3a3d41;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
   .msg-body{flex:1}
@@ -59,32 +46,24 @@
   .msg-actions{margin-top:8px;display:flex;gap:8px}
   .msg-action{font-size:13px;color:var(--muted);cursor:pointer;padding:6px;border-radius:6px}
   .msg-action:hover{background:rgba(255,255,255,0.03)}
-  /* right panel (DMs + members) */
   .col-right{width:320px;background:var(--surface);padding:12px;display:flex;flex-direction:column;gap:10px}
   .dm-list,.member-list{overflow:auto;max-height:42vh;padding-right:6px}
   .dm-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer}
   .dm-item:hover{background:#2d2f33}
   .member-row{display:flex;align-items:center;justify-content:space-between;padding:6px;border-radius:6px}
   .role-pill{font-size:12px;padding:2px 6px;border-radius:6px}
-  /* modals / drawers */
   .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#2b2f33;padding:16px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.6);z-index:200}
   .hidden{display:none}
   .small{font-size:12px;color:var(--muted)}
-  /* notifications & badge */
   .badge{background:#ed4245;color:white;padding:2px 6px;border-radius:999px;font-size:12px}
-  /* search results */
-  .search-result{padding:8px;border-radius:6px;background:#232425;margin-bottom:6px}
-  /* scrollbars */
   ::-webkit-scrollbar{width:10px;height:10px}
   ::-webkit-scrollbar-thumb{background:#383b40;border-radius:6px}
 </style>
 </head>
 <body>
 <div class="app">
-  <!-- left servers -->
   <div class="col-servers" id="serversCol"></div>
 
-  <!-- channels column -->
   <div class="col-channels">
     <div class="server-header">
       <div>
@@ -101,7 +80,6 @@
     <div class="add-channel" onclick="createChannel()">+ Create Channel</div>
   </div>
 
-  <!-- chat -->
   <div class="col-chat">
     <div class="chat-top">
       <div>
@@ -120,10 +98,12 @@
       <input id="fileInput" type="file" class="hidden" onchange="onAttachment(event)"/>
       <input id="messageInput" class="input" placeholder="Message #general" />
       <button class="btn" onclick="sendMessage()">Send</button>
+      <button class="small" onclick="openEmoji()">🙂</button>
+      <button class="small" onclick="openThreads()">Threads</button>
+      <button class="small" onclick="openPins()">Pins</button>
     </div>
   </div>
 
-  <!-- right -->
   <div class="col-right">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div><strong>Direct Messages</strong></div>
@@ -154,8 +134,8 @@
   </div>
 </div>
 
-<!-- login modal -->
-<div id="loginModal" class="modal" style="width:420px">
+<!-- login -->
+<div id="loginModal" class="modal">
   <h2 style="margin:0 0 8px 0">Sign in or Register</h2>
   <input id="loginName" class="input" placeholder="Username" style="width:100%;margin-bottom:8px"/>
   <input id="loginPass" class="input" placeholder="Password" type="password" style="width:100%;margin-bottom:8px"/>
@@ -167,8 +147,8 @@
   <div class="small" style="margin-top:8px;color:var(--muted)">Note: this demo stores your JSONBin master key and bins in client code per your request. Not secure for production.</div>
 </div>
 
-<!-- server settings drawer -->
-<div id="serverSettings" class="modal hidden" style="right:20px;left:auto;top:20px;transform:none;width:480px;height:80vh;overflow:auto">
+<!-- server settings (includes invite management, audit log) -->
+<div id="serverSettings" class="modal hidden" style="width:680px;height:80vh;overflow:auto;left:auto;right:20px;top:10px;transform:none">
   <h3>Server Settings</h3>
   <div style="margin-top:8px">
     <label class="small">Name</label>
@@ -187,6 +167,25 @@
     <label class="small" style="margin-top:12px">Members</label>
     <div id="settingsMembers" style="margin-top:6px"></div>
 
+    <label class="small" style="margin-top:12px">Invites</label>
+    <div id="inviteList" style="margin-top:6px"></div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <input id="inviteRoleSelect" class="input" placeholder="Role to assign on join (optional)"/>
+      <input id="inviteMaxUses" class="input" placeholder="Max uses (0 = unlimited)" style="width:150px"/>
+      <input id="inviteTTL" type="datetime-local" class="input" style="width:220px"/>
+      <button onclick="createInvite()" class="small">Create Invite</button>
+    </div>
+
+    <label class="small" style="margin-top:12px">Audit Log</label>
+    <div id="auditList" style="margin-top:6px;max-height:180px;overflow:auto"></div>
+
+    <label class="small" style="margin-top:12px">Webhooks</label>
+    <div id="webhooksList" style="margin-top:6px"></div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <input id="newWebhookName" class="input" placeholder="Webhook name"/>
+      <button onclick="createWebhook()" class="small">Create Webhook</button>
+    </div>
+
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
       <button class="small" onclick="saveServerSettings()">Save</button>
       <button class="small" onclick="closeServerSettings()">Close</button>
@@ -194,12 +193,21 @@
   </div>
 </div>
 
-<!-- pinned drawer -->
+<!-- pins -->
 <div id="pinsModal" class="modal hidden" style="width:520px">
   <h3>Pinned Messages</h3>
   <div id="pinsList" style="max-height:60vh;overflow:auto;margin-top:8px"></div>
   <div style="display:flex;justify-content:flex-end;margin-top:8px">
     <button class="small" onclick="closePins()">Close</button>
+  </div>
+</div>
+
+<!-- threads modal -->
+<div id="threadsModal" class="modal hidden" style="width:520px">
+  <h3>Threads</h3>
+  <div id="threadsList" style="max-height:60vh;overflow:auto;margin-top:8px"></div>
+  <div style="display:flex;justify-content:flex-end;margin-top:8px">
+    <button class="small" onclick="closeThreads()">Close</button>
   </div>
 </div>
 
@@ -210,9 +218,9 @@
   <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="small" onclick="closeSearch()">Close</button></div>
 </div>
 
-<!-- invite modal -->
+<!-- invite modal (copy) -->
 <div id="inviteModal" class="modal hidden" style="width:420px">
-  <h3>Create Invite</h3>
+  <h3>Invite Created</h3>
   <div id="inviteCodeBox" class="small" style="margin:8px 0"></div>
   <div style="display:flex;gap:8px;justify-content:flex-end">
     <button class="small" onclick="copyInvite()">Copy</button>
@@ -220,702 +228,567 @@
   </div>
 </div>
 
-<!-- extensive emoji picker -->
-<div id="emojiPicker" class="modal hidden" style="width:420px">
-  <h3>Emoji</h3>
-  <div style="max-height:50vh;overflow:auto;display:grid;grid-template-columns:repeat(8,1fr);gap:6px;padding-top:8px">
-    <script> // emoji cells will be injected dynamically </script>
-  </div>
-  <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="small" onclick="closeEmoji()">Close</button></div>
-</div>
+<!-- emoji picker -->
+<div id="emojiPicker" class="modal hidden" style="width:420px"><h3>Emoji</h3><div id="emojiGrid" style="max-height:50vh;overflow:auto;display:grid;grid-template-columns:repeat(8,1fr);gap:6px;padding-top:8px"></div><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="small" onclick="closeEmoji()">Close</button></div></div>
 
 <input id="hiddenCopy" class="hidden" />
 
 <script>
-/*
-  High-fidelity Discord-like static app.
-  Uses JSONBin as database. Configurable constants below.
-  NOTE: This is a client-side demo. Your master key is embedded below as requested.
-*/
+/* ===========================
+   CONFIG & BINS
+   =========================== */
+const JSONBIN_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
+const LOGIN_BIN = "68f665aad0ea881f40aec7bf";
+const SERVERS_BIN = "68f665aad0ea881f40aec700";
+const POLL_MS = 2000;
 
-/* ======================
-   CONFIG
-   ====================== */
-const JSONBIN_KEY = "$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH."; // you provided
-const LOGIN_BIN = "68f665aad0ea881f40aec7bf"; // you provided (accounts)
-const SERVERS_BIN = "68f665aad0ea881f40aec700"; // master servers bin used previously
-const POLL_MS = 2000; // polling interval
-
-/* ======================
-   Helpers for JSONBin v3
-   ====================== */
+/* JSONBin helpers */
 async function jsonbin_get(binId){
-  const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers: { "X-Master-Key": JSONBIN_KEY }});
-  if(!res.ok) throw new Error("Failed GET bin " + binId + " (status " + res.status + ")");
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers:{ "X-Master-Key": JSONBIN_KEY } });
+  if(!res.ok) throw new Error("GET failed "+res.status);
   return res.json();
 }
 async function jsonbin_put(binId, data){
   const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
-    method: "PUT", headers: { "Content-Type": "application/json", "X-Master-Key": JSONBIN_KEY }, body: JSON.stringify(data)
+    method: "PUT",
+    headers: { "Content-Type":"application/json", "X-Master-Key": JSONBIN_KEY },
+    body: JSON.stringify(data)
   });
-  if(!res.ok) throw new Error("Failed PUT bin " + binId + " (status " + res.status + ")");
+  if(!res.ok) throw new Error("PUT failed "+res.status);
   return res.json();
 }
 
-/* ======================
-   App state
-   ====================== */
+/* ===========================
+   App State
+   =========================== */
 let me = null;
-let users = []; // from LOGIN_BIN
-let servers = {}; // mapping serverId -> server object
-let activeServer = null; // server id
-let activeChannel = null; // channel name
+let users = [];
+let servers = {};
+let activeServer = null;
+let activeChannel = null;
 let pollTimer = null;
-let attachments = []; // attachments queued for next message
+let attachments = [];
 
-/* ======================
+/* ===========================
    Startup
-   ====================== */
+   =========================== */
 async function init(){
-  // load user accounts (login bin)
-  try {
-    const ub = await jsonbin_get(LOGIN_BIN);
-    users = ub.record || [];
-  } catch(e) {
-    console.warn("Could not load LOGIN_BIN:", e);
-    users = [];
-  }
-
-  // load servers
-  try {
-    const sb = await jsonbin_get(SERVERS_BIN);
-    servers = sb.record || {};
-    // if no servers, create default
-    if(Object.keys(servers).length === 0) await createDefaultServer();
-  } catch(e) {
-    console.warn("Servers bin missing; bootstrapping default server locally.", e);
-    await createDefaultServer();
-  }
-
-  // if user not logged in, show modal
-  document.getElementById('loginModal').style.display = 'block';
-
-  // populate emoji picker
-  buildEmojiPicker();
-
-  // render servers column
+  // load users
+  try { const ub = await jsonbin_get(LOGIN_BIN); users = ub.record || []; } catch(e){ console.warn("users load failed", e); users=[]; }
+  // load or create servers bin
+  try { const sb = await jsonbin_get(SERVERS_BIN); servers = sb.record || {}; } catch(e){ console.warn("servers load failed", e); servers = {}; await createDefaultServer(); }
+  if(Object.keys(servers).length===0) await createDefaultServer();
+  // UI
   renderServersColumn();
-  // set default active server
   activeServer = Object.keys(servers)[0];
   activeChannel = servers[activeServer].channels[0].name || "general";
-  renderSidePanels();
-  renderChat();
+  buildEmojiGrid();
+  document.getElementById('loginModal').style.display = 'block';
   startPolling();
 }
 
-/* create default server and persist */
+/* create default server if none */
 async function createDefaultServer(){
   const id = "srv_default";
   servers[id] = {
-    id, name: "Default Server", icon: null,
-    channels: [ { name: "general", topic: "Welcome to general" }, { name: "rules", topic: "Rules & Info" } ],
+    id, name: "Default Server", icon:null,
+    channels: [ {name:"general", topic:"Welcome!"} ],
     voiceChannels: [],
-    roles: { "admin": { color: "#ff595e", perms: { all:true } }, "member": { color:"#57f287", perms:{ send:true } } },
-    users: {}, messages: { "general": [], "rules": [] }, invites: [], pins: [], audit: []
+    roles: { admin:{color:"#ff595e", perms:{all:true}}, member:{color:"#57f287", perms:{send:true}} },
+    users: {}, messages: { general: [] }, invites: [], pins: [], threads: {}, audit: [], webhooks: []
   };
-  // persist
-  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("Failed persist default:", e); }
+  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("write default failed", e); }
 }
 
-/* ======================
-   Auth functions
-   ====================== */
+/* ===========================
+   Authentication
+   =========================== */
 async function login(){
   const name = document.getElementById('loginName').value.trim();
   const pass = document.getElementById('loginPass').value;
-  if(!name || !pass) return alert("username and password required");
-  // reload users to avoid stale
-  try { const ub = await jsonbin_get(LOGIN_BIN); users = ub.record || []; } catch(e){ console.warn("users bin get fail", e); }
-  const u = users.find(x => x.username === name && x.password === pass);
-  if(!u) return alert("Invalid credentials");
-  me = u; me.lastActive = Date.now();
-  document.getElementById('loginModal').style.display = 'none';
+  if(!name || !pass) return alert("username+password required");
+  try { const ub = await jsonbin_get(LOGIN_BIN); users = ub.record || []; } catch(e){ console.warn("users reload fail", e); }
+  const user = users.find(u=>u.username===name && u.password===pass);
+  if(!user) return alert("invalid");
+  me = user; me.lastActive = Date.now();
+  document.getElementById('loginModal').style.display='none';
   onLoggedIn();
 }
 async function register(){
   const name = document.getElementById('loginName').value.trim();
   const pass = document.getElementById('loginPass').value;
-  if(!name || !pass) return alert("username and password required");
-  try { const ub = await jsonbin_get(LOGIN_BIN); users = ub.record || []; } catch(e){ users = []; }
-  if(users.some(x=>x.username === name)) return alert("Username exists");
-  const profile = { username: name, password: pass, avatar: null, bio: "", status: "online", createdAt: Date.now() };
+  if(!name || !pass) return alert("username+password required");
+  try { const ub = await jsonbin_get(LOGIN_BIN); users = ub.record || []; } catch(e){ users=[]; }
+  if(users.some(u=>u.username===name)) return alert("username exists");
+  const profile = { username:name, password:pass, avatar:null, status:"online", createdAt:Date.now() };
   users.push(profile);
-  try { await jsonbin_put(LOGIN_BIN, users); } catch(e){ console.error("Failed saving users", e); }
-  me = profile;
-  document.getElementById('loginModal').style.display = 'none';
+  try { await jsonbin_put(LOGIN_BIN, users); } catch(e){ console.warn("save users failed", e); }
+  me = profile; document.getElementById('loginModal').style.display='none';
   onLoggedIn();
 }
-function continueAsGuest(){
-  me = { username: "Guest"+Math.floor(Math.random()*9000+1000), avatar:null, status:"online" };
-  document.getElementById('loginModal').style.display = 'none';
-  onLoggedIn();
-}
-async function saveProfile(){
-  const name = document.getElementById('profileName').value.trim();
-  if(!name) return alert("Enter a name");
-  me.username = name;
-  // write back if user exists in users list
-  const idx = users.findIndex(u=>u.username === name);
-  if(idx >= 0){
-    users[idx] = { ...users[idx], ...me };
-    try { await jsonbin_put(LOGIN_BIN, users); } catch(e){ console.warn("Failed update users bin", e); }
-  }
-  renderSidePanels();
-}
-function logout(){
-  if(!confirm("Logout?")) return;
-  me = null;
-  document.getElementById('loginModal').style.display = 'block';
+function continueAsGuest(){ me = { username:"Guest"+Math.floor(Math.random()*9000+1000), status:"online" }; document.getElementById('loginModal').style.display='none'; onLoggedIn(); }
+async function saveProfile(){ const name = document.getElementById('profileName').value.trim(); if(!name) return alert("enter name"); me.username = name; const idx = users.findIndex(u=>u.username===name); if(idx>=0){ users[idx] = {...users[idx], ...me}; try{ await jsonbin_put(LOGIN_BIN, users); }catch(e){console.warn("save profile fail",e);} } renderSidePanels(); }
+
+/* ===========================
+   Polling & Sync
+   =========================== */
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async ()=>{
+    try { const ub = await jsonbin_get(LOGIN_BIN); users = ub.record || users; } catch(e){/*ignore*/ }
+    try { const sb = await jsonbin_get(SERVERS_BIN); servers = sb.record || servers; if(!activeServer) activeServer = Object.keys(servers)[0]; if(activeServer && servers[activeServer] && !servers[activeServer].channels.find(c=>c.name===activeChannel)) activeChannel = servers[activeServer].channels[0]?.name; renderServersColumn(); renderSidePanels(); renderChat(); } catch(e){ console.warn("poll server fail", e); }
+  }, POLL_MS);
 }
 
-/* ======================
-   UI Render helpers
-   ====================== */
+/* ===========================
+   UI Rendering
+   =========================== */
 function renderServersColumn(){
-  const col = document.getElementById('serversCol');
-  col.innerHTML = "";
+  const col = document.getElementById('serversCol'); col.innerHTML='';
   Object.keys(servers).forEach(sid=>{
     const s = servers[sid];
-    const btn = document.createElement('div');
-    btn.className = "server-btn";
-    btn.title = s.name;
-    btn.innerText = (s.name && s.name[0]) || "S";
+    const btn = document.createElement('div'); btn.className='server-btn'; btn.title = s.name; btn.innerText = s.name ? s.name[0] : 'S';
     btn.onclick = ()=> { activeServer = sid; activeChannel = s.channels[0].name; renderSidePanels(); renderChat(); };
     col.appendChild(btn);
   });
-  const add = document.createElement('div');
-  add.className = "server-btn add";
-  add.innerText = "+";
-  add.title = "Create Server";
-  add.onclick = ()=> createServerPrompt();
-  col.appendChild(add);
+  const add = document.createElement('div'); add.className='server-btn add'; add.innerText='+'; add.title='Create server'; add.onclick = createServerPrompt; col.appendChild(add);
 }
 
 function renderSidePanels(){
   if(!activeServer) return;
-  // server header
   const srv = servers[activeServer];
   document.getElementById('serverName').innerText = srv.name;
-  document.getElementById('serverMembers').innerText = (Object.keys(srv.users || {}).length) + " members";
-
-  // left: categories & channels
-  const catContainer = document.getElementById('categoriesContainer');
-  catContainer.innerHTML = "";
-  // We'll render channel categories as a single category "Text Channels"
-  const textCat = document.createElement('div');
-  textCat.className = "category";
-  const title = document.createElement('div');
-  title.className = "cat-title section-title";
-  title.innerText = "Text Channels";
-  textCat.appendChild(title);
-  srv.channels.forEach(ch => {
-    const chEl = document.createElement('div');
-    chEl.className = "channel-item " + (activeChannel === ch.name ? "active":"");
-    chEl.innerHTML = `<div class="name"># ${ch.name}</div><div style="margin-left:auto" class="small">${(srv.messages[ch.name]||[]).filter(m=>!m.deleted).length}</div>`;
-    chEl.onclick = ()=> { activeChannel = ch.name; renderChat(); renderSidePanels(); };
-    textCat.appendChild(chEl);
+  document.getElementById('serverMembers').innerText = (Object.keys(srv.users||{}).length) + " members";
+  // channels
+  const container = document.getElementById('categoriesContainer'); container.innerHTML='';
+  const textCat = document.createElement('div'); textCat.className='category';
+  const title = document.createElement('div'); title.className='cat-title section-title'; title.innerText='Text Channels'; textCat.appendChild(title);
+  srv.channels.forEach(ch=>{
+    const el = document.createElement('div'); el.className='channel-item ' + (activeChannel===ch.name ? 'active':'' ); el.innerHTML = `<div class="name"># ${ch.name}</div><div style="margin-left:auto" class="small">${(srv.messages[ch.name]||[]).filter(m=>!m.deleted).length}</div>`;
+    el.onclick = ()=> { activeChannel = ch.name; renderChat(); renderSidePanels(); };
+    textCat.appendChild(el);
   });
-  catContainer.appendChild(textCat);
-
+  container.appendChild(textCat);
   // voice channels
-  const voiceCat = document.createElement('div');
-  voiceCat.className = "category";
-  const vtitle = document.createElement('div');
-  vtitle.className = "cat-title section-title";
-  vtitle.innerText = "Voice Channels";
-  voiceCat.appendChild(vtitle);
-  (srv.voiceChannels||[]).forEach(vc=>{
-    const vcEl = document.createElement('div'); vcEl.className = "channel-item";
-    vcEl.innerText = "🔊 " + vc.name;
-    voiceCat.appendChild(vcEl);
-  });
-  catContainer.appendChild(voiceCat);
-
-  // right: members
-  renderMembers();
-  renderDMs();
-  // profile mini
-  document.getElementById('miniAvatar').innerText = me.username? me.username[0] : '?';
+  const vc = document.createElement('div'); vc.className='category'; const vtitle = document.createElement('div'); vtitle.className='cat-title section-title'; vtitle.innerText='Voice Channels'; vc.appendChild(vtitle); (srv.voiceChannels||[]).forEach(v=>{ const vEl=document.createElement('div'); vEl.className='channel-item'; vEl.innerText='🔊 '+v.name; vc.appendChild(vEl); }); container.appendChild(vc);
+  // right columns
+  renderMembers(); renderDMs();
+  document.getElementById('miniAvatar').innerText = me.username ? me.username[0] : '?';
   document.getElementById('profileName').value = me.username || '';
 }
 
 function renderMembers(){
-  const out = document.getElementById('membersList');
-  out.innerHTML = "";
-  const srv = servers[activeServer];
+  const out = document.getElementById('membersList'); out.innerHTML=''; const srv = servers[activeServer];
   if(!srv) return;
-  const names = Object.keys(srv.users || {});
-  names.forEach(un=>{
-    const role = srv.users[un];
-    const roleColor = (srv.roles && srv.roles[role] && srv.roles[role].color) || "#999";
-    const row = document.createElement('div');
-    row.className = "member-row";
-    const left = document.createElement('div'); left.style.display="flex"; left.style.alignItems="center"; left.style.gap="8px";
+  Object.keys(srv.users||{}).forEach(un=>{
+    const role = srv.users[un]; const roleColor = (srv.roles && srv.roles[role] && srv.roles[role].color) || '#999';
+    const row = document.createElement('div'); row.className='member-row';
+    const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center'; left.style.gap='8px';
     const avatar = document.createElement('div'); avatar.className='avatar'; avatar.style.width='36px'; avatar.style.height='36px'; avatar.innerText = un[0];
     const txt = document.createElement('div'); txt.innerHTML = `<div style="font-weight:600;color:${roleColor}">${un}</div><div style="font-size:12px;color:var(--muted)">${role||'member'}</div>`;
     left.appendChild(avatar); left.appendChild(txt);
-    const right = document.createElement('div');
-    const dmBtn = document.createElement('button'); dmBtn.className='small'; dmBtn.innerText='Message'; dmBtn.onclick = ()=> openDM([me.username, un]);
-    right.appendChild(dmBtn);
-    row.appendChild(left); row.appendChild(right);
-    out.appendChild(row);
+    const right = document.createElement('div'); const dmBtn = document.createElement('button'); dmBtn.className='small'; dmBtn.innerText='Message'; dmBtn.onclick = ()=> openDM([me.username, un]); right.appendChild(dmBtn);
+    row.appendChild(left); row.appendChild(right); out.appendChild(row);
   });
 }
 
-/* DM list (servers starting with DM_) */
 function renderDMs(){
-  const out = document.getElementById('dmList');
-  out.innerHTML = "";
-  Object.keys(servers).forEach(sid=>{
-    if(!sid.startsWith('DM_')) return;
-    const s = servers[sid];
-    if(!s.users || !s.users[me.username]) return; // only show DMs the user is in
-    const item = document.createElement('div'); item.className="dm-item";
-    item.onclick = ()=> { activeServer = sid; activeChannel = s.channels[0].name; renderSidePanels(); renderChat(); };
-    const left = document.createElement('div'); left.style.display='flex'; left.style.gap='8px'; left.style.alignItems='center';
-    const avatar = document.createElement('div'); avatar.className='avatar'; avatar.style.width='36px'; avatar.style.height='36px'; avatar.innerText = s.name[0]||'D';
-    left.appendChild(avatar); left.appendChild(document.createElement('div')).innerHTML=`<div style="font-weight:600">${s.name}</div>`;
-    item.appendChild(left);
-    out.appendChild(item);
-  });
+  const out = document.getElementById('dmList'); out.innerHTML=''; Object.keys(servers).forEach(sid=>{ if(!sid.startsWith('DM_')) return; const s = servers[sid]; if(!s.users || !s.users[me.username]) return; const item=document.createElement('div'); item.className='dm-item'; item.onclick = ()=>{ activeServer=sid; activeChannel=s.channels[0].name; renderSidePanels(); renderChat(); }; const left=document.createElement('div'); left.style.display='flex'; left.style.gap='8px'; left.style.alignItems='center'; const avatar=document.createElement('div'); avatar.className='avatar'; avatar.style.width='36px'; avatar.style.height='36px'; avatar.innerText = s.name[0]||'D'; left.appendChild(avatar); left.appendChild(document.createElement('div')).innerHTML=`<div style="font-weight:600">${s.name}</div>`; item.appendChild(left); out.appendChild(item); });
 }
 
-/* render chat messages for active server/channel */
+/* render chat */
 function renderChat(){
-  const area = document.getElementById('messageArea');
-  area.innerHTML = "";
-  const srv = servers[activeServer];
-  if(!srv) return;
-  document.getElementById('channelHeader').innerText = "#" + activeChannel;
-  document.getElementById('channelTopic').innerText = (srv.channels.find(c=>c.name===activeChannel) || {}).topic || "";
-
+  const area = document.getElementById('messageArea'); area.innerHTML='';
+  const srv = servers[activeServer]; if(!srv) return;
+  document.getElementById('channelHeader').innerText = "#"+activeChannel;
+  document.getElementById('channelTopic').innerText = (srv.channels.find(c=>c.name===activeChannel)||{}).topic || '';
   const msgs = (srv.messages && srv.messages[activeChannel]) || [];
-  msgs.forEach(m => {
+  msgs.forEach(m=>{
     if(m.deleted) return;
     const row = document.createElement('div'); row.className='msg-row';
-    const av = document.createElement('div'); av.className='avatar'; av.innerText = (m.user && m.user[0]) || '?';
+    const av = document.createElement('div'); av.className='avatar'; av.innerText = m.user ? m.user[0] : '?';
     const body = document.createElement('div'); body.className='msg-body';
     const header = document.createElement('div'); header.className='msg-header';
-    const username = document.createElement('div'); username.className='msg-user'; username.innerText = m.user;
-    // role color
-    const roleName = (srv.users && srv.users[m.user]) || null;
-    if(roleName){
-      const pill = document.createElement('span'); pill.className='msg-role-badge'; pill.innerText = roleName;
-      pill.style.background = (srv.roles && srv.roles[roleName] && srv.roles[roleName].color) || '#666';
-      header.appendChild(pill);
-    }
-    const timeEl = document.createElement('div'); timeEl.className='msg-time'; timeEl.innerText = new Date(m.time).toLocaleString();
-    header.appendChild(username); header.appendChild(timeEl);
+    const uname = document.createElement('div'); uname.className='msg-user'; uname.innerText = m.user;
+    header.appendChild(uname);
+    const roleName = srv.users && srv.users[m.user];
+    if(roleName){ const pill = document.createElement('span'); pill.className='msg-role-badge'; pill.innerText = roleName; pill.style.background = srv.roles[roleName].color || '#666'; header.appendChild(pill); }
+    const time = document.createElement('div'); time.className='msg-time'; time.innerText = new Date(m.time).toLocaleString(); header.appendChild(time);
     body.appendChild(header);
-    const text = document.createElement('div'); text.className='msg-text'; text.innerHTML = formatText(m.text || "");
-    body.appendChild(text);
-
-    // attachments
+    const content = document.createElement('div'); content.className='msg-text'; content.innerHTML = formatText(m.text || '');
+    body.appendChild(content);
     if(m.attachments && m.attachments.length){
-      m.attachments.forEach(att=>{
-        if(att.type && att.type.startsWith('image/')){
-          const img = document.createElement('img'); img.src = att.dataUrl; img.style.maxWidth='360px'; img.style.marginTop='8px'; img.style.borderRadius='8px';
-          body.appendChild(img);
-        } else {
-          const a = document.createElement('a'); a.href = att.dataUrl; a.target='_blank'; a.innerText = "📎 " + att.name; a.className='small'; a.style.display='block'; a.style.marginTop='8px';
-          body.appendChild(a);
-        }
+      m.attachments.forEach(a=>{
+        if(a.type && a.type.startsWith('image/')){ const img=document.createElement('img'); img.src=a.dataUrl; img.style.maxWidth='320px'; img.style.marginTop='8px'; img.style.borderRadius='8px'; body.appendChild(img); }
+        else { const link=document.createElement('a'); link.href=a.dataUrl; link.target='_blank'; link.innerText = '📎 '+a.name; link.className='small'; link.style.display='block'; link.style.marginTop='8px'; body.appendChild(link); }
       });
     }
-
     // reactions
     const reactBar = document.createElement('div'); reactBar.className='msg-actions';
-    (m.reactions || []).forEach(r=>{
-      const btn = document.createElement('div'); btn.className='msg-action'; btn.innerText = `${r.emoji} ${r.users.length}`;
-      btn.onclick = ()=> toggleReaction(m.id, r.emoji);
+    (m.reactions||[]).forEach(r=>{
+      const btn = document.createElement('div'); btn.className='msg-action'; btn.innerText = `${r.emoji} ${r.users.length}`; btn.onclick = ()=> toggleReaction(m.id, r.emoji);
       reactBar.appendChild(btn);
     });
-    // add react
-    const addR = document.createElement('div'); addR.className='msg-action'; addR.innerText='+';
-    addR.onclick = ()=> { const em = prompt("Emoji to react with"); if(em) toggleReaction(m.id, em); };
+    const addR = document.createElement('div'); addR.className='msg-action'; addR.innerText='+'; addR.onclick = ()=> { const e = prompt("emoji"); if(e) toggleReaction(m.id, e); };
     reactBar.appendChild(addR);
-
-    // actions: edit/delete/pin/copy
-    const editBtn = document.createElement('div'); editBtn.className='msg-action'; editBtn.innerText='Edit';
-    editBtn.onclick = ()=> editMessage(m.id);
-    const delBtn = document.createElement('div'); delBtn.className='msg-action'; delBtn.innerText='Delete';
-    delBtn.onclick = ()=> deleteMessage(m.id);
-    const pinBtn = document.createElement('div'); pinBtn.className='msg-action'; pinBtn.innerText='Pin';
-    pinBtn.onclick = ()=> pinMessage(m.id);
-    const copyBtn = document.createElement('div'); copyBtn.className='msg-action'; copyBtn.innerText='Copy';
-    copyBtn.onclick = ()=> { navigator.clipboard.writeText(m.text || ""); alert("Copied"); };
-
-    reactBar.appendChild(editBtn); reactBar.appendChild(delBtn); reactBar.appendChild(pinBtn); reactBar.appendChild(copyBtn);
+    // actions
+    const editBtn = document.createElement('div'); editBtn.className='msg-action'; editBtn.innerText='Edit'; editBtn.onclick = ()=> editMessage(m.id);
+    const delBtn = document.createElement('div'); delBtn.className='msg-action'; delBtn.innerText='Delete'; delBtn.onclick = ()=> deleteMessage(m.id);
+    const replyBtn = document.createElement('div'); replyBtn.className='msg-action'; replyBtn.innerText='Reply'; replyBtn.onclick = ()=> createThreadFromMessage(m.id, m.user, m.text);
+    const pinBtn = document.createElement('div'); pinBtn.className='msg-action'; pinBtn.innerText='Pin'; pinBtn.onclick = ()=> pinMessage(m.id);
+    reactBar.appendChild(editBtn); reactBar.appendChild(delBtn); reactBar.appendChild(replyBtn); reactBar.appendChild(pinBtn);
     body.appendChild(reactBar);
-
-    row.appendChild(av); row.appendChild(body);
-    area.appendChild(row);
+    row.appendChild(av); row.appendChild(body); area.appendChild(row);
   });
-
-  // scroll bottom
   area.scrollTop = area.scrollHeight;
 }
 
-/* ======================
-   Text formatting & mentions
-   ====================== */
+/* ===========================
+   Text formatting / mentions
+   =========================== */
 function formatText(t){
   if(!t) return "";
-  // escape
   let s = t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // bold/italic/code
   s = s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
   s = s.replace(/\*(.+?)\*/g,'<em>$1</em>');
   s = s.replace(/`(.+?)`/g,'<code>$1</code>');
-  // mentions
-  s = s.replace(/@([a-zA-Z0-9_]+)/g, (m, uname) => {
-    // highlight if present in server
-    const srv = servers[activeServer];
-    if(srv && srv.users && srv.users[uname]) return `<span style="background:#3a3f44;padding:2px 6px;border-radius:6px">@${uname}</span>`;
-    return `@${uname}`;
-  });
+  s = s.replace(/@([a-zA-Z0-9_]+)/g, (m, uname)=> { const srv = servers[activeServer]; if(srv && srv.users && srv.users[uname]) return `<span style="background:#3a3f44;padding:2px 6px;border-radius:6px">@${uname}</span>`; return `@${uname}`; });
   return s;
 }
 
-/* ======================
-   Message actions: send/edit/delete/pin/reactions
-   ====================== */
+/* ===========================
+   Send / edit / delete / reactions / pins
+   Includes permission overwrite checks for sending
+   =========================== */
+function roleCanSend(srv, username, channelName){
+  // role/perms: server-level role gives perms unless overridden by channel overwrites
+  const roleName = (srv.users && srv.users[username]) || null;
+  if(!roleName) return false;
+  const role = srv.roles && srv.roles[roleName];
+  if(role && role.perms && role.perms.all) return true;
+  // check channel overwrites (simple allow/deny for send)
+  const ch = srv.channels.find(c=>c.name===channelName);
+  if(ch && ch.overwrites){
+    // overwrites: { roleName: { allow:{send:true}, deny:{send:true} } }
+    const own = ch.overwrites[roleName];
+    if(own){
+      if(own.deny && own.deny.send) return false;
+      if(own.allow && own.allow.send) return true;
+    }
+  }
+  // fallback to role.perms.send
+  return role && role.perms && role.perms.send;
+}
+
 async function sendMessage(){
-  const input = document.getElementById('messageInput');
-  const text = input.value.trim();
+  const text = document.getElementById('messageInput').value.trim();
   if(!text && attachments.length===0) return;
   const srv = servers[activeServer];
-  if(!srv) return alert("No server");
-  const ch = activeChannel;
-  const msg = {
-    id: "m_"+Date.now()+"_"+Math.random().toString(36, 4).slice(2),
-    user: me.username,
-    text,
-    attachments: attachments,
-    reactions: [], // array of {emoji, users:[]}
-    time: Date.now(), edited:false, deleted:false
-  };
-  srv.messages[ch] = srv.messages[ch] || [];
-  srv.messages[ch].push(msg);
-  // audit log
-  srv.audit = srv.audit || [];
-  srv.audit.push({ action: 'message_create', user: me.username, target: ch, time: Date.now(), id: msg.id });
-  // save
+  if(!roleCanSend(srv, me.username, activeChannel)) return alert("You don't have permission to send messages here");
+  const msg = { id:"m_"+Date.now()+"_"+Math.random().toString(36).slice(2,6), user:me.username, text, attachments:attachments, reactions:[], time:Date.now(), edited:false, deleted:false };
+  srv.messages = srv.messages || {}; srv.messages[activeChannel] = srv.messages[activeChannel] || []; srv.messages[activeChannel].push(msg);
+  srv.audit = srv.audit || []; srv.audit.push({ action:'message_create', user:me.username, channel:activeChannel, id:msg.id, time:Date.now() });
   try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.error("save fail", e); }
-  attachments = [];
-  input.value = "";
+  attachments = []; document.getElementById('messageInput').value = '';
   renderChat();
 }
 
 async function editMessage(mid){
-  const srv = servers[activeServer];
-  const ch = activeChannel;
-  const m = (srv.messages[ch] || []).find(x=>x.id===mid);
-  if(!m) return alert("Message not found");
-  if(m.user !== me.username) return alert("You can only edit your own messages");
-  const txt = prompt("Edit message", m.text);
-  if(txt === null) return;
-  m.text = txt; m.edited = true; m.editedAt = Date.now();
-  srv.audit = srv.audit || []; srv.audit.push({action:'message_edit', user:me.username, id:mid, time:Date.now()});
-  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.error("edit save fail", e); }
+  const srv = servers[activeServer]; const ch = activeChannel; const m = (srv.messages[ch]||[]).find(x=>x.id===mid);
+  if(!m) return;
+  if(m.user !== me.username) return alert("Can only edit your messages");
+  const newText = prompt("Edit message", m.text); if(newText===null) return;
+  m.text = newText; m.edited = true; m.editedAt = Date.now();
+  srv.audit = srv.audit || []; srv.audit.push({ action:'message_edit', user:me.username, id:mid, time:Date.now() });
+  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("edit save fail", e); }
   renderChat();
 }
 
 async function deleteMessage(mid){
-  const srv = servers[activeServer];
-  const ch = activeChannel;
-  const m = (srv.messages[ch] || []).find(x=>x.id===mid);
+  const srv = servers[activeServer]; const ch = activeChannel; const m = (srv.messages[ch]||[]).find(x=>x.id===mid);
   if(!m) return;
-  // permission: author or admin
-  const myRole = srv.users[me.username];
-  const isAdmin = srv.roles && srv.roles[myRole] && srv.roles[myRole].perms && srv.roles[myRole].perms.all;
+  const myRole = srv.users[me.username]; const isAdmin = srv.roles && srv.roles[myRole] && srv.roles[myRole].perms && srv.roles[myRole].perms.all;
   if(m.user !== me.username && !isAdmin) return alert("No permission");
   if(!confirm("Delete message?")) return;
   m.deleted = true;
-  srv.audit = srv.audit || []; srv.audit.push({action:'message_delete', user:me.username, id:mid, time:Date.now()});
-  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.error("del save fail", e); }
+  srv.audit = srv.audit || []; srv.audit.push({ action:'message_delete', user:me.username, id:mid, time:Date.now() });
+  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("delete save fail", e); }
+  renderChat();
+}
+
+async function toggleReaction(mid, emoji){
+  const srv = servers[activeServer]; const ch = activeChannel; const m = (srv.messages[ch]||[]).find(x=>x.id===mid);
+  if(!m) return;
+  m.reactions = m.reactions || [];
+  let r = m.reactions.find(r=>r.emoji===emoji);
+  if(!r){ r = { emoji, users:[] }; m.reactions.push(r); }
+  const idx = r.users.indexOf(me.username);
+  if(idx>=0) r.users.splice(idx,1); else r.users.push(me.username);
+  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("react save fail", e); }
   renderChat();
 }
 
 async function pinMessage(mid){
-  const srv = servers[activeServer];
-  srv.pins = srv.pins || [];
-  if(!srv.pins.includes(mid)) srv.pins.push(mid);
-  srv.audit = srv.audit || []; srv.audit.push({action:'pin', user:me.username, id:mid, time:Date.now()});
-  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.error("pin fail", e); }
+  const srv = servers[activeServer]; srv.pins = srv.pins || []; if(!srv.pins.includes(mid)) srv.pins.push(mid);
+  srv.audit = srv.audit || []; srv.audit.push({ action:'pin', user:me.username, id:mid, time:Date.now() });
+  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("pin save fail", e); }
   openPins();
 }
 
-async function toggleReaction(mid, emoji){
-  const srv = servers[activeServer];
-  const ch = activeChannel;
-  const m = (srv.messages[ch]||[]).find(x=>x.id===mid);
-  if(!m) return;
-  m.reactions = m.reactions || [];
-  let r = m.reactions.find(r=>r.emoji === emoji);
-  if(!r){ r = { emoji, users: [] }; m.reactions.push(r); }
-  const idx = r.users.indexOf(me.username);
-  if(idx >= 0) r.users.splice(idx,1);
-  else r.users.push(me.username);
-  try{ await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.error("react save fail", e); }
-  renderChat();
-}
-
-/* attachments */
+/* attachments as base64 */
 function onAttachment(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  const fr = new FileReader();
-  fr.onload = function(evt){
-    attachments.push({ name: file.name, size: file.size, type: file.type, dataUrl: evt.target.result });
-    alert("Attachment queued: " + file.name);
-  };
-  fr.readAsDataURL(file);
+  const file = e.target.files[0]; if(!file) return;
+  const fr = new FileReader(); fr.onload = (ev)=>{ attachments.push({ name:file.name, type:file.type, size:file.size, dataUrl:ev.target.result }); alert("Attachment queued: "+file.name); }; fr.readAsDataURL(file);
 }
 
-/* ======================
-   Channel & server management
-   ====================== */
-async function createChannel(){
-  const name = prompt("Channel name (no #):");
-  if(!name) return;
+/* ===========================
+   Channel overwrites & permission UI
+   =========================== */
+function openChannelOverwritesUI(channelName){
   const srv = servers[activeServer];
-  srv.channels.push({ name, topic: "" });
-  srv.messages[name] = [];
-  srv.audit = srv.audit || []; srv.audit.push({action:'channel_create', user:me.username, channel:name, time:Date.now()});
-  try{ await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.error("create channel save fail", e); }
-  renderSidePanels(); renderChat();
+  const ch = srv.channels.find(c=>c.name===channelName);
+  ch.overwrites = ch.overwrites || {}; // mapping roleName -> { allow:{send:true}, deny:{send:false} }
+  const html = ["Permission overwrites for channel: "+channelName+"\n"];
+  // will editing in server settings channel area — left as accessible via server settings UI: rendered there.
 }
 
-async function createServerPrompt(){
-  const name = prompt("Server name:");
-  if(!name) return;
-  const id = "srv_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);
-  servers[id] = { id, name, icon:null, channels:[{name:"general",topic:""}], voiceChannels:[], roles:{ "owner":{color:"#ffb86b", perms:{all:true}}, "member":{color:"#57f287", perms:{send:true}} }, users:{ [me.username]:"owner" }, messages:{ "general": [] }, invites:[], pins:[], audit:[] };
-  try{ await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.error("create server save fail", e); }
-  activeServer = id; activeChannel = "general";
-  renderServersColumn(); renderSidePanels(); renderChat();
+/* ===========================
+   Threads (create thread from message) — threads stored in server.threads mapping
+   =========================== */
+async function createThreadFromMessage(mid, author, excerpt){
+  const name = prompt("Thread name (topic) — leave blank to use snippet");
+  const threadName = name || ("thread-"+excerpt.slice(0,20).replace(/\s+/g,'_'));
+  const srv = servers[activeServer];
+  srv.threads = srv.threads || {};
+  const tid = "t_"+Date.now()+"_"+Math.random().toString(36).slice(2,5);
+  srv.threads[tid] = { id:tid, name:threadName, parentMessage:mid, messages:[], createdBy:me.username, createdAt:Date.now() };
+  srv.audit = srv.audit || []; srv.audit.push({ action:'thread_create', user:me.username, id:tid, parent:mid, time:Date.now() });
+  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("thread save fail", e); }
+  openThreads();
 }
 
-/* Server settings */
-function openServerSettings(){
-  const modal = document.getElementById('serverSettings');
-  modal.classList.remove('hidden');
-  modal.style.display = 'block';
-  const srv = servers[activeServer];
-  document.getElementById('settingsName').value = srv.name;
-  renderSettingsChannels();
-  renderSettingsRoles();
-  renderSettingsMembers();
-}
-function closeServerSettings(){ const m = document.getElementById('serverSettings'); m.classList.add('hidden'); m.style.display='none'; }
-function renderSettingsChannels(){
-  const cont = document.getElementById('settingsChannels'); cont.innerHTML = "";
-  const srv = servers[activeServer];
-  srv.channels.forEach(ch=>{
-    const d = document.createElement('div'); d.innerHTML = `<strong># ${ch.name}</strong> - <span class="small">${ch.topic||''}</span>`;
-    cont.appendChild(d);
+function openThreads(){
+  const modal = document.getElementById('threadsModal'); modal.classList.remove('hidden'); modal.style.display='block';
+  const list = document.getElementById('threadsList'); list.innerHTML='';
+  const srv = servers[activeServer]; (srv.threads ? Object.values(srv.threads) : []).forEach(t=>{
+    const div = document.createElement('div'); div.className='search-result';
+    div.innerHTML = `<div style="font-weight:700">${t.name}</div><div class="small">by ${t.createdBy} • ${new Date(t.createdAt).toLocaleString()}</div>`;
+    const openBtn = document.createElement('button'); openBtn.className='small'; openBtn.innerText='Open'; openBtn.onclick = ()=> openThread(t.id);
+    div.appendChild(openBtn); list.appendChild(div);
   });
 }
-function renderSettingsRoles(){
-  const cont = document.getElementById('settingsRoles'); cont.innerHTML = "";
-  const srv = servers[activeServer];
-  Object.keys(srv.roles || {}).forEach(rn=>{
-    const role = srv.roles[rn];
-    const div = document.createElement('div'); div.style.display='flex'; div.style.gap='8px'; div.style.alignItems='center'; div.style.marginBottom='6px';
-    const nameInput = document.createElement('input'); nameInput.value = rn; nameInput.className='input'; nameInput.style.width='160px';
-    const colorInput = document.createElement('input'); colorInput.type='color'; colorInput.value = role.color || '#888';
-    const del = document.createElement('button'); del.className='small'; del.innerText='Delete'; del.onclick = ()=> { delete srv.roles[rn]; renderSettingsRoles(); renderSidePanels(); };
-    div.appendChild(nameInput); div.appendChild(colorInput); div.appendChild(del);
-    cont.appendChild(div);
-    // wire rename on blur
-    nameInput.onblur = ()=> {
-      const newn = nameInput.value.trim(); if(!newn || newn === rn) return;
-      srv.roles[newn] = srv.roles[rn]; delete srv.roles[rn];
-      // remap users
-      Object.keys(srv.users).forEach(u=>{ if(srv.users[u] === rn) srv.users[u] = newn; });
-      renderSettingsRoles(); renderSettingsMembers(); renderSidePanels();
-    };
-    colorInput.onchange = ()=> { srv.roles[rn].color = colorInput.value; renderSidePanels(); }
-  });
-}
-function renderSettingsMembers(){
-  const cont = document.getElementById('settingsMembers'); cont.innerHTML = "";
-  const srv = servers[activeServer];
-  Object.keys(srv.users || {}).forEach(un=>{
-    const row = document.createElement('div'); row.style.display='flex'; row.style.gap='8px'; row.style.alignItems='center'; row.style.marginBottom='6px';
-    const name = document.createElement('div'); name.innerText = un; name.style.flex='1';
-    const sel = document.createElement('select'); sel.className='input';
-    Object.keys(srv.roles || {}).forEach(rn=> { const o = document.createElement('option'); o.value=rn; o.innerText = rn; if(srv.users[un]===rn) o.selected=true; sel.appendChild(o); });
-    sel.onchange = ()=> { srv.users[un] = sel.value; renderMembers(); };
-    row.appendChild(name); row.appendChild(sel);
-    cont.appendChild(row);
-  });
-}
-async function addRole(){
-  const name = document.getElementById('newRoleName').value.trim();
-  const color = document.getElementById('newRoleColor').value;
-  if(!name) return alert("role name required");
-  const srv = servers[activeServer];
-  srv.roles[name] = { color, perms: { send:true } };
-  document.getElementById('newRoleName').value = '';
-  renderSettingsRoles();
-}
-async function saveServerSettings(){
-  const srv = servers[activeServer];
-  srv.name = document.getElementById('settingsName').value.trim();
-  try{ await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.error("save server settings failed", e); }
-  closeServerSettings();
-  renderServersColumn(); renderSidePanels(); renderChat();
+function closeThreads(){ document.getElementById('threadsModal').classList.add('hidden'); document.getElementById('threadsModal').style.display='none'; }
+function openThread(tid){
+  const t = servers[activeServer].threads[tid];
+  if(!t) return alert("Thread not found");
+  // show thread messages in a quick modal (simpler inline UI)
+  const w = window.open('', '_blank', 'width=600,height=800');
+  w.document.title = 'Thread: ' + t.name;
+  const html = ['<body style="background:#111;color:#fff;font-family:Inter;padding:12px"><h2>Thread: '+t.name+'</h2>'];
+  t.messages.forEach(m=> html.push(`<div style="padding:8px;border-bottom:1px solid #333"><strong>${m.user}</strong> ${new Date(m.time).toLocaleString()}<div>${m.text}</div></div>`));
+  html.push('<div style="margin-top:8px"><input id="threadMsg" style="width:80%"><button onclick="opener.postMessage({type:\'thread_msg\', text:document.getElementById(\\'threadMsg\\').value})">Send</button></div>');
+  html.push('<script>window.addEventListener(\"message\", e=>{ if(e.data && e.data.type==\"thread_msg\"){ const p = e.data; document.body.innerHTML += `<div style=\"padding:8px;border-top:1px solid #333\"><strong>${p.user}</strong><div>${p.text}</div></div>`; } });</script></body>');
+  w.document.write(html.join(''));
+  // The new window won't be connected to JSONBin — thread posting here is manual. For full integration, we'd build an in-app thread UI; kept short due to single-file constraints.
 }
 
-/* ======================
-   Invites
-   ====================== */
+/* ===========================
+   Invites: creation, listing, join by code with uses/ttl/role assignment/revoke
+   =========================== */
 async function createInvite(){
-  const code = "INV_" + Math.random().toString(36).slice(2,8).toUpperCase();
-  const srv = servers[activeServer];
-  srv.invites = srv.invites || []; srv.invites.push({ code, createdBy: me.username, createdAt: Date.now() });
-  try{ await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("invite save fail", e); }
+  const role = document.getElementById('inviteRoleSelect').value.trim() || null;
+  const maxUses = parseInt(document.getElementById('inviteMaxUses').value || "0") || 0; // 0 unlimited
+  let ttl = document.getElementById('inviteTTL').value;
+  let expiresAt = null;
+  if(ttl) expiresAt = new Date(ttl).getTime();
+  const code = "INV_"+Math.random().toString(36).slice(2,8).toUpperCase();
+  const entry = { code, createdBy:me.username, createdAt:Date.now(), roleAssigned: role, maxUses, uses:0, expiresAt, revoked:false };
+  servers[activeServer].invites = servers[activeServer].invites || [];
+  servers[activeServer].invites.push(entry);
+  servers[activeServer].audit = servers[activeServer].audit || []; servers[activeServer].audit.push({ action:'invite_create', user:me.username, code, roleAssigned:role, time:Date.now() });
+  try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("invite save failed", e); }
   document.getElementById('inviteCodeBox').innerText = code;
   document.getElementById('inviteModal').classList.remove('hidden');
+  renderInviteList();
 }
-function copyInvite(){
-  const t = document.getElementById('inviteCodeBox').innerText; navigator.clipboard.writeText(t).then(()=>alert("Copied"));
-}
-function closeInvite(){ document.getElementById('inviteModal').classList.add('hidden'); }
-async function acceptInvite(code){
-  // find server
+
+function copyInvite(){ const t = document.getElementById('inviteCodeBox').innerText; navigator.clipboard.writeText(t).then(()=>alert("Copied")); }
+function closeInvite(){ document.getElementById('inviteModal').classList.add('hidden'); document.getElementById('inviteModal').style.display='none'; }
+
+async function inviteJoinPrompt(){
+  const code = prompt("Paste invite code:");
+  if(!code) return;
+  // find invite
   for(const sid in servers){
-    if((servers[sid].invites||[]).find(i=>i.code === code)){
-      servers[sid].users = servers[sid].users || {}; servers[sid].users[me.username] = "member";
-      try{ await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("accept invite save fail", e); }
-      activeServer = sid; activeChannel = servers[sid].channels[0].name;
-      renderServersColumn(); renderSidePanels(); renderChat(); return alert("Joined");
+    const srv = servers[sid];
+    const inv = (srv.invites||[]).find(i=>i.code === code && !i.revoked);
+    if(inv){
+      // check expiry
+      if(inv.expiresAt && Date.now() > inv.expiresAt) return alert("Invite expired");
+      if(inv.maxUses && inv.uses >= inv.maxUses) return alert("Invite has no remaining uses");
+      // add user
+      srv.users = srv.users || {}; srv.users[me.username] = inv.roleAssigned || 'member';
+      inv.uses = (inv.uses||0) + 1;
+      srv.audit = srv.audit || []; srv.audit.push({ action:'invite_use', code, user:me.username, time:Date.now() });
+      try { await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("join invite save fail", e); }
+      activeServer = sid; activeChannel = srv.channels[0].name; renderServersColumn(); renderSidePanels(); renderChat(); return alert("Joined " + srv.name);
     }
   }
   alert("Invite not found");
 }
 
-/* UI helpers for pins/search */
-function openPins(){
-  const m = document.getElementById('pinsModal'); m.classList.remove('hidden'); m.style.display='block';
-  const out = document.getElementById('pinsList'); out.innerHTML='';
+/* render invites in server settings */
+function renderInviteList(){
+  const out = document.getElementById('inviteList'); out.innerHTML='';
   const srv = servers[activeServer];
-  (srv.pins||[]).forEach(id=>{
-    const msg = Object.values(srv.messages).flat().find(x=>x.id === id);
-    if(!msg) return;
-    const div = document.createElement('div'); div.className='search-result'; div.innerHTML = `<strong>${msg.user}</strong><div class="small">${msg.text}</div>`;
-    out.appendChild(div);
+  (srv.invites || []).forEach(inv=>{
+    const div = document.createElement('div'); div.style.display='flex'; div.style.justifyContent='space-between'; div.style.alignItems='center'; div.style.padding='6px'; div.style.marginBottom='6px'; div.style.background='#1b1d1f'; div.style.borderRadius='6px';
+    const left = document.createElement('div'); left.innerHTML = `<div style="font-weight:700">${inv.code}</div><div class="small">role:${inv.roleAssigned||'member'} uses:${inv.uses||0}/${inv.maxUses||'∞'} ${inv.expiresAt?('expires:'+new Date(inv.expiresAt).toLocaleString()):''}</div>`;
+    const right = document.createElement('div');
+    const revoke = document.createElement('button'); revoke.className='small'; revoke.innerText='Revoke'; revoke.onclick = async ()=> { inv.revoked = true; servers[activeServer].audit = servers[activeServer].audit || []; servers[activeServer].audit.push({ action:'invite_revoke', code:inv.code, user:me.username, time:Date.now() }); await jsonbin_put(SERVERS_BIN, servers); renderInviteList(); };
+    const copy = document.createElement('button'); copy.className='small'; copy.innerText='Copy'; copy.onclick = ()=> { navigator.clipboard.writeText(inv.code).then(()=>alert("Copied")); };
+    right.appendChild(copy); right.appendChild(revoke);
+    div.appendChild(left); div.appendChild(right); out.appendChild(div);
   });
 }
-function closePins(){ const m=document.getElementById('pinsModal'); m.classList.add('hidden'); m.style.display='none'; }
 
+/* ===========================
+   Audit log view
+   =========================== */
+function renderAudit(){
+  const out = document.getElementById('auditList'); out.innerHTML='';
+  const srv = servers[activeServer];
+  (srv.audit || []).slice().reverse().forEach(a=>{
+    const div = document.createElement('div'); div.className='search-result'; div.innerHTML = `<div class="small">${new Date(a.time).toLocaleString()} • ${a.user || a.by || ''} • ${a.action}</div><div class="small">${JSON.stringify(a)}</div>`; out.appendChild(div);
+  });
+}
+
+/* ===========================
+   Webhooks (simple)
+   =========================== */
+async function createWebhook(){
+  const name = document.getElementById('newWebhookName').value.trim();
+  if(!name) return alert("name required");
+  const token = "wh_"+Math.random().toString(36).slice(2,12);
+  const entry = { name, token, createdBy:me.username, createdAt:Date.now() };
+  servers[activeServer].webhooks = servers[activeServer].webhooks || []; servers[activeServer].webhooks.push(entry);
+  servers[activeServer].audit = servers[activeServer].audit || []; servers[activeServer].audit.push({ action:'webhook_create', user:me.username, name, token, time:Date.now() });
+  try{ await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("webhook save fail", e); }
+  renderWebhooks();
+}
+
+/* list webhooks */
+function renderWebhooks(){
+  const out = document.getElementById('webhooksList'); out.innerHTML='';
+  (servers[activeServer].webhooks || []).forEach(w=>{
+    const div = document.createElement('div'); div.style.display='flex'; div.style.justifyContent='space-between'; div.style.alignItems='center'; div.style.padding='6px'; div.style.background='#1b1d1f'; div.style.borderRadius='6px'; div.style.marginBottom='6px';
+    const left = document.createElement('div'); left.innerHTML = `<div style="font-weight:700">${w.name}</div><div class="small">token: ${w.token}</div>`;
+    const right = document.createElement('div'); const copy = document.createElement('button'); copy.className='small'; copy.innerText='Copy Token'; copy.onclick = ()=> navigator.clipboard.writeText(w.token).then(()=>alert("Copied"));
+    right.appendChild(copy); div.appendChild(left); div.appendChild(right); out.appendChild(div);
+  });
+}
+
+/* helper: post via webhook (client-side demo) */
+async function webhookPost(token, content){
+  // find webhook server & webhook, simple lookup
+  for(const sid in servers){
+    const w = (servers[sid].webhooks||[]).find(x=>x.token===token);
+    if(w){
+      // push message into the server default channel
+      const srv = servers[sid];
+      const ch = srv.channels[0].name;
+      const msg = { id:"m_"+Date.now()+"_"+Math.random().toString(36,4).slice(2), user: w.name+" (webhook)", text: content, attachments:[], reactions:[], time:Date.now() };
+      srv.messages[ch] = srv.messages[ch] || []; srv.messages[ch].push(msg);
+      srv.audit = srv.audit || []; srv.audit.push({ action:'webhook_post', webhook:w.name, token, time:Date.now() });
+      try{ await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("webhook post fail", e); }
+      return true;
+    }
+  }
+  return false;
+}
+
+/* ===========================
+   Invite join helper (public prompt)
+   =========================== */
+async function acceptInvitePrompt(){
+  const code = prompt("Enter invite code (e.g. INV_XXXX):");
+  if(!code) return;
+  for(const sid in servers){
+    const inv = (servers[sid].invites||[]).find(i=>i.code===code && !i.revoked);
+    if(inv){
+      if(inv.expiresAt && Date.now() > inv.expiresAt) return alert("Invite expired");
+      if(inv.maxUses && inv.uses >= inv.maxUses) return alert("Invite exhausted");
+      servers[sid].users = servers[sid].users || {}; servers[sid].users[me.username] = inv.roleAssigned || 'member';
+      inv.uses = (inv.uses||0) + 1;
+      servers[sid].audit = servers[sid].audit || []; servers[sid].audit.push({ action:'invite_use', user:me.username, code:inv.code, time:Date.now() });
+      try{ await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("invite accept save fail", e); }
+      activeServer = sid; activeChannel = servers[sid].channels[0].name; renderServersColumn(); renderSidePanels(); renderChat(); return alert("Joined "+servers[sid].name);
+    }
+  }
+  alert("Invite not found");
+}
+
+/* ===========================
+   Server settings UI helpers (render invites/audit/webhooks)
+   =========================== */
+function renderInviteList(){ const el = document.getElementById('inviteList'); el.innerHTML=''; const srv=servers[activeServer]; (srv.invites||[]).forEach(inv=>{ const div=document.createElement('div'); div.style.display='flex'; div.style.justifyContent='space-between'; div.style.alignItems='center'; div.style.padding='6px'; div.style.marginBottom='6px'; div.style.background='#1b1d1f'; div.style.borderRadius='6px'; div.innerHTML = `<div><strong>${inv.code}</strong><div class="small">role:${inv.roleAssigned||'member'} uses:${inv.uses||0}/${inv.maxUses||'∞'} ${inv.expiresAt?('• expires:'+new Date(inv.expiresAt).toLocaleString()):''}</div></div>`; const right=document.createElement('div'); const copy=document.createElement('button'); copy.className='small'; copy.innerText='Copy'; copy.onclick=()=>navigator.clipboard.writeText(inv.code).then(()=>alert('Copied')); const revoke=document.createElement('button'); revoke.className='small'; revoke.innerText='Revoke'; revoke.onclick = async ()=>{ inv.revoked=true; srv.audit=srv.audit||[]; srv.audit.push({action:'invite_revoke', code:inv.code, user:me.username, time:Date.now()}); await jsonbin_put(SERVERS_BIN, servers); renderInviteList(); }; right.appendChild(copy); right.appendChild(revoke); div.appendChild(right); el.appendChild(div); }); }
+
+function renderWebhooks(){ const el=document.getElementById('webhooksList'); el.innerHTML=''; (servers[activeServer].webhooks||[]).forEach(w=>{ const d=document.createElement('div'); d.style.display='flex'; d.style.justifyContent='space-between'; d.style.padding='6px'; d.style.marginBottom='6px'; d.style.background='#1b1d1f'; d.style.borderRadius='6px'; d.innerHTML = `<div><strong>${w.name}</strong><div class="small">token: ${w.token}</div></div>`; const right=document.createElement('div'); const copy=document.createElement('button'); copy.className='small'; copy.innerText='Copy Token'; copy.onclick=()=>navigator.clipboard.writeText(w.token).then(()=>alert('Copied')); right.appendChild(copy); d.appendChild(right); el.appendChild(d); }); }
+
+function renderAudit(){ const el=document.getElementById('auditList'); el.innerHTML=''; const srv=servers[activeServer]; (srv.audit||[]).slice().reverse().forEach(a=>{ const d=document.createElement('div'); d.className='search-result'; d.innerHTML = `<div class="small">${new Date(a.time).toLocaleString()} • ${a.user||''} • ${a.action}</div><div class="small">${JSON.stringify(a)}</div>`; el.appendChild(d); }); }
+
+/* server settings open/close/save */
+function openServerSettings(){ document.getElementById('serverSettings').classList.remove('hidden'); document.getElementById('serverSettings').style.display='block'; const srv=servers[activeServer]; document.getElementById('settingsName').value = srv.name; renderSettingsChannels(); renderSettingsRoles(); renderSettingsMembers(); renderInviteList(); renderAudit(); renderWebhooks(); }
+function closeServerSettings(){ document.getElementById('serverSettings').classList.add('hidden'); document.getElementById('serverSettings').style.display='none'; }
+function renderSettingsChannels(){ const el=document.getElementById('settingsChannels'); el.innerHTML=''; const srv=servers[activeServer]; srv.channels.forEach(c=>{ const row=document.createElement('div'); row.style.marginBottom='6px'; row.innerHTML = `<strong># ${c.name}</strong> — <input class="input" value="${c.topic||''}" onchange="(function(v){ c.topic=v; })(this.value)" />`; el.appendChild(row); }); }
+function renderSettingsRoles(){ const el=document.getElementById('settingsRoles'); el.innerHTML=''; const srv=servers[activeServer]; Object.keys(srv.roles||{}).forEach(rn=>{ const role=srv.roles[rn]; const row=document.createElement('div'); row.style.display='flex'; row.style.gap='8px'; row.style.alignItems='center'; row.style.marginBottom='6px'; const nameInput=document.createElement('input'); nameInput.className='input'; nameInput.value = rn; nameInput.onblur = ()=>{ const newn = nameInput.value.trim(); if(!newn || newn===rn) return; srv.roles[newn] = srv.roles[rn]; delete srv.roles[rn]; Object.keys(srv.users).forEach(u=>{ if(srv.users[u]===rn) srv.users[u]=newn; }); renderSettingsRoles(); renderSettingsMembers(); }; const colorInput=document.createElement('input'); colorInput.type='color'; colorInput.value = role.color || '#777'; colorInput.onchange = ()=> { srv.roles[rn].color = colorInput.value; renderSidePanels(); }; const del=document.createElement('button'); del.className='small'; del.innerText='Delete'; del.onclick = ()=> { delete srv.roles[rn]; renderSettingsRoles(); renderSettingsMembers(); }; row.appendChild(nameInput); row.appendChild(colorInput); row.appendChild(del); el.appendChild(row); }); }
+function renderSettingsMembers(){ const el=document.getElementById('settingsMembers'); el.innerHTML=''; const srv=servers[activeServer]; Object.keys(srv.users||{}).forEach(un=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.gap='8px'; row.style.alignItems='center'; row.style.marginBottom='6px'; const name=document.createElement('div'); name.innerText = un; name.style.flex='1'; const sel=document.createElement('select'); sel.className='input'; Object.keys(srv.roles||{}).forEach(rn=>{ const opt=document.createElement('option'); opt.value=rn; opt.innerText = rn; if(srv.users[un]===rn) opt.selected=true; sel.appendChild(opt); }); sel.onchange = ()=> { srv.users[un] = sel.value; }; row.appendChild(name); row.appendChild(sel); el.appendChild(row); }); }
+
+async function addRole(){ const name = document.getElementById('newRoleName').value.trim(); const color = document.getElementById('newRoleColor').value; if(!name) return alert("role name required"); servers[activeServer].roles[name] = { color, perms:{ send:true } }; document.getElementById('newRoleName').value=''; renderSettingsRoles(); }
+
+/* save settings */
+async function saveServerSettings(){ const srv = servers[activeServer]; srv.name = document.getElementById('settingsName').value.trim(); try{ await jsonbin_put(SERVERS_BIN, servers); } catch(e){ console.warn("save settings failed", e); } closeServerSettings(); renderServersColumn(); renderSidePanels(); renderChat(); }
+
+/* ===========================
+   Search & Pins & Emoji
+   =========================== */
 function quickSearch(){
   const term = document.getElementById('quickSearchInput').value.trim();
-  if(!term) return alert("enter search term");
-  const srv = servers[activeServer];
-  const results = [];
-  Object.keys(srv.messages || {}).forEach(ch=>{
-    (srv.messages[ch] || []).forEach(m=>{
-      if(m.text && m.text.toLowerCase().includes(term.toLowerCase())) results.push({ ch, m });
-    });
-  });
-  // show modal
-  const m = document.getElementById('searchModal'); m.classList.remove('hidden'); m.style.display='block';
-  const out = document.getElementById('searchResults'); out.innerHTML='';
-  results.slice(0,200).forEach(r=>{
-    const div = document.createElement('div'); div.className='search-result';
-    div.innerHTML = `<div><strong>#${r.ch} — ${r.m.user}</strong> <div class="small">${new Date(r.m.time).toLocaleString()}</div></div><div class="small">${r.m.text}</div>`;
-    out.appendChild(div);
-  });
+  if(!term) return alert("enter search");
+  const srv = servers[activeServer]; const res=[];
+  Object.keys(srv.messages||{}).forEach(ch=>{ (srv.messages[ch]||[]).forEach(m=>{ if(m.text && m.text.toLowerCase().includes(term.toLowerCase())) res.push({ch,m}); }); });
+  const modal = document.getElementById('searchModal'); modal.classList.remove('hidden'); modal.style.display='block';
+  const out = document.getElementById('searchResults'); out.innerHTML=''; res.forEach(r=>{ const d=document.createElement('div'); d.className='search-result'; d.innerHTML=`<div><strong>#${r.ch} • ${r.m.user}</strong> <div class="small">${new Date(r.m.time).toLocaleString()}</div></div><div class="small">${r.m.text}</div>`; out.appendChild(d); });
 }
 function closeSearch(){ document.getElementById('searchModal').classList.add('hidden'); document.getElementById('searchModal').style.display='none'; }
+function openPins(){ const m=document.getElementById('pinsModal'); m.classList.remove('hidden'); m.style.display='block'; const out = document.getElementById('pinsList'); out.innerHTML=''; const srv = servers[activeServer]; (srv.pins||[]).forEach(id=>{ const msg = Object.values(srv.messages).flat().find(x=>x.id===id); if(!msg) return; const div=document.createElement('div'); div.className='search-result'; div.innerHTML=`<div><strong>${msg.user}</strong><div class="small">${msg.text}</div></div>`; out.appendChild(div); }); }
+function closePins(){ document.getElementById('pinsModal').classList.add('hidden'); document.getElementById('pinsModal').style.display='none'; }
 
-/* ======================
-   DMs
-   ====================== */
-async function openNewDM(){
-  const name = prompt("Enter username or comma list for group DM");
-  if(!name) return;
-  const names = name.split(',').map(x=>x.trim()).filter(Boolean);
-  names.push(me.username);
-  const id = "DM_"+ names.slice().sort().join("_");
-  if(!servers[id]){
-    servers[id] = { id, name: names.filter(n=>n!==me.username).join(", "), channels:[{name:"general"}], users:{}, roles:{ member:{ color:"#57f287", perms:{ send:true } } }, messages:{ general:[] }, invites:[], pins:[], audit:[] };
-    names.forEach(n => servers[id].users[n] = "member");
-    await jsonbin_put(SERVERS_BIN, servers);
-  }
-  activeServer = id; activeChannel = "general"; renderSidePanels(); renderChat();
-}
-function openDM(names){
-  const arr = Array.isArray(names) ? names : [names];
-  arr.push(me.username);
-  const id = "DM_"+ arr.slice().sort().join("_");
-  if(!servers[id]) openNewDM(); else { activeServer = id; activeChannel = "general"; renderSidePanels(); renderChat(); }
-}
-
-/* ======================
-   Realtime polling
-   ====================== */
-function startPolling(){
-  if(pollTimer) clearInterval(pollTimer);
-  pollTimer = setInterval(async ()=>{
-    try {
-      const ub = await jsonbin_get(LOGIN_BIN); users = ub.record || users;
-    } catch(e){ /* ignore */ }
-    try {
-      const sb = await jsonbin_get(SERVERS_BIN);
-      servers = sb.record || servers;
-      if(!activeServer) activeServer = Object.keys(servers)[0];
-      // ensure active channel exists
-      if(activeServer && servers[activeServer] && !servers[activeServer].channels.find(c=>c.name === activeChannel)){
-        activeChannel = servers[activeServer].channels[0]?.name || null;
-      }
-      renderServersColumn(); renderSidePanels(); renderChat();
-    } catch(e){
-      console.warn("poll fail", e);
-    }
-  }, POLL_MS);
-}
-
-/* ======================
-   Emoji picker
-   ====================== */
-function buildEmojiPicker(){
-  const emojis = ["😀","😃","😄","😁","😆","😅","😂","🤣","🙂","🙃","😉","😊","😍","😘","😜","🤪","🤩","😎","🤔","🤨","😐","😶","🙄","😏","😴","😭","😢","😤","😡","👍","👎","🙏","👏","🙌","🔥","✨","🎉","💯"];
-  const container = document.getElementById('emojiPicker').querySelector('div');
-  emojis.forEach(e=>{
-    const b = document.createElement('button'); b.className='small'; b.style.padding='6px'; b.innerText = e;
-    b.onclick = ()=> { document.getElementById('messageInput').value += e; closeEmoji(); };
-    container.appendChild(b);
-  });
-}
+/* emoji picker */
+function buildEmojiGrid(){ const grid = document.getElementById('emojiGrid'); const emojis = ["😀","😃","😄","😁","😆","😅","😂","🤣","🙂","🙃","😉","😊","😍","😘","😜","🤪","🤩","😎","🤔","🤨","😐","😶","🙄","😏","😴","😭","😢","😤","😡","👍","👎","🙏","👏","🙌","🔥","✨","🎉","💯"]; emojis.forEach(e=>{ const b=document.createElement('button'); b.className='small'; b.style.padding='6px'; b.innerText=e; b.onclick=()=>{ document.getElementById('messageInput').value += e; closeEmoji(); }; grid.appendChild(b); }); }
+function openEmoji(){ document.getElementById('emojiPicker').classList.remove('hidden'); document.getElementById('emojiPicker').style.display='block'; }
 function closeEmoji(){ document.getElementById('emojiPicker').classList.add('hidden'); document.getElementById('emojiPicker').style.display='none'; }
 
-/* ======================
-   Utility & bootstrap
-   ====================== */
-function onLoggedIn(){
-  renderSidePanels();
-  renderChat();
-  // welcome message
-  try { if(me && me.username) alert("Welcome " + me.username); } catch(e){}
-  // ensure user is in default server if not present
-  if(!servers[activeServer].users[me.username]){
-    servers[activeServer].users[me.username] = "member";
-    jsonbin_put(SERVERS_BIN, servers).catch(()=>{});
-  }
+/* ===========================
+   DMs
+   =========================== */
+async function openNewDM(){
+  const name = prompt("username or comma-list:");
+  if(!name) return;
+  const arr = name.split(',').map(s=>s.trim()).filter(Boolean);
+  arr.push(me.username);
+  const id = "DM_"+arr.slice().sort().join("_");
+  if(!servers[id]){ servers[id] = { id, name: arr.filter(x=>x!==me.username).join(", "), channels:[{name:"general"}], users:{}, roles:{ member:{ color:"#57f287", perms:{send:true} } }, messages:{ general:[] }, invites:[], pins:[], threads:{}, audit:[], webhooks:[] }; arr.forEach(u=>servers[id].users[u]='member'); await jsonbin_put(SERVERS_BIN, servers); }
+  activeServer = id; activeChannel = "general"; renderSidePanels(); renderChat();
+}
+function openDM(names){ const arr = Array.isArray(names) ? names : [names]; arr.push(me.username); const id = "DM_"+arr.slice().sort().join("_"); if(!servers[id]) openNewDM(); else { activeServer=id; activeChannel=servers[id].channels[0].name; renderSidePanels(); renderChat(); } }
+
+/* ===========================
+   Utilities & boot
+   =========================== */
+function onLoggedIn(){ renderSidePanels(); renderChat(); // ensure user in current server
+  if(!servers[activeServer].users[me.username]){ servers[activeServer].users[me.username] = 'member'; jsonbin_put(SERVERS_BIN, servers).catch(()=>{}); }
+  alert("Welcome "+me.username);
 }
 window.addEventListener('load', ()=> init());
 
