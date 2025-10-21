@@ -3,23 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Discord Clone Multiuser</title>
+<title>Full Discord Clone Phase 1</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-thumb { background-color: #555; border-radius: 4px; }
+  .server:hover, .channel:hover, .dm-user:hover { filter:brightness(1.2); cursor:pointer; }
 </style>
 </head>
 <body class="bg-gray-800 text-white h-screen flex">
 
-<!-- Sidebar: Servers -->
+<!-- Server Sidebar -->
 <div id="server-sidebar" class="flex flex-col w-20 bg-gray-900 p-2 gap-2 overflow-y-auto"></div>
 
 <!-- Channel Sidebar -->
 <div class="flex flex-col w-64 bg-gray-900 p-4" id="channel-sidebar">
-  <h2 id="server-name" class="text-lg font-bold mb-4">Default Server</h2>
+  <div class="flex justify-between items-center mb-4">
+    <h2 id="server-name" class="text-lg font-bold">Default Server</h2>
+    <button onclick="createChannel()" class="px-2 py-1 bg-blue-600 rounded hover:bg-blue-500 text-sm">+Channel</button>
+  </div>
   <div id="channel-list" class="flex flex-col gap-2"></div>
-  <button onclick="createChannel()" class="mt-4 px-2 py-1 bg-blue-600 rounded hover:bg-blue-500">+ Add Channel</button>
 </div>
 
 <!-- Main Chat -->
@@ -51,37 +54,47 @@
 <script>
 /*** CONFIG ***/
 const JSONBIN_KEY="$2a$10$w7kHZII5PZ.x1MhtZTBQm.WFZP1ZkfvsbDscb/WNBo9.0kmDtxgH.";
-const LOGIN_BIN="68f665aad0ea881f40aec7bf"; // user accounts
-const SERVER_BIN="68f665aad0ea881f40aec700"; // master bin for servers data
-let currentUser="", currentServer="default", currentChannel="general";
-
-/*** UTILS ***/
-async function fetchBin(binId){ const res=await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, { headers:{'X-Master-Key':JSONBIN_KEY}}); return res.json(); }
-async function updateBin(binId,data){ await fetch(`https://api.jsonbin.io/v3/b/${binId}`,{method:'PUT', headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_KEY}, body:JSON.stringify(data)}); }
+const LOGIN_BIN="68f665aad0ea881f40aec7bf";
+const SERVER_BIN="68f665aad0ea881f40aec700"; // master servers bin
 
 /*** STATE ***/
-let users=[], servers={default:{name:"Default Server",channels:["general"],roles:{admin:{color:"red",perm:["all"]}},users:{}}}, messages={} ;
+let currentUser="", currentServer="default", currentChannel="general";
+let users=[], servers={}, messages={};
 
-/*** LOGIN ***/
-async function loadUsersBin(){ try{ const bin=await fetchBin(LOGIN_BIN); users=bin.record||[]; }catch{ users=[]; } }
-async function saveUsersBin(){ await updateBin(LOGIN_BIN,users); }
+/*** UTILS ***/
+async function fetchBin(binId){ const res=await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`,{headers:{'X-Master-Key':JSONBIN_KEY}}); return res.json(); }
+async function updateBin(binId,data){ await fetch(`https://api.jsonbin.io/v3/b/${binId}`,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':JSONBIN_KEY},body:JSON.stringify(data)}); }
+
+/*** LOGIN / REGISTER ***/
+async function loadUsers(){ try{ const bin=await fetchBin(LOGIN_BIN); users=bin.record||[]; }catch{ users=[]; } }
+async function saveUsers(){ await updateBin(LOGIN_BIN,users); }
+
 async function login(){
-  await loadUsersBin(); const u=document.getElementById('loginUser').value.trim(); const p=document.getElementById('loginPass').value;
+  await loadUsers();
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
   const found=users.find(x=>x.username===u && x.password===p);
   if(found){ currentUser=u; document.getElementById('login').style.display='none'; loadServers(); loadUI(); startPolling(); }
   else alert('Invalid login');
 }
+
 async function register(){
-  await loadUsersBin(); const u=document.getElementById('loginUser').value.trim(); const p=document.getElementById('loginPass').value;
+  await loadUsers();
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
   if(users.find(x=>x.username===u)){ alert('Username exists'); return; }
-  users.push({username:u,password:p,dms:[],servers:["default"]}); currentUser=u; await saveUsersBin(); document.getElementById('login').style.display='none';
+  users.push({username:u,password:p,dms:[],servers:["default"]});
+  currentUser=u; await saveUsers(); document.getElementById('login').style.display='none';
   loadServers(); loadUI(); startPolling();
 }
 
 /*** SERVERS / CHANNELS ***/
 async function loadServers(){
-  try{ const bin=await fetchBin(SERVER_BIN); servers=bin.record||servers; messages={} ; for(let s in servers){ messages[s]={}; servers[s].channels.forEach(c=>messages[s][c]=[]); } } catch(e){ console.error(e); }
+  try{ const bin=await fetchBin(SERVER_BIN); servers=bin.record||{default:{name:"Default Server",channels:["general"],roles:{admin:{color:"red",perm:["all"]}},users:{}}}; messages={} ; 
+  for(let s in servers){ messages[s]={}; servers[s].channels.forEach(c=>messages[s][c]=servers[s].messages?.[c]||[]); } } 
+  catch(e){ console.error(e); }
 }
+
 async function saveServers(){ await updateBin(SERVER_BIN,servers); }
 
 function renderServers(){
@@ -93,23 +106,26 @@ function renderServers(){
   const addBtn=document.createElement('div'); addBtn.className='server bg-green-600 flex items-center justify-center rounded text-lg cursor-pointer'; addBtn.textContent="+";
   addBtn.onclick=createServer; sidebar.appendChild(addBtn);
 }
+
 function renderChannels(){
   const list=document.getElementById('channel-list'); list.innerHTML='';
   servers[currentServer].channels.forEach(c=>{
-    const div=document.createElement('div'); div.className='channel'; div.textContent='# '+c; div.onclick=()=>switchChannel(c);
-    list.appendChild(div);
+    const div=document.createElement('div'); div.className='channel'; div.textContent='# '+c; div.onclick=()=>switchChannel(c); list.appendChild(div);
   });
 }
+
 function createServer(){
   const name=prompt("Server Name?"); if(!name) return;
   const id="S"+Date.now();
-  servers[id]={name,channels:["general"],roles:{admin:{color:"red",perm:["all"]}},users:{[currentUser]:"admin"}};
-  saveServers(); renderServers(); switchServer(id);
+  servers[id]={name,channels:["general"],roles:{admin:{color:"red",perm:["all"]}},users:{[currentUser]:"admin"}, messages:{}};
+  messages[id]={general:[]}; saveServers(); renderServers(); switchServer(id);
 }
+
 function createChannel(){
   const name=prompt("Channel Name?"); if(!name) return;
   servers[currentServer].channels.push(name); messages[currentServer][name]=[]; saveServers(); renderChannels();
 }
+
 function switchServer(id){ currentServer=id; currentChannel=servers[id].channels[0]; document.getElementById('server-name').textContent=servers[id].name; renderChannels(); renderMessages(); }
 
 /*** MESSAGES ***/
@@ -124,37 +140,40 @@ function renderMessages(){
   });
   container.scrollTop=container.scrollHeight;
 }
+
 function sendMessage(){
   const input=document.getElementById('messageInput'); if(!input.value.trim()) return;
   const msg={user:currentUser,text:input.value,time:Date.now()};
   messages[currentServer][currentChannel].push(msg);
-  renderMessages(); input.value='';
-  servers[currentServer].messages=messages[currentServer]; saveServers();
+  servers[currentServer].messages=currentServer in servers?messages[currentServer]:{}; servers[currentServer].messages[currentChannel]=messages[currentServer][currentChannel];
+  renderMessages(); input.value=''; saveServers();
 }
+
 function switchChannel(c){ currentChannel=c; renderMessages(); }
 
-/*** DM SYSTEM ***/
+/*** DMS ***/
 function renderDMUsers(){
   const dm=document.getElementById('dm-users'); dm.innerHTML='';
   users.filter(u=>u.username!=currentUser).forEach(u=>{
     const div=document.createElement('div'); div.className='dm-user cursor-pointer'; div.textContent=u.username; div.onclick=()=>openDM(u.username); dm.appendChild(div);
   });
 }
+
 function openDM(username){
   const dmId="DM_"+[currentUser,username].sort().join("_");
-  if(!servers[dmId]) servers[dmId]={name:username,channels:["general"],roles:{member:{color:"green",perm:["chat"]}},users:{[currentUser]:"member",[username]:"member"}};
+  if(!servers[dmId]) servers[dmId]={name:username,channels:["general"],roles:{member:{color:"green",perm:["chat"]}},users:{[currentUser]:"member",[username]:"member"}, messages:{general:[]} };
   if(!messages[dmId]) messages[dmId]={general:[]};
   switchServer(dmId);
 }
 
-/*** POLLING FOR MULTIUSER SYNC ***/
+/*** MULTI-USER POLLING ***/
 function startPolling(){
   setInterval(async ()=>{
     await loadServers(); renderServers(); renderChannels(); renderDMUsers(); renderMessages();
   },2000);
 }
 
-/*** INIT UI ***/
+/*** INITIAL UI ***/
 function loadUI(){ renderServers(); renderChannels(); renderDMUsers(); renderMessages(); }
 
 </script>
