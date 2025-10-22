@@ -53,6 +53,11 @@ body{
 #b3{top:42%}
 #b4{top:52%}
 #b5{top:62%}
+#b6{top:72%}
+#b7{top:82%}
+#b8{top:92%}
+#b9{top:102%}
+#b10{top:112%}
 
 
 /* 
@@ -105,8 +110,13 @@ body{
 	<button id="b1" class="button" disabled><b></b>Money per Click x2</button>
 	<button id="b2" class="button" disabled><b></b>+5 every second</button>
 	<button id="b3" class="button" disabled><b></b>Auto Gain x2</button>
-	<button id="b4" class="button" disabled><b></b>Money Per Click x12</button>
-	<button id="b5" class="button" disabled><b></b>Auto Gain x8</button>
+	<button id="b4" class="button" disabled><b></b>Auto Gain x8</button>
+	<button id="b5" class="button" disabled><b></b>Money Per Click x12</button>
+	<button id="b6" class="button" disabled><b></b>Money per Click x20</button>
+	<button id="b7" class="button" disabled><b></b>+5 x 23 every second</button>
+	<button id="b8" class="button" disabled><b></b>Auto Gain x780</button>
+	<button id="b9" class="button" disabled><b></b>Money Per Click x600</button>
+	<button id="b10" class="button" disabled><b></b>Auto Gain x12000</button>
     <script>
 var money = 0,
 	clickGain = 1,
@@ -175,22 +185,35 @@ element.clicker.onclick = function() {
 function newPrice1(obj){obj.price = clickGain * 25 * obj.purchaseLvl;}
 function newPrice2(obj){obj.price = 200 * obj.purchaseLvl;}
 function newPrice3(obj){obj.price = autoGain * 30 * obj.purchaseLvl + 500;}
+function newPrice4(obj){obj.price = 70000 * obj.purchaseLvl;}
+function newPrice5(obj){obj.price = 100000 * obj.purchaseLvl;}
+function newPrice6(obj){obj.price = clickGain * 1034 * obj.purchaseLvl;}
+function newPrice7(obj){obj.price = 400000 * obj.purchaseLvl;}
+function newPrice8(obj){obj.price = autoGain * 7000 * obj.purchaseLvl + 500;}
+function newPrice9(obj){obj.price = 7023600 * obj.purchaseLvl;}
+function newPrice10(obj){obj.price = 10704200 * obj.purchaseLvl;}
 function onClick1(obj){clickGain*=2;}
 function onClick2(obj){autoMoney(this.purchaseLvl);}
 function onClick3(obj){autoGain*=2;}
 function onClick4(obj){autoGain*=8;}
 function onClick5(obj){clickGain*=12;}
-function newPrice4(obj){obj.price = 700 * obj.purchaseLvl;}
-function newPrice5(obj){obj.price = 1000 * obj.purchaseLvl;}
-
-
+function onClick6(obj){clickGain*=20;}
+function onClick7(obj){autoMoney(this.purchaseLvl*23);}
+function onClick8(obj){autoGain*=780;}
+function onClick9(obj){autoGain*=6000;}
+function onClick10(obj){clickGain*=12000;}
 
 shop = [
 	new ShopElement("b1",newPrice1,onClick1),
 	new ShopElement("b2",newPrice2,onClick2),
 	new ShopElement("b3",newPrice3,onClick3),
-	new ShopElement("b3",newPrice4,onClick4),
-	new ShopElement("b3",newPrice5,onClick5),
+	new ShopElement("b4",newPrice4,onClick4),
+	new ShopElement("b5",newPrice5,onClick5),
+	new ShopElement("b6",newPrice1,onClick6),
+	new ShopElement("b7",newPrice2,onClick7),
+	new ShopElement("b8",newPrice3,onClick8),
+	new ShopElement("b9",newPrice4,onClick9),
+	new ShopElement("b10",newPrice5,onClick10),
 ];
 
 
