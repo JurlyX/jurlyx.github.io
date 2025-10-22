@@ -1,18 +1,64 @@
 <html>
   <head>
+    <style>
+      .pulse {
+  animation: pulse 0.8s ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+    </style>
     <title>Click.JS</title>
     <meta rel=icon src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png">
   </head>
   <body>
-    <p id="count">0</p>
-    <button onclick="Click()">click</button>
+    <p id="money">0</p>
+    <img src="https://t3.ftcdn.net/jpg/02/92/14/82/360_F_292148241_z7k3tR5mxEeQsvoE0HhLb9O8zjvyJSH8.jpg" id="main-clicker"></img>
     <script>
-      let clicks = "0";
-      function Click()  {
-        const count = document.getElementById("count");
-        clicks += 1;
-        document.getElementById("count").innerHtml = clicks;
-      }
+var money = 0;
+	clickGain = 1
+	autoGain = 1;
+	interval;
+
+// HTML MAIN ELEMENTS (except  shop buttons)
+var element = {
+	clicker   : document.getElementById("main-clicker"),
+	money     : document.getElementById("money"),
+}
+document.getElementById('main-clicker').addEventListener('click', function() {
+  const button = this;
+  button.classList.add('pulse');
+
+  // Remove the class after the animation duration to allow re-triggering
+  setTimeout(() => {
+    button.classList.remove('pulse');
+  }, 800); // Matches the animation duration
+});
+function addMoney() { 
+  money = money + clickGain;
+}
+function updateMoney(check=true) {
+  text = "$" + money;
+  element.money.innerHTML = text;
+  if(check){checkPrices();}
+}
+element.clicker.onclick = function() { 
+	element.clicker.disabled = true;
+	addMoney(); updateMoney(); 
+	element.clicker.disabled = false;
+};
     </script>
   </body>
 </html>
