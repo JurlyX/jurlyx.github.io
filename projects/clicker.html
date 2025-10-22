@@ -4,14 +4,14 @@
     <meta rel=icon src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png">
   </head>
   <body>
-    <div id="count">0</div>
+    <p id="count">0</p>
     <button onclick="Click()">click</button>
     <script>
       let clicks = "0";
       function Click()  {
         const count = document.getElementById("count");
         clicks += 1;
-        count.innerHtml = `${clicks}`;
+        document.getElementById("count").innerHtml = clicks;
       }
     </script>
   </body>
