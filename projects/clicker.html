@@ -19,13 +19,22 @@
     opacity: 1;
   }
 }
+		button {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+    overflow: hidden;
+    outline: none;
+}
     </style>
     <title>Click.JS</title>
     <meta rel=icon src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png">
   </head>
   <body>
     <p id="money">0</p>
-    <img src="https://t3.ftcdn.net/jpg/02/92/14/82/360_F_292148241_z7k3tR5mxEeQsvoE0HhLb9O8zjvyJSH8.jpg" id="main-clicker"></img>
+	<button id="main-clicker" width=720px height=360px>
+    <img src="https://t3.ftcdn.net/jpg/02/92/14/82/360_F_292148241_z7k3tR5mxEeQsvoE0HhLb9O8zjvyJSH8.jpg"></img>
+	</button>
     <script>
 var money = 0;
 	clickGain = 1
