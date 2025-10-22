@@ -1,0 +1,257 @@
+<html>
+  <head>
+    <script src="https://jurlyx.github.io/projects/dev.js">
+    <style>
+body{
+	background: rgb(15,232,146);
+	background: radial-gradient(circle, rgba(64, 193, 245, 1) 0%, rgba(26, 15, 247, 1) 52%, rgba(131, 30, 214, 1) 100%);
+}
+
+/* 
+      ================= ALL BUTTONS ANIMATIONS =================
+*/
+
+.button, .clicker {
+	/*Disable selection and drag*/
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    
+	/*Revome buttons borders and otlines*/
+	outline: none;
+	border: none;
+	background-color:#FFFFFF;/*white*/
+	
+	/*Transition Animation between hover/active...*/
+	transition: box-shadow 0.3s, background-color 0.3s;
+}
+.button:hover, .clicker:hover{
+	box-shadow: 0 27px 55px 0 rgba(0, 0, 0, 0.3), 0 17px 17px 0 rgba(15, 15, 15, 0.15);/*shadow*/
+}
+.button:active, .clicker:active{
+	/*Shadow, color transition*/
+	transition: box-shadow 0.15s, background-color 0.1s;
+	box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.3), 0 20px 20px 0 rgba(0, 0, 0, 0.15);
+	background-color:#F0F0F0;
+}
+
+/*
+			================= SHOP =================
+*/
+.button{
+	width: 200;height: 50;
+	position: absolute;
+	left: 87%;
+	transform: translate(-50%, -50%);
+}
+.button:disabled{
+	background-color: #B3B3B3;
+}
+
+#b1{top:22%}
+#b2{top:32%}
+#b3{top:42%}
+#b4{top:52%}
+#b5{top:62%}
+#b6{top:72%}
+#b7{top:82%}
+#b8{top:92%}
+#b9{top:102%}
+#b10{top:112%}
+
+
+/* 
+	  ================= Main Clicker Button =================
+*/
+.clicker {
+	/*Size*/
+	border-radius: 50%;
+	width:200px;
+	height:200px;
+	/* Position */
+	position: absolute;/*                postulat de départ */
+	top: 50%; left: 50%;/*               à 50%/50% du parent référent */
+	transform: translate(-50%, -50%);/*  décalage de 50% de sa propre taille */
+	/* Animation */
+	transition: width 0.3s, height 0.3s;
+}
+.clicker:hover {
+	width:225px;
+	height:225px;
+}
+.clicker:active {
+	transition: width 0.05s, height 0.05s;
+	width:200px;
+	height:200px;
+}
+
+/* 
+	    ================= Money text Display =================
+*/
+
+.money-text {
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  margin-left: 20px;
+  color: #FFFFFF;
+  font-size: 50;
+}
+    </style>
+
+    <title>Click.JS</title>
+    <meta rel=icon src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png">
+  </head>
+  <body>
+    <p id="money" class="money-text"></p>
+	<button id="main-clicker" class="clicker">
+		<img id="logo-clicker" src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png" draggable=false class="clicker"></img>
+	</button>
+	<button id="b1" class="button" disabled><b></b>Money per Click x2</button>
+	<button id="b2" class="button" disabled><b></b>+5 every second</button>
+	<button id="b3" class="button" disabled><b></b>Auto Gain x2</button>
+	<button id="b4" class="button" disabled><b></b>Auto Gain x8</button>
+	<button id="b5" class="button" disabled><b></b>Money Per Click x12</button>
+	<button id="b6" class="button" disabled><b></b>Money per Click x20</button>
+	<button id="b7" class="button" disabled><b></b>+5 x 23 every second</button>
+	<button id="b8" class="button" disabled><b></b>Auto Gain x780</button>
+	<button id="b9" class="button" disabled><b></b>Money Per Click x600</button>
+	<button id="b10" class="button" disabled><b></b>Auto Gain x12000</button>
+    <script>
+var money = 0,
+	clickGain = 1,
+	autoGain = 1,
+	interval;
+
+var element = {
+	clicker   : document.getElementById("main-clicker"),
+	money     : document.getElementById("money"),
+}
+function addMoney() { 
+  money = money + clickGain;
+}
+function updateMoney(check=true) {
+  text = "Clicks " + money;
+  element.money.innerHTML = text;
+  if(check){checkPrices();}
+}
+function autoMoney(amount) {
+  clearInterval(interval);
+  interval = setInterval(function(){ money = money + autoGain; updateMoney(); }, 200 / amount);
+}
+element.clicker.onclick = function() { 
+	element.clicker.disabled = true;
+	addMoney(); updateMoney(); 
+	element.clicker.disabled = false;
+};
+		class ShopElement{
+
+	
+	constructor (id,newprice_func,onclick_func) 
+	{
+		this.id = id;
+		this.element = document.getElementById(id);
+		this.element.onclick = this.purchase.bind(this);
+		this.text_element = this.element.getElementsByTagName("b")[0];
+		
+		this._updatePrice = newprice_func;
+		this._onClick = onclick_func;
+		
+		this.price = 0;
+		this.purchaseLvl = 1;
+		this.updatePrice();
+	}
+	onClick(){this._onClick(this);}
+	updatePrice(){this._updatePrice(this);}
+	
+	updateText(){
+		this.text_element.innerHTML = "<b>" +'$'+this.price+': ' + "</b>";}
+	
+	update(){
+		this.updatePrice(); 
+		this.updateText(); 
+	}
+	purchase(){
+		this.purchaseLvl += 1;
+		this.onClick();
+		onBuy(this);
+		this.update()
+		checkPrices();
+	}
+	
+}
+
+
+function newPrice1(obj){obj.price = clickGain * 25 * obj.purchaseLvl;}
+function newPrice2(obj){obj.price = 200 * obj.purchaseLvl;}
+function newPrice3(obj){obj.price = autoGain * 30 * obj.purchaseLvl + 500;}
+function newPrice4(obj){obj.price = 70000 * obj.purchaseLvl;}
+function newPrice5(obj){obj.price = 100000 * obj.purchaseLvl;}
+function newPrice6(obj){obj.price = clickGain * 203234 * obj.purchaseLvl;}
+function newPrice7(obj){obj.price = 400000 * obj.purchaseLvl;}
+function newPrice8(obj){obj.price = autoGain * 7026300 * obj.purchaseLvl + 500;}
+function newPrice9(obj){obj.price = 7023600 * obj.purchaseLvl;}
+function newPrice10(obj){obj.price = 10704200 * obj.purchaseLvl;}
+function onClick1(obj){clickGain*=2;}
+function onClick2(obj){autoMoney(this.purchaseLvl);}
+function onClick3(obj){autoGain*=2;}
+function onClick4(obj){autoGain*=8;}
+function onClick5(obj){clickGain*=12;}
+function onClick6(obj){clickGain*=20;}
+function onClick7(obj){autoMoney(this.purchaseLvl*23);}
+function onClick8(obj){autoGain*=780;}
+function onClick9(obj){autoGain*=6000;}
+function onClick10(obj){clickGain*=12000;}
+
+shop = [
+	new ShopElement("b1",newPrice1,onClick1),
+	new ShopElement("b2",newPrice2,onClick2),
+	new ShopElement("b3",newPrice3,onClick3),
+	new ShopElement("b4",newPrice4,onClick4),
+	new ShopElement("b5",newPrice5,onClick5),
+	new ShopElement("b6",newPrice6,onClick6),
+	new ShopElement("b7",newPrice7,onClick7),
+	new ShopElement("b8",newPrice8,onClick8),
+	new ShopElement("b9",newPrice9,onClick9),
+	new ShopElement("b10",newPrice10,onClick10),
+];
+
+
+updateMoney(); 
+for (let i=0;i<shop.length;i++){
+	shop[i].update() //buttons txt & price
+}
+		function checkPrices() {
+
+	for(let i=0;i<shop.length;i++){
+		if(money >= shop[i].price){
+			shop[i].element.disabled = false;
+		}
+	}
+}
+function op() { 
+  money = money + 2 * 82585834768932743;
+  clickGain = clickGain * 523750346882402376;
+  autoGain = autoGain * 905348725727584568325345;
+  updateMoney();
+}
+function rbth() { 
+  money = 0;
+  clickGain = 1 * 20;
+  autoGain = 0 + 1 * 20;
+  updateMoney();
+}
+function onBuy(obj) {
+
+	money -= obj.price;
+	updateMoney(check=false);
+
+	for(let i=0;i<shop.length;i++){
+		shop[i].element.disabled = true;
+	}
+}
+    </script>
+  </body>
+</html>
