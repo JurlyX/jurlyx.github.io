@@ -134,14 +134,6 @@ var element = {
 function addMoney() { 
   money = money + clickGain;
 }
-function loadSave() {
-  const automatic = getCookie("auto");
-  const perclick = getCookie("gain");
-  const dolla = getCookie("mony");
-  money = 0 + dolla;
-  clickGain = 0 + perclick;
-  autoGain = 0 + automatic;
-}
 function clearSave() { 
 	deleteCookie("auto", "/");
 	deleteCookie("gain", "/");
@@ -150,9 +142,6 @@ function clearSave() {
 function updateMoney(check=true) {
   text = "Clicks " + money;
   element.money.innerHTML = text;
-  document.cookie = 'auto=' + autoGain;
-  document.cookie = 'gain=' + clickGain;
-  document.cookie = 'mony=' + money;
   if(check){checkPrices();}
 }
 function autoMoney(amount) {
@@ -201,21 +190,6 @@ element.clicker.onclick = function() {
 	
 }
 
-function getCookie(name) {
-  const cname = name + "=";
-  const decodedCookie = decodeURIComponent(document.cookie);
-  const ca = decodedCookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) === ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(cname) === 0) {
-      return c.substring(cname.length, c.length);
-    }
-  }
-  return "";
-}
 function deleteCookie(name, path, domain) {
     document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=" + path + "; domain=" + domain;
 }
