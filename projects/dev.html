@@ -224,15 +224,15 @@ function newPrice8(obj){obj.price = autoGain * 7026300 * obj.purchaseLvl + 500;}
 function newPrice9(obj){obj.price = 7023600 * obj.purchaseLvl;}
 function newPrice10(obj){obj.price = 10704200 * obj.purchaseLvl;}
 function onClick1(obj){clickGain*=2;}
-function onClick2(obj){autoMoney(this.purchaseLvl);}
+function onClick2(obj){autoGain+=5;}
 function onClick3(obj){autoGain*=2;}
 function onClick4(obj){autoGain*=8;}
 function onClick5(obj){clickGain*=12;}
-function onClick6(obj){clickGain*=20;}
-function onClick7(obj){autoMoney(this.purchaseLvl*23);}
-function onClick8(obj){autoGain*=780;}
-function onClick9(obj){autoGain*=6000;}
-function onClick10(obj){clickGain*=12000;}
+function onClick6(obj){clickGain*=13;}
+function onClick7(obj){autoGain+=1000}
+function onClick8(obj){autoGain*=15;}
+function onClick9(obj){autoGain*=18;}
+function onClick10(obj){clickGain*=20;}
 
 shop = [
 	new ShopElement("b1",newPrice1,onClick1),
