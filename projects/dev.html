@@ -138,9 +138,9 @@ function loadSave() {
   const automatic = getCookie("auto");
   const perclick = getCookie("gain");
   const dolla = getCookie("mony");
-  money = dolla;
-  clickGain = perclick;
-  autoGain = automatic;
+  money = 0 + dolla;
+  clickGain = 0 + perclick;
+  autoGain = 0 + automatic;
 }
 function clearSave() { 
 	deleteCookie("auto", "/");
@@ -150,9 +150,9 @@ function clearSave() {
 function updateMoney(check=true) {
   text = "Clicks " + money;
   element.money.innerHTML = text;
-  document.cookie = `auto=${autoGain}`;
-  document.cookie = `gain=${clickGain}`;
-  document.cookie = `mony=${money}`;
+  document.cookie = 'auto=' + autoGain;
+  document.cookie = 'gain=' + clickGain;
+  document.cookie = 'mony=' + money;
   if(check){checkPrices();}
 }
 function autoMoney(amount) {
