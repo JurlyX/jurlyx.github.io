@@ -135,6 +135,7 @@ body{
 	<button id="b9" class="button" disabled><b></b>Money Per Click x600</button>
 	<button id="b10" class="button" disabled><b></b>Auto Gain x12000</button>
     <script>
+	autoMoney();
 var money = 0,
 	clickGain = 1,
 	autoGain = 1,
@@ -159,9 +160,9 @@ function updateMoney(check=true) {
   updateCount();
   if(check){checkPrices();}
 }
-function autoMoney(amount) {
+function autoMoney() {
   clearInterval(interval);
-  interval = setInterval(function(){ money = money + autoGain; updateMoney(); updateCount(); }, 200 / amount);
+  interval = setInterval(function(){ money = money + autoGain; updateMoney(); updateCount(); }, 1000);
 }
 function updateCount()	{
 	txtl = "Money Per Second " + autoGain;
