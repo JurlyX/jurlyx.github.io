@@ -119,6 +119,7 @@ body{
 	<button id="b8" class="button" disabled><b></b>Auto Gain x780</button>
 	<button id="b9" class="button" disabled><b></b>Money Per Click x600</button>
 	<button id="b10" class="button" disabled><b></b>Auto Gain x12000</button>
+	<button id="b11" class="button" disabled><b></b>Rebirth</button>
     <script>
 var money = 0,
 	clickGain = 1,
@@ -194,6 +195,7 @@ function newPrice7(obj){obj.price = 400000 * obj.purchaseLvl;}
 function newPrice8(obj){obj.price = autoGain * 7026300 * obj.purchaseLvl + 500;}
 function newPrice9(obj){obj.price = 7023600 * obj.purchaseLvl;}
 function newPrice10(obj){obj.price = 10704200 * obj.purchaseLvl;}
+function newPrice11(obj){obj.price = 2385256782 * obj.purchaseLvl;}
 function onClick1(obj){clickGain*=2;}
 function onClick2(obj){autoMoney(this.purchaseLvl);}
 function onClick3(obj){autoGain*=2;}
@@ -204,6 +206,7 @@ function onClick7(obj){autoMoney(this.purchaseLvl*23);}
 function onClick8(obj){autoGain*=780;}
 function onClick9(obj){autoGain*=6000;}
 function onClick10(obj){clickGain*=12000;}
+function onClick11(obj){rbth();}
 
 shop = [
 	new ShopElement("b1",newPrice1,onClick1),
@@ -216,6 +219,7 @@ shop = [
 	new ShopElement("b8",newPrice8,onClick8),
 	new ShopElement("b9",newPrice9,onClick9),
 	new ShopElement("b10",newPrice10,onClick10),
+	new ShopElement("b11",newPrice11,onClick11),
 ];
 
 
@@ -243,7 +247,17 @@ function rbth() {
   money = 0;
   clickGain = 2 * rebirth;
   autoGain = 2 * rebirth;
-  updateMoney();
+  newPrice10(purchaselvl=0)
+  newPrice9(purchaselvl=0)
+  newPrice8(purchaselvl=0)
+  newPrice7(purchaselvl=0)
+  newPrice6(purchaselvl=0)
+  newPrice5(purchaselvl=0)
+  newPrice4(purchaselvl=0)
+  newPrice3(purchaselvl=0)
+  newPrice2(purchaselvl=0)
+  newPrice1(purchaselvl=0)
+  updateMoney(check=true);
 }
 function onBuy(obj) {
 
