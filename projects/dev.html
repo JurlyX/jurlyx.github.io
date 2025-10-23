@@ -105,6 +105,7 @@ body{
     <meta rel=icon src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png">
   </head>
   <body>
+	<button onclick="clearSave()">Clear Save</button>
     <p id="money" class="money-text"></p>
 	<button id="main-clicker" class="clicker">
 		<img id="logo-clicker" src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png" draggable=false class="clicker"></img>
@@ -119,7 +120,6 @@ body{
 	<button id="b8" class="button" disabled><b></b>Auto Gain x780</button>
 	<button id="b9" class="button" disabled><b></b>Money Per Click x600</button>
 	<button id="b10" class="button" disabled><b></b>Auto Gain x12000</button>
-	<button id="b11" class="button" disabled><b></b>Rebirth</button>
     <script>
 var money = 0,
 	clickGain = 1,
@@ -133,9 +133,23 @@ var element = {
 function addMoney() { 
   money = money + clickGain;
 }
+function clearSave() { 
+	deleteCookie("auto", "/");
+	deleteCookie("gain", "/");
+	deleteCookie("money", "/");
+}
 function updateMoney(check=true) {
   text = "Clicks " + money;
   element.money.innerHTML = text;
+  document.cookie = `auto=${autoGain}`;
+  document.cookie = `gain=${clickGain}`;
+  document.cookie = `money=${money}`;
+  const automatic = getCookie("auto");
+  const perclick = getCookie("gain");
+  const dolla = getCookie("money");
+  money = dolla;
+  clickGain = perclick;
+  autoGain = automatic;
   if(check){checkPrices();}
 }
 function autoMoney(amount) {
@@ -184,7 +198,24 @@ element.clicker.onclick = function() {
 	
 }
 
-
+function getCookie(name) {
+  const cname = name + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(cname) === 0) {
+      return c.substring(cname.length, c.length);
+    }
+  }
+  return "";
+}
+function deleteCookie(name, path, domain) {
+    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=" + path + "; domain=" + domain;
+}
 function newPrice1(obj){obj.price = clickGain * 25 * obj.purchaseLvl;}
 function newPrice2(obj){obj.price = 200 * obj.purchaseLvl;}
 function newPrice3(obj){obj.price = autoGain * 30 * obj.purchaseLvl + 500;}
@@ -195,7 +226,6 @@ function newPrice7(obj){obj.price = 400000 * obj.purchaseLvl;}
 function newPrice8(obj){obj.price = autoGain * 7026300 * obj.purchaseLvl + 500;}
 function newPrice9(obj){obj.price = 7023600 * obj.purchaseLvl;}
 function newPrice10(obj){obj.price = 10704200 * obj.purchaseLvl;}
-function newPrice11(obj){obj.price = 2385256782 * obj.purchaseLvl;}
 function onClick1(obj){clickGain*=2;}
 function onClick2(obj){autoMoney(this.purchaseLvl);}
 function onClick3(obj){autoGain*=2;}
@@ -206,7 +236,6 @@ function onClick7(obj){autoMoney(this.purchaseLvl*23);}
 function onClick8(obj){autoGain*=780;}
 function onClick9(obj){autoGain*=6000;}
 function onClick10(obj){clickGain*=12000;}
-function onClick11(obj){rbth();}
 
 shop = [
 	new ShopElement("b1",newPrice1,onClick1),
@@ -219,7 +248,6 @@ shop = [
 	new ShopElement("b8",newPrice8,onClick8),
 	new ShopElement("b9",newPrice9,onClick9),
 	new ShopElement("b10",newPrice10,onClick10),
-	new ShopElement("b11",newPrice11,onClick11),
 ];
 
 
