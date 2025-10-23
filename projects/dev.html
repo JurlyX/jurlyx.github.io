@@ -136,17 +136,17 @@ function addMoney() {
 function clearSave() { 
 	deleteCookie("auto", "/");
 	deleteCookie("gain", "/");
-	deleteCookie("money", "/");
+	deleteCookie("mony", "/");
 }
 function updateMoney(check=true) {
   text = "Clicks " + money;
   element.money.innerHTML = text;
   document.cookie = `auto=${autoGain}`;
   document.cookie = `gain=${clickGain}`;
-  document.cookie = `money=${money}`;
+  document.cookie = `mony=${money}`;
   const automatic = getCookie("auto");
   const perclick = getCookie("gain");
-  const dolla = getCookie("money");
+  const dolla = getCookie("mony");
   money = dolla;
   clickGain = perclick;
   autoGain = automatic;
