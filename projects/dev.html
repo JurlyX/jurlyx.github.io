@@ -106,6 +106,7 @@ body{
   </head>
   <body>
 	<button onclick="clearSave()">Clear Save</button>
+	<button onclick="loadSave()">Load Save</button>
     <p id="money" class="money-text"></p>
 	<button id="main-clicker" class="clicker">
 		<img id="logo-clicker" src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png" draggable=false class="clicker"></img>
@@ -133,6 +134,14 @@ var element = {
 function addMoney() { 
   money = money + clickGain;
 }
+function loadSave() {
+  const automatic = getCookie("auto");
+  const perclick = getCookie("gain");
+  const dolla = getCookie("mony");
+  money = dolla;
+  clickGain = perclick;
+  autoGain = automatic;
+}
 function clearSave() { 
 	deleteCookie("auto", "/");
 	deleteCookie("gain", "/");
@@ -144,12 +153,6 @@ function updateMoney(check=true) {
   document.cookie = `auto=${autoGain}`;
   document.cookie = `gain=${clickGain}`;
   document.cookie = `mony=${money}`;
-  const automatic = getCookie("auto");
-  const perclick = getCookie("gain");
-  const dolla = getCookie("mony");
-  money = dolla;
-  clickGain = perclick;
-  autoGain = automatic;
   if(check){checkPrices();}
 }
 function autoMoney(amount) {
