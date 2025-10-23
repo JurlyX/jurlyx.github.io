@@ -91,6 +91,17 @@ body{
 */
 
 .money-text {
+	font-family: Monospace;
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  margin-left: 20px;
+  color: #FFFFFF;
+  font-size: 50;
+}
+.auto-text {
+	font-family: Monospace;
 	-webkit-touch-callout: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -105,9 +116,8 @@ body{
     <meta rel=icon src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png">
   </head>
   <body>
-	<button onclick="clearSave()">Clear Save</button>
-	<button onclick="loadSave()">Load Save</button>
     <p id="money" class="money-text"></p>
+	<p id="amt" class="auto-text"></p>
 	<button id="main-clicker" class="clicker">
 		<img id="logo-clicker" src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png" draggable=false class="clicker"></img>
 	</button>
@@ -130,6 +140,7 @@ var money = 0,
 var element = {
 	clicker   : document.getElementById("main-clicker"),
 	money     : document.getElementById("money"),
+	auto     : document.getElementById("amt"),
 }
 function addMoney() { 
   money = money + clickGain;
@@ -141,7 +152,9 @@ function clearSave() {
 }
 function updateMoney(check=true) {
   text = "Clicks " + money;
+  text2 = "Money Per Second " + autoGain;
   element.money.innerHTML = text;
+  element.auto.innerHTML = text2;
   if(check){checkPrices();}
 }
 function autoMoney(amount) {
