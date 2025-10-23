@@ -243,21 +243,23 @@ function op() {
 }
 var rebirth = 0
 function rbth() { 
-  rebirth = rebirth + 1
-  money = 0;
-  clickGain = 2 * rebirth;
-  autoGain = 2 * rebirth;
-  newPrice10(purchaselvl=0)
-  newPrice9(purchaselvl=0)
-  newPrice8(purchaselvl=0)
-  newPrice7(purchaselvl=0)
-  newPrice6(purchaselvl=0)
-  newPrice5(purchaselvl=0)
-  newPrice4(purchaselvl=0)
-  newPrice3(purchaselvl=0)
-  newPrice2(purchaselvl=0)
-  newPrice1(purchaselvl=0)
-  updateMoney(check=true);
+  setTimeout(() => {
+	  rebirth = rebirth + 1
+	  money = 0;
+	  clickGain = 2 * rebirth;
+	  autoGain = 2 * rebirth;
+	  newPrice10(purchaselvl=0)
+	  newPrice9(purchaselvl=0)
+	  newPrice8(purchaselvl=0)
+	  newPrice7(purchaselvl=0)
+	  newPrice6(purchaselvl=0)
+	  newPrice5(purchaselvl=0)
+	  newPrice4(purchaselvl=0)
+	  newPrice3(purchaselvl=0)
+	  newPrice2(purchaselvl=0)
+	  newPrice1(purchaselvl=0)
+	  updateMoney(check=true);
+	}, 5000);
 }
 function onBuy(obj) {
 
