@@ -162,7 +162,7 @@ function updateMoney(check=true) {
 }
 function autoMoney(amount) {
   clearInterval(interval);
-  interval = setInterval(function(){ money = money + autoGain; updateMoney(); }, 200 / amount);
+  interval = setInterval(function(){ money = money + autoGain; updateMoney(); }, 1000 / amount);
 }
 element.clicker.onclick = function() { 
 	element.clicker.disabled = true;
@@ -222,13 +222,13 @@ function newPrice10(obj){obj.price = 10704200 * obj.purchaseLvl;}
 function onClick1(obj){clickGain*=2;}
 function onClick2(obj){autoMoney(this.purchaseLvl);}
 function onClick3(obj){autoGain*=2;}
-function onClick4(obj){autoGain*=8;}
-function onClick5(obj){clickGain*=12;}
-function onClick6(obj){clickGain*=20;}
-function onClick7(obj){autoMoney(this.purchaseLvl*23);}
-function onClick8(obj){autoGain*=780;}
-function onClick9(obj){autoGain*=6000;}
-function onClick10(obj){clickGain*=12000;}
+function onClick4(obj){autoGain*=6;}
+function onClick5(obj){clickGain*=10;}
+function onClick6(obj){clickGain*=12;}
+function onClick7(obj){autoMoney(this.purchaseLvl*7);}
+function onClick8(obj){autoGain*=78;}
+function onClick9(obj){autoGain*=600;}
+function onClick10(obj){clickGain*=1200;}
 
 shop = [
 	new ShopElement("b1",newPrice1,onClick1),
