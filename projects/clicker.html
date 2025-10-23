@@ -1,5 +1,6 @@
 <html>
   <head>
+
     <style>
 body{
 	background: rgb(15,232,146);
@@ -11,6 +12,7 @@ body{
 */
 
 .button, .clicker {
+	position: fixed;
 	/*Disable selection and drag*/
 	-webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -64,6 +66,7 @@ body{
 	  ================= Main Clicker Button =================
 */
 .clicker {
+	position: fixed;
 	/*Size*/
 	border-radius: 50%;
 	width:200px;
@@ -90,11 +93,25 @@ body{
 */
 
 .money-text {
+	position: fixed;
+	font-family: Monospace;
 	-webkit-touch-callout: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
   margin-left: 20px;
+  color: #FFFFFF;
+  font-size: 50;
+}
+.auto-text {
+	position: fixed;
+	font-family: Monospace;
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  margin-left: 20px;
+  margin-top: 100px;
   color: #FFFFFF;
   font-size: 50;
 }
@@ -105,20 +122,24 @@ body{
   </head>
   <body>
     <p id="money" class="money-text"></p>
+	<p id="amt" class="auto-text"></p>
 	<button id="main-clicker" class="clicker">
 		<img id="logo-clicker" src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png" draggable=false class="clicker"></img>
 	</button>
-	<button id="b1" class="button" disabled><b></b>Money per Click x2</button>
-	<button id="b2" class="button" disabled><b></b>+5 every second</button>
-	<button id="b3" class="button" disabled><b></b>Auto Gain x2</button>
-	<button id="b4" class="button" disabled><b></b>Auto Gain x8</button>
-	<button id="b5" class="button" disabled><b></b>Money Per Click x12</button>
-	<button id="b6" class="button" disabled><b></b>Money per Click x20</button>
-	<button id="b7" class="button" disabled><b></b>+5 x 23 every second</button>
-	<button id="b8" class="button" disabled><b></b>Auto Gain x780</button>
-	<button id="b9" class="button" disabled><b></b>Money Per Click x600</button>
-	<button id="b10" class="button" disabled><b></b>Auto Gain x12000</button>
+	<div id=shop>
+		<button id="b1" class="button" disabled><b></b>Double Tap</button>
+		<button id="b2" class="button" disabled><b></b>Hire 5 Friends</button>
+		<button id="b3" class="button" disabled><b></b>Carl</button>
+		<button id="b4" class="button" disabled><b></b>Get McDonalds</button>
+		<button id="b5" class="button" disabled><b></b>John's Nostalgia</button>
+		<button id="b6" class="button" disabled><b></b>Download Cheats</button>
+		<button id="b7" class="button" disabled><b></b>+Bombadio Reactor</button>
+		<button id="b8" class="button" disabled><b></b>Steal Random Dudes Cursor</button>
+		<button id="b9" class="button" disabled><b></b>Use A Keyboard Instead Of Mouse</button>
+		<button id="b10" class="button" disabled><b></b>Godly Unlock</button>
+	</div>
     <script>
+	autoMoney();
 var money = 0,
 	clickGain = 1,
 	autoGain = 1,
@@ -127,22 +148,33 @@ var money = 0,
 var element = {
 	clicker   : document.getElementById("main-clicker"),
 	money     : document.getElementById("money"),
+	auto     : document.getElementById("amt"),
 }
 function addMoney() { 
   money = money + clickGain;
 }
+function clearSave() { 
+	deleteCookie("auto", "/");
+	deleteCookie("gain", "/");
+	deleteCookie("mony", "/");
+}
 function updateMoney(check=true) {
   text = "Clicks " + money;
   element.money.innerHTML = text;
+  updateCount();
   if(check){checkPrices();}
 }
-function autoMoney(amount) {
+function autoMoney() {
   clearInterval(interval);
-  interval = setInterval(function(){ money = money + autoGain; updateMoney(); }, 200 / amount);
+  interval = setInterval(function(){ money = money + autoGain; updateMoney(); updateCount(); }, 1000);
+}
+function updateCount()	{
+	txtl = "Money Per Second " + autoGain;
+	element.auto.innerHTML = txtl;
 }
 element.clicker.onclick = function() { 
 	element.clicker.disabled = true;
-	addMoney(); updateMoney(); 
+	addMoney(); updateMoney(); updateCount(); 
 	element.clicker.disabled = false;
 };
 		class ShopElement{
@@ -178,31 +210,34 @@ element.clicker.onclick = function() {
 		onBuy(this);
 		this.update()
 		checkPrices();
+		updateCount();
 	}
 	
 }
 
-
+function deleteCookie(name, path, domain) {
+    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=" + path + "; domain=" + domain;
+}
 function newPrice1(obj){obj.price = clickGain * 25 * obj.purchaseLvl;}
 function newPrice2(obj){obj.price = 200 * obj.purchaseLvl;}
-function newPrice3(obj){obj.price = autoGain * 30 * obj.purchaseLvl + 500;}
-function newPrice4(obj){obj.price = 70000 * obj.purchaseLvl;}
-function newPrice5(obj){obj.price = 100000 * obj.purchaseLvl;}
-function newPrice6(obj){obj.price = clickGain * 203234 * obj.purchaseLvl;}
-function newPrice7(obj){obj.price = 400000 * obj.purchaseLvl;}
-function newPrice8(obj){obj.price = autoGain * 7026300 * obj.purchaseLvl + 500;}
-function newPrice9(obj){obj.price = 7023600 * obj.purchaseLvl;}
-function newPrice10(obj){obj.price = 10704200 * obj.purchaseLvl;}
-function onClick1(obj){clickGain*=2;}
-function onClick2(obj){autoMoney(this.purchaseLvl);}
-function onClick3(obj){autoGain*=2;}
-function onClick4(obj){autoGain*=8;}
-function onClick5(obj){clickGain*=12;}
-function onClick6(obj){clickGain*=20;}
-function onClick7(obj){autoMoney(this.purchaseLvl*23);}
-function onClick8(obj){autoGain*=780;}
-function onClick9(obj){autoGain*=6000;}
-function onClick10(obj){clickGain*=12000;}
+function newPrice3(obj){obj.price = 1000 * obj.purchaseLvl + 500;}
+function newPrice4(obj){obj.price = 2500 * obj.purchaseLvl;}
+function newPrice5(obj){obj.price = 3000 * obj.purchaseLvl;}
+function newPrice6(obj){obj.price = 6000 * obj.purchaseLvl;}
+function newPrice7(obj){obj.price = 10000 * obj.purchaseLvl;}
+function newPrice8(obj){obj.price = 18000 * obj.purchaseLvl;}
+function newPrice9(obj){obj.price = 5000000 * obj.purchaseLvl;}
+function newPrice10(obj){obj.price = 1000000 * obj.purchaseLvl;}
+function onClick1(obj){clickGain+=1;}
+function onClick2(obj){autoGain+=5;}
+function onClick3(obj){clickGain+=10;}
+function onClick4(obj){autoGain+=50;}
+function onClick5(obj){clickGain+=100;}
+function onClick6(obj){clickGain+=150;}
+function onClick7(obj){autoGain+=250}
+function onClick8(obj){autoGain+=750;}
+function onClick9(obj){clickGain+=2;}
+function onClick10(obj){autoGain*=2;}
 
 shop = [
 	new ShopElement("b1",newPrice1,onClick1),
@@ -236,11 +271,25 @@ function op() {
   autoGain = autoGain * 905348725727584568325345;
   updateMoney();
 }
+var rebirth = 0
 function rbth() { 
-  money = 0;
-  clickGain = 1 * 20;
-  autoGain = 0 + 1 * 20;
-  updateMoney();
+  setTimeout(() => {
+	  rebirth = rebirth + 1
+	  money = 0;
+	  clickGain = 2 * rebirth;
+	  autoGain = 2 * rebirth;
+	  newPrice10(purchaselvl=0)
+	  newPrice9(purchaselvl=0)
+	  newPrice8(purchaselvl=0)
+	  newPrice7(purchaselvl=0)
+	  newPrice6(purchaselvl=0)
+	  newPrice5(purchaselvl=0)
+	  newPrice4(purchaselvl=0)
+	  newPrice3(purchaselvl=0)
+	  newPrice2(purchaselvl=0)
+	  newPrice1(purchaselvl=0)
+	  updateMoney(check=true);
+	}, 5000);
 }
 function onBuy(obj) {
 
