@@ -155,18 +155,21 @@ function clearSave() {
 }
 function updateMoney(check=true) {
   text = "Clicks " + money;
-  text2 = "Money Per Second " + autoGain;
   element.money.innerHTML = text;
-  element.auto.innerHTML = text2;
+  updateCount();
   if(check){checkPrices();}
 }
 function autoMoney(amount) {
   clearInterval(interval);
-  interval = setInterval(function(){ money = money + autoGain; updateMoney(); }, 200 / amount);
+  interval = setInterval(function(){ money = money + autoGain; updateMoney(); updateCount(); }, 200 / amount);
+}
+function updateCount()	{
+	txtl = "Money Per Second " + autoGain;
+	element.auto.innerHTML = txtl;
 }
 element.clicker.onclick = function() { 
 	element.clicker.disabled = true;
-	addMoney(); updateMoney(); 
+	addMoney(); updateMoney(); updateCount(); 
 	element.clicker.disabled = false;
 };
 		class ShopElement{
@@ -202,6 +205,7 @@ element.clicker.onclick = function() {
 		onBuy(this);
 		this.update()
 		checkPrices();
+		updateCount();
 	}
 	
 }
