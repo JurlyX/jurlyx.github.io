@@ -163,8 +163,6 @@ function updateMoney(check=true) {
 function autoMoney(amount) {
   clearInterval(interval);
   interval = setInterval(function(){ money = money + autoGain; updateMoney(); }, 1000 / amount);
-  text2 = "Money Per Second " + autoGain;
-  element.auto.innerHTML = text2;
 }
 element.clicker.onclick = function() { 
 	element.clicker.disabled = true;
