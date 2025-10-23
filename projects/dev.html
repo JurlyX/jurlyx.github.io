@@ -237,10 +237,12 @@ function op() {
   autoGain = autoGain * 905348725727584568325345;
   updateMoney();
 }
+var rebirth = 0
 function rbth() { 
+  rebirth = rebirth + 1
   money = 0;
-  clickGain = 1 * 20;
-  autoGain = 0 + 1 * 20;
+  clickGain = 2 * rebirth;
+  autoGain = 2 * rebirth;
   updateMoney();
 }
 function onBuy(obj) {
