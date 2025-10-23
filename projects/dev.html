@@ -126,16 +126,18 @@ body{
 	<button id="main-clicker" class="clicker">
 		<img id="logo-clicker" src="https://images.vexels.com/media/users/3/131773/isolated/preview/790c78d39fd853ae72167411aa11d727-pixilated-hand-cursor-1.png" draggable=false class="clicker"></img>
 	</button>
-	<button id="b1" class="button" disabled><b></b>Money per Click x2</button>
-	<button id="b2" class="button" disabled><b></b>+5 every second</button>
-	<button id="b3" class="button" disabled><b></b>Auto Gain x2</button>
-	<button id="b4" class="button" disabled><b></b>Auto Gain x8</button>
-	<button id="b5" class="button" disabled><b></b>Money Per Click x12</button>
-	<button id="b6" class="button" disabled><b></b>Money per Click x20</button>
-	<button id="b7" class="button" disabled><b></b>+5 x 23 every second</button>
-	<button id="b8" class="button" disabled><b></b>Auto Gain x780</button>
-	<button id="b9" class="button" disabled><b></b>Money Per Click x600</button>
-	<button id="b10" class="button" disabled><b></b>Auto Gain x12000</button>
+	<div id=shop>
+		<button id="b1" class="button" disabled><b></b>Double Tap</button>
+		<button id="b2" class="button" disabled><b></b>Hire 5 Friends</button>
+		<button id="b3" class="button" disabled><b></b></button>
+		<button id="b4" class="button" disabled><b></b>Auto Gain x8</button>
+		<button id="b5" class="button" disabled><b></b>Money Per Click x12</button>
+		<button id="b6" class="button" disabled><b></b>Money per Click x20</button>
+		<button id="b7" class="button" disabled><b></b>+5 x 23 every second</button>
+		<button id="b8" class="button" disabled><b></b>Auto Gain x780</button>
+		<button id="b9" class="button" disabled><b></b>Money Per Click x600</button>
+		<button id="b10" class="button" disabled><b></b>Auto Gain x12000</button>
+	</div>
     <script>
 	autoMoney();
 var money = 0,
@@ -218,24 +220,24 @@ function deleteCookie(name, path, domain) {
 }
 function newPrice1(obj){obj.price = clickGain * 25 * obj.purchaseLvl;}
 function newPrice2(obj){obj.price = 200 * obj.purchaseLvl;}
-function newPrice3(obj){obj.price = autoGain * 30 * obj.purchaseLvl + 500;}
-function newPrice4(obj){obj.price = 70000 * obj.purchaseLvl;}
-function newPrice5(obj){obj.price = 100000 * obj.purchaseLvl;}
-function newPrice6(obj){obj.price = clickGain * 203234 * obj.purchaseLvl;}
-function newPrice7(obj){obj.price = 400000 * obj.purchaseLvl;}
-function newPrice8(obj){obj.price = autoGain * 7026300 * obj.purchaseLvl + 500;}
-function newPrice9(obj){obj.price = 7023600 * obj.purchaseLvl;}
-function newPrice10(obj){obj.price = 10704200 * obj.purchaseLvl;}
-function onClick1(obj){clickGain*=2;}
+function newPrice3(obj){obj.price = 1000 * obj.purchaseLvl + 500;}
+function newPrice4(obj){obj.price = 2500 * obj.purchaseLvl;}
+function newPrice5(obj){obj.price = 3000 * obj.purchaseLvl;}
+function newPrice6(obj){obj.price = 6000 * obj.purchaseLvl;}
+function newPrice7(obj){obj.price = 10000 * obj.purchaseLvl;}
+function newPrice8(obj){obj.price = 18000 * obj.purchaseLvl;}
+function newPrice9(obj){obj.price = 5000000 * obj.purchaseLvl;}
+function newPrice10(obj){obj.price = 1000000 * obj.purchaseLvl;}
+function onClick1(obj){clickGain+=1;}
 function onClick2(obj){autoGain+=5;}
-function onClick3(obj){autoGain*=2;}
-function onClick4(obj){autoGain*=8;}
-function onClick5(obj){clickGain*=12;}
-function onClick6(obj){clickGain*=13;}
-function onClick7(obj){autoGain+=1000}
-function onClick8(obj){autoGain*=15;}
-function onClick9(obj){autoGain*=18;}
-function onClick10(obj){clickGain*=20;}
+function onClick3(obj){clickGain+=10;}
+function onClick4(obj){autoGain+=50;}
+function onClick5(obj){clickGain+=100;}
+function onClick6(obj){clickGain+=150;}
+function onClick7(obj){autoGain+=250}
+function onClick8(obj){autoGain+=750;}
+function onClick9(obj){clickGain+=2;}
+function onClick10(obj){autoGain*=2;}
 
 shop = [
 	new ShopElement("b1",newPrice1,onClick1),
