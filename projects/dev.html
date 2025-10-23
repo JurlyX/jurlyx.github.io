@@ -112,6 +112,7 @@ body{
   margin-top: 100px;
   color: #FFFFFF;
   font-size: 50;
+  display: none;
 }
     </style>
 
@@ -162,6 +163,7 @@ function updateMoney(check=true) {
 }
 function autoMoney(amount) {
   clearInterval(interval);
+  element.auto.style.display = block
   interval = setInterval(function(){ money = money + autoGain; updateMoney(); }, 200 / amount);
 }
 element.clicker.onclick = function() { 
