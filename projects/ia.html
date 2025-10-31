@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <title>XenzGPT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <div class="max-w-5xl mx-auto p-4 flex flex-col h-screen">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-3xl font-bold text-blue-600">XenzGPT</h1>
+      <div class="flex gap-2 items-center">
+        <select id="model" class="p-2 rounded border" onchange="newChat()">
+          <option value="gpt-4o" selected>GPT-4o</option>
+          <option value="gpt-4.1">GPT-4.1</option>
+          <option value="gpt-3.5-turbo">GPT-3.5</option>
+          <option value="dall-e-3">DALL·E 3</option>
+        </select>
+        <label class="flex items-center text-sm">
+          <input type="checkbox" id="imageToggle" class="mr-1" checked />
+          Image Gen
+        </label>
+        <input type="file" id="fileInput" class="hidden" />
+        <button onclick="document.getElementById('fileInput').click()" class="bg-gray-200 px-3 py-1 rounded text-sm">📁 Upload</button>
+        <button onclick="newChat()" class="bg-green-100 px-3 py-1 rounded text-sm">➕ New Chat</button>
+        <button onclick="loadChatList()" class="bg-blue-100 px-3 py-1 rounded text-sm">📂 Chats</button>
+      </div>
+    </div>
+
+    <!-- Chat History Selector -->
+    <div id="chatList" class="mb-2 hidden">
+      <label class="block text-sm mb-1">Switch chat:</label>
+      <select id="chatSelector" class="w-full border rounded p-2 mb-2" onchange="switchChat(this.value)"></select>
+    </div>
+
+    <!-- Messages -->
+    <div id="messages" class="bg-white rounded-lg p-4 flex-1 overflow-y-auto flex flex-col space-y-3 border mb-4"></div>
+
+    <!-- Input -->
+    <div class="flex gap-2">
+      <textarea
+        id="user-input"
+        rows="2"
+        placeholder="Type or speak..."
+        class="flex-1 p-3 rounded border resize-none"
+        onkeydown="handleInputKey(event)"
+      ></textarea>
+      <button onclick="sendMessage()" class="bg-blue-600 text-white px-4 py-2 rounded">Send</button>
+      <button onclick="startListening()" class="bg-gray-300 px-3 rounded" id="voiceBtn" title="Start voice input">🎤</button>
+    </div>
+  </div>
+
+  <script>
+    let history = [];
+    let chatId = `chat-${Date.now()}`;
+    let isListening = false;
+    let recognition;
+
+    function addMessage(sender, text, isHTML = false) {
+      const div = document.createElement("div");
+      if (sender === "user") {
+        div.className = "self-end bg-blue-100 p-3 rounded max-w-[75%] whitespace-pre-wrap";
+        if (isHTML) div.innerHTML = text;
+        else div.textContent = text;
+      } else {
+        div.className = "bg-gray-100 p-3 rounded max-w-[75%] whitespace-pre-wrap";
+        div.innerHTML = isHTML ? text : marked.parse(text);
+      }
+      document.getElementById("messages").appendChild(div);
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      const el = document.getElementById("messages");
+      el.scrollTop = el.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const text = input.value.trim();
+      const model = document.getElementById("model").value;
+      const allowImages = document.getElementById("imageToggle").checked;
+
+      if (!text) return;
+      input.value = "";
+      addMessage("user", text);
+
+      if (allowImages && model.startsWith("dall-e")) {
+        if (!text || typeof text !== "string" || text.trim() === "") {
+          addMessage("bot", "⚠️ Please enter a valid prompt for image generation.");
+          return;
+        }
+        try {
+          const response = await puter.ai.txt2img({
+            prompt: text.trim(),
+            model: model,
+            n: 1,
+            size: "1024x1024",
+          });
+          console.log("Image generation response:", response);
+
+          const url = response.data?.[0]?.url;
+          if (url) {
+            addMessage(
+              "bot",
+              `<img src="${url}" alt="Generated image" class="rounded mt-2 max-w-sm" />`,
+              true
+            );
+            history.push({ role: "assistant", content: `![image](${url})` });
+            saveChat();
+            return;
+          } else {
+            throw new Error("No image URL in response");
+          }
+        } catch (e) {
+          console.error("Image generation error:", e);
+          const msg = e?.message || JSON.stringify(e) || String(e);
+          addMessage("bot", "⚠️ Image generation failed: " + msg);
+          return;
+        }
+      }
+
+      // Text chat fallback
+      try {
+        history.push({ role: "user", content: text });
+        const stream = await puter.ai.chat(history, { model, stream: true });
+
+        let reply = '';
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "bg-gray-100 p-3 rounded max-w-[75%] whitespace-pre-wrap";
+        msgDiv.innerHTML = '<em>...</em>';
+        document.getElementById("messages").appendChild(msgDiv);
+        scrollToBottom();
+
+        for await (const part of stream) {
+          reply += part.text;
+          msgDiv.innerHTML = marked.parse(reply);
+          scrollToBottom();
+        }
+
+        history.push({ role: "assistant", content: reply });
+        speak(stripMarkdown(reply));
+        saveChat();
+      } catch (e) {
+        addMessage("bot", "⚠️ Chat error: " + (e.message || e));
+      }
+    }
+
+    function startListening() {
+      if (isListening) return;
+
+      if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
+        alert("Speech Recognition not supported in this browser.");
+        return;
+      }
+
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.interimResults = true;
+      recognition.continuous = false;
+
+      isListening = true;
+      document.getElementById("voiceBtn").textContent = "🎙️ Listening...";
+
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        document.getElementById("user-input").value = transcript;
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        isListening = false;
+        document.getElementById("voiceBtn").textContent = "🎤";
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        document.getElementById("voiceBtn").textContent = "🎤";
+      };
+
+      recognition.start();
+    }
+
+    function speak(text) {
+    }
+
+    function stripMarkdown(md) {
+      return md.replace(/[`_*#>~\-]/g, '');
+    }
+
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        addMessage("user", `📎 Uploaded: ${file.name}`);
+      }
+    });
+
+    async function saveChat() {
+      try {
+        const file = await puter.fs.getFile(`/xenzgpt/${chatId}.json`, { create: true });
+        await file.write(JSON.stringify(history));
+        updateChatList(chatId);
+      } catch (e) {
+        console.error("Failed to save chat:", e);
+      }
+    }
+
+    async function loadChatList() {
+      try {
+        const dir = await puter.fs.getDirectory('/xenzgpt', { create: true });
+        const files = await dir.listFiles();
+        const selector = document.getElementById("chatSelector");
+        selector.innerHTML = "";
+        files.forEach(file => {
+          const opt = document.createElement("option");
+          opt.value = file.name.replace(".json", "");
+          opt.textContent = file.name.replace(".json", "");
+          selector.appendChild(opt);
+        });
+        document.getElementById("chatList").classList.remove("hidden");
+      } catch (e) {
+        console.error("Failed to load chat list:", e);
+      }
+    }
+
+    async function switchChat(id) {
+      chatId = id;
+      try {
+        const file = await puter.fs.getFile(`/xenzgpt/${chatId}.json`);
+        const text = await file.readAsText();
+        history = JSON.parse(text);
+        document.getElementById("messages").innerHTML = "";
+        history.forEach(msg => {
+          addMessage(msg.role === "user" ? "user" : "bot", msg.content);
+        });
+      } catch (e) {
+        console.error("Failed to load chat:", e);
+      }
+    }
+
+    function newChat() {
+      chatId = `chat-${Date.now()}`;
+      history = [];
+      document.getElementById("messages").innerHTML = "";
+      document.getElementById("chatList").classList.add("hidden");
+    }
+
+    async function updateChatList(newId) {
+      const selector = document.getElementById("chatSelector");
+      if (![...selector.options].some(opt => opt.value === newId)) {
+        const opt = document.createElement("option");
+        opt.value = newId;
+        opt.textContent = newId;
+        selector.appendChild(opt);
+      }
+    }
+
+    function handleInputKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+  </script>
+
+</body>
+</html>

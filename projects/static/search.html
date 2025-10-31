@@ -1,0 +1,317 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui, shrink-to-fit=yes">
+    <title>Loading...</title>
+    <link rel="stylesheet" href="https://zeelix.web.app/static/stylee.css">
+    <link rel="manifest" href="https://zeelix.web.app/static/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval'  https://2p9rns-8080.csb.app  https://www.gstatic.com/ https://apis.google.com/ https://www.authpro.com https://www.googletagmanager.com https://maxcdn.bootstrapcdn.com https://cdnjs.cloudflare.com https://static.cloudflareinsights.com https://cdn.jsdelivr.net https://widgetbot.io https://docs.widgetbot.io 'unsafe-inline';">
+<style>
+    :root{
+      --bg: #0b0a0f;
+      --bg-soft: #14101d;
+      --card: rgba(20, 14, 28, 0.82);
+      --surface: rgba(23, 18, 32, 0.85);
+      --border: rgba(255,255,255,0.08);
+      --text: #e9e1ff;
+      --muted: #c6b4d8;
+      --primary: #a755f5;
+      --primary-dark: #7e2bd7;
+      --accent: #7c3aed;
+      --glow: 0 0 18px rgba(167, 85, 245, 0.65);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      width: 100%
+      background: radial-gradient(circle at 20% -10%, rgba(124,58,237,0.25) 0%, rgba(124,58,237,0) 40%),
+                  radial-gradient(circle at 100% 0%, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0) 45%),
+                  linear-gradient(135deg, #0a0a0f 0%, #0b0b14 50%, #0a0a11 100%);
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 40px 20px 60px;
+    }
+
+    .card {
+      width: min(80%, 80%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 28px 26px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      backdrop-filter: saturate(1.2) blur(6px);
+      position: relative;
+      overflow: hidden;
+    }
+
+      button {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 28px 26px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      backdrop-filter: saturate(1.2) blur(6px);
+      position: relative;
+      overflow: hidden;
+        }
+    
+    /* decorative glow corners */
+    .card:before, .card:after {
+      content: "";
+      position: absolute;
+      width: 180px; height: 180px;
+      filter: blur(40px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .card:before {
+      top: -60px; left: -60px;
+      background: radial-gradient(circle at 30% 30%, rgba(124,58,237,0.9), transparent 40%);
+    }
+    .card:after {
+      bottom: -60px; right: -60px;
+      background: radial-gradient(circle at 70% 70%, rgba(168,85,246,0.8), transparent 40%);
+    }
+
+    .header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 54px; height: 54px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.9), rgba(124,58,237,0.4));
+      display: grid; place-items: center;
+      box-shadow: 0 6px 18px rgba(124,58,237,0.6);
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .logo svg { width: 28px; height: 28px; }
+
+    .name {
+      font-family: "Montserrat", sans-serif;
+      font-weight: 800;
+      font-size: 34px;
+      letter-spacing: 0.5px;
+      margin: 0;
+      background: linear-gradient(90deg, #d8b4fe 0%, #a78bfa 40%, #c4b5fd 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 22px rgba(124,58,237,0.6);
+    }
+
+    .tagline {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .description {
+      font-size: 15.5px;
+      line-height: 1.6;
+      color: #e8e0ff;
+      opacity: 0.95;
+    }
+
+    h2 {
+      font-family: Inter, sans-serif;
+      font-size: 20px;
+      margin: 18px 0 12px;
+      letter-spacing: .4px;
+      color: #f2e6ff;
+    }
+
+    .section {
+      margin-top: 8px;
+    }
+
+    .clan-list {
+      list-style: none;
+      padding: 0;
+      margin: 6px 0 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .clan-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .clan-icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: inline-grid; place-items: center;
+      background: linear-gradient(135deg, #6d28d9, #4c1d95);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+
+    .clan-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #f6f0ff;
+    }
+
+    .clan-meta {
+      margin-left: auto;
+      font-size: 12px;
+      color: #c9b6d8;
+      opacity: .9;
+    }
+
+    .progress-wrap {
+      margin-top: 6px;
+      height: 20px;
+      background: #261a2b;
+      border-radius: 999px;
+      padding: 3px;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 70%; /* adjust with inline style as needed */
+      background: linear-gradient(90deg, #a855f7 0%, #7c3aed 60%, #5b2cd9 100%);
+      border-radius: 999px;
+      box-shadow: var(--glow);
+      transition: width 0.5s ease;
+    }
+
+    .percent {
+      text-align: right;
+      font-family: Inter, sans-serif;
+      font-weight: 700;
+      font-size: 12.5px;
+      color: #e8d7ff;
+      margin-top: 6px;
+      letter-spacing: .4px;
+    }
+
+    /* responsive tweaks */
+    @media (max-width: 700px){
+      .name { font-size: 28px; }
+      .logo { width: 48px; height: 48px; }
+    }
+    p {
+      justify-content: center;
+      align-items: center;    
+      text-align: center;
+      font-family: "Montserrat", sans-serif;
+      font-weight: 800;
+      font-size: 75px;
+      letter-spacing: 0.5px;
+      margin: 0;
+      background: linear-gradient(90deg, #d8b4fe 0%, #a78bfa 40%, #c4b5fd 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 22px rgba(124,58,237,0.6);
+    }
+</style>
+
+</head>
+
+<body>
+      <main class="page" aria-label="Xenz profile page">
+    <section class="card" style="max-width: 980px;">
+      <div class="header">
+        <div class="brand" aria-label="Brand">
+          <div>
+            <div id="card" class="load"></div>
+            <p class="name">
+                Loading 
+                Search or Website.
+            </p>
+          </div>
+        </div>
+      </div>
+    <script src="uv/uv.bundle.js"></script>
+    <script src="uv/uv.config.js"></script>
+    <script src="register-sw.js"></script>
+    <script>"use strict";
+const hashText = location.hash.slice(1).trim();
+if (!hashText) throw new Error("Empty hash string");
+
+let destination = null;
+
+function tryUrl(candidate, base = undefined) {
+  try {
+    return base ? new URL(candidate, base).toString() : new URL(candidate).toString();
+  } catch {
+    return null;
+  }
+}
+
+// 1) protocol-relative //example.com -> prepend current protocol
+if (/^\/\//.test(hashText)) {
+  destination = tryUrl(location.protocol + hashText);
+}
+
+// 2) absolute with scheme (https:, http:, ftp:, etc.)
+if (!destination && /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(hashText)) {
+  destination = tryUrl(hashText);
+}
+
+// 3) relative URL (starts with /, ./, ../, ?, or #) -> resolve against current location
+if (!destination && /^[\/.?#]/.test(hashText)) {
+  destination = tryUrl(hashText, location.href);
+}
+
+// 4) domain-like (contains a dot) -> try https:// + text
+if (!destination && /\./.test(hashText)) {
+  destination = tryUrl("https://" + hashText);
+}
+
+// 5) last resort -> google search
+if (!destination) {
+  destination = `https://www.google.com/search?q=${encodeURIComponent(hashText)}`;
+}
+
+console.log("destination =", destination);
+// location.href = destination; // uncomment to redirect
+
+
+
+registerSW()
+  .then(() => {
+    window.open(
+      __uv$config.prefix + __uv$config.encodeUrl(destination),
+      "_self"
+    );
+  })
+  .catch((err) => {
+    alert(`Encountered error:\n${err}`);
+  });</script>
+</body></html>

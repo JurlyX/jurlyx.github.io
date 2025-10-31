@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Xenz Image Generator</title>
+  <script src="https://cdn.puter.com/puter.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+      text-align: center;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 0.5rem;
+      width: 300px;
+    }
+    button {
+      cursor: pointer;
+    }
+    #loading {
+      display: none;
+      font-style: italic;
+      margin-top: 1rem;
+    }
+    img {
+      margin-top: 1rem;
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>🖼️ Xenz Image Generator</h1>
+  <input type="text" id="prompt" placeholder="Describe your image..." />
+  <br>
+  <button onclick="generateImage()">Generate Image</button>
+  <div id="loading">Generating image...</div>
+  <img id="outputImage" src="" alt="Your image will appear here" />
+
+  <script>
+    async function generateImage() {
+      const prompt = document.getElementById('prompt').value.trim();
+      const loading = document.getElementById('loading');
+      const image = document.getElementById('outputImage');
+
+      if (!prompt) {
+        alert("Please enter a prompt!");
+        return;
+      }
+
+      loading.style.display = 'block';
+      image.src = '';
+
+      try {
+        const result = await puter.ai.txt2img({ prompt });
+        image.src = result.url;
+      } catch (error) {
+        alert("Error generating image: " + error.message);
+      } finally {
+        loading.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="/static/tabcloaker.js"></script>
+    <meta name="google-adsense-account" content="ca-pub-8655131518824482">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            cloakAll();
+			search();
+    const savedURL = search();
+    const Url = search();
+    if (savedURL) {
+        const firstIframe = document.querySelector(".tab-iframe.active");
+        if (firstIframe) {
+            firstIframe.src = `${Url}`;
+            localStorage.removeItem("url");
+        }
+    }
+});
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JC8E4VJGL9"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-JC8E4VJGL9');
+    </script>
+    <style>
+
+        * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body, html {
+                    height: 100%;
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .tabs {
+                    display: flex;
+                    align-items: center;
+                    background-color: #222;
+                    border-bottom: 2px solid #FF0000;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    transition: transform 0.5s ease-in-out;
+                }
+                .tab {
+                    display: flex;
+                    align-items: center;
+                    padding: 5px 10px;
+                    color: #ccc;
+                    cursor: pointer;
+                    position: relative;
+                    background-color: #333;
+                    border-right: 1px solid #555;
+                    transition: background-color 0.3s;
+                    flex-shrink: 1;
+                    max-width: 150px;
+                    overflow: hidden;
+                    border-radius: 5px;
+                    text-overflow: ellipsis;
+                }
+                .tab.active {
+                    background-color: #444;
+                    color: #FF0000;
+                }
+                .tab:hover {
+                    background-color: #555;
+                }
+                .tab .close-button {
+                    margin-left: 5px;
+                    color: #ccc;
+                    cursor: pointer;
+                    font-size: 14px;
+                }
+                .tab .close-button:hover {
+                    color: #262626;
+                }
+                .add-tab-button {
+                    padding: 10px;
+                    cursor: pointer;
+                    background-color: #333;
+                    color: #FF0000;
+                    border: none;
+                    outline: none;
+                    font-size: 20px;
+                }
+                .navbarmain {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background-color: #333;
+                    padding: 10px;
+                    width: 100%;
+                    border-bottom: 2px solid #FF0000;
+                    transition: transform 0.5s ease-in-out;
+                }
+                .navbarmain-left {
+                    display: flex;
+                    gap: 10px;
+                }
+                .navbarmain button {
+                    background: transparent;
+                    border: none;
+                    color: #FF0000;
+                    cursor: pointer;
+                    font-size: 20px;
+                }
+                .navbarmain button:hover {
+                    color: #fff;
+                }
+                .search-bar {
+                    flex-grow: 1;
+                    display: flex;
+                    align-items: center;
+                    border-radius: 25px;
+                    background-color: #000;
+                    border: 2px solid #FF0000;
+                    overflow: hidden;
+                    height: 30px;
+                  margin-left: 20px;
+                }
+                .search-bar input {
+                    flex-grow: 1;
+                    padding: 10px;
+                    border: none;
+                    background-color: transparent;
+                    color: #ccc;
+                    font-size: 16px;
+                }
+                .search-bar input:focus {
+                    outline: none;
+                }
+                .search-bar button {
+                    background-color: #FF0000;
+                    border: none;
+                    padding: 10px 20px;
+                    font-size: 16px;
+                    color: #000;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    border-radius: 0 25px 25px 0;
+                }
+                .search-bar button i {
+                    margin-left: 5px;
+                }
+                .content-wrapper {
+                    flex-grow: 1;
+                    overflow: hidden;
+                    position: relative;
+                    height: 100%;
+                    width:  100%;
+                }
+                iframe {
+                    width: 100%;
+                    height: 100%;
+                    border: none;
+                    display: none;
+                }
+                iframe.active {
+                    display: block;
+                }
+                .hide-button {
+                    position: fixed;
+                    top: 10px;
+                    right: 10px;
+                    background-color: transparent;
+                    border: none;
+                    font-size: 30px;
+                    color: #FF0000;
+                    cursor: pointer;
+                    z-index: 1001;
+                }
+            .navbar.hidden, .tabs.hidden {
+                transform: translateY(-200%);
+                }
+                .show-navbar-button {
+                    position: fixed;
+                    top: 10px;
+                    right: 10px;
+                    background-color: transparent;
+                    border: none;
+                    font-size: 30px;
+                    color: white;
+                    cursor: pointer;
+                    display: none;
+                    z-index: 2000;
+                }
+                .show-navbar-button i {
+                    color: #FF0000;
+                }
+            
+            </style>
+</head>
+    <div class="content-wrapper" id="content-wrapper">
+        <iframe class="tab-iframe active" src="/static/ebv2.html#https://google.com" id="iframe-1"></iframe>
+    </div>
+    <script>
+		window.onload = function() {
+			search();
+		};
+        	    function goFullscreen() {
+	 const element = document.querySelector('.tab-iframe.active')
+	    
+      if (element.requestFullscreen) {
+        element.requestFullscreen().catch((err) => {
+          console.error(`Failed to enter fullscreen mode: \${err.message}`);
+        });
+      } else if (element.mozRequestFullScreen) { // Firefox
+        element.mozRequestFullScreen().catch((err) => {
+          console.error(`Failed to enter fullscreen mode: \${err.message}`);
+        });
+      } else if (element.webkitRequestFullscreen) { // Older WebKit
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) { // IE/Edge
+        element.msRequestFullscreen();
+      } else {
+        console.error("Fullscreen API is not supported on this browser.");
+      }
+    
+    }
+        let tabCount = 1;
+
+        function selectTab(tabElement) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-iframe').forEach(tabiframe => tabiframe.classList.remove('active'));
+            tabElement.classList.add('active');
+            const tabIndex = [...tabElement.parentElement.children].indexOf(tabElement);
+            const tabiframe = document.querySelectorAll('.tab-iframe')[tabIndex];
+            tabiframe.classList.add('active');
+        }
+        function observeIframe(iframe, tabElement) {
+    const observer = new MutationObserver(() => {
+        try {
+            const title = iframe.contentWindow.document.title || 'Google';
+            tabElement.textContent = title.substring(0, 15);
+            tabElement.innerHTML += ' <span class="close-button" onclick="closeTab(event, this)">×</span>';
+        } catch (error) {
+            tabElement.textContent = 'Google';
+            tabElement.innerHTML += ' <span class="close-button" onclick="closeTab(event, this)">×</span>';
+        }
+    });
+
+    observer.observe(iframe, { attributes: true, attributeFilter: ['src'] });
+
+    iframe.onload = () => {
+        try {
+            const title = iframe.contentWindow.document.title || 'New Tab';
+            tabElement.textContent = title.substring(0, 15);
+            tabElement.innerHTML += ' <span class="close-button" onclick="closeTab(event, this)">×</span>';
+
+            // Override window.open to force opening in the same iframe (or window)
+            const originalWindowOpen = iframe.contentWindow.open;
+            iframe.contentWindow.open = function(url, target, features) {
+                if (target === '_blank') {
+                    // Open the link in the same iframe
+                    iframe.src = url;
+                } else {
+                    // If not _blank, use the original open behavior
+                    originalWindowOpen.call(iframe.contentWindow, url, target, features);
+                }
+            };
+
+        } catch (error) {
+            tabElement.textContent = 'New Tab';
+            tabElement.innerHTML += ' <span class="close-button" onclick="closeTab(event, this)">×</span>';
+        }
+    };
+}
+
+function addTab2(url) {
+    tabCount++;
+    const tabsContainer = document.getElementById('tabs');
+    const iframe = document.createElement('iframe');
+            const newTab = document.createElement('div');
+    newTab.classList.add('tab');
+    newTab.textContent = "Loading...";
+    newTab.innerHTML += ' <span class="close-button" onclick="closeTab(event, this)">×</span>';
+    newTab.onclick = () => selectTab(newTab);
+    tabsContainer.insertBefore(newTab, document.querySelector('.add-tab-button'));
+    if (!url) {
+        url = "https://google.com";
+    }
+    iframe.classList.add('tab-iframe');
+    iframe.id = `iframe-${tabCount}`;
+    iframe.src = `/static/ebv2.html#${url}`;
+    document.getElementById('content-wrapper').appendChild(iframe);
+	search();
+
+    // Observe iframe changes and update the tab name
+    observeIframe(iframe, newTab);
+}
+function addTab(url) {
+	search();
+}
+
+
+        function closeTab(event, closeButton) {
+            event.stopPropagation();
+            const tab = closeButton.parentElement;
+            if (tab.classList.contains('active')) {
+                const nextTab = tab.nextElementSibling || tab.previousElementSibling;
+                if (nextTab) selectTab(nextTab);
+            }
+            tab.remove();
+            document.getElementById(`iframe-${tab.dataset.tabId}`).remove();
+        }
+
+        function updateTabName(iframe, tabElement) {
+            iframe.onload = () => {
+                try {
+                    const title = iframe.contentWindow.document.title || 'New Tab';
+                    tabElement.textContent = title.substring(0, 15);
+                    tabElement.innerHTML += ' <span class="close-button" onclick="closeTab(event, this)">×</span>';
+                } catch (error) {
+                    tabElement.textContent = 'New Tab';
+                    tabElement.innerHTML += ' <span class="close-button" onclick="closeTab(event, this)">×</span>';
+                }
+            };
+        }
+        function search() {
+	var fullHash = window.location.hash; 
+    const inputElement = document.getElementById('search-input');
+    const input = fullHash.substring(1); 
+    const activeIframe = document.querySelector('.tab-iframe.active');
+
+    /**
+     * Determines the appropriate URL for navigation.
+     * @param {string} input
+     * @param {string} template Template for a search query.
+     * @returns {string} Fully qualified URL or search query URL.
+     */
+    function detectURL(input, template) {
+        // If the input ends with a space, treat it as a search query
+        if (input.includes(" ") && !input.startsWith("http")) {
+            return template.replace("%s", encodeURIComponent(input));
+        }
+
+        try {
+            // Check if input is a valid URL
+            return new URL(input);
+        } catch (err) {}
+
+        try {
+            // Check if input becomes a valid URL with "http://" prefix
+            const url = new URL(`http://${input}`);
+            if (url.hostname.includes(".")) return url.toString();
+        } catch (err) {}
+
+        // If all URL checks fail, treat it as a search query
+        return template.replace("%s", encodeURIComponent(input));
+    }
+
+    // Use the function to decide
+    const url = detectURL(input, "https://www.google.com/search?q=%s");
+
+    // Redirect to appropriate iframe source
+    activeIframe.src = url.startsWith("http") ? `/static/ebv2.html#${url}` : url;
+	}
+        function home() {
+window.location.href = "/static/"
+        }
+        
+function eToggle() {
+  const activeIframe = document.querySelector(".tab-iframe.active");
+  if (!activeIframe) {
+    console.error("No active iframe found");
+    return;
+  }
+  const erudaWindow = activeIframe.contentWindow;
+  if (!erudaWindow) {
+    console.error("No content window found for the active iframe");
+    return;
+  }
+  if (erudaWindow.eruda) {
+    if (erudaWindow.eruda._isInit) {
+      erudaWindow.eruda.destroy();
+    } else {
+      console.error("Eruda is not initialized in the active iframe");
+      erudaWindow.eruda.init();
+      erudaWindow.eruda.show();
+    }
+  } else {
+    const erudaDocument = activeIframe.contentDocument;
+    if (!erudaDocument) {
+      console.error("No content document found for the active iframe");
+      return;
+    }
+    const script = erudaDocument.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/eruda";
+    script.onload = () => {
+      if (!erudaWindow.eruda) {
+        console.error("Failed to load Eruda in the active iframe");
+        return;
+      }
+      erudaWindow.eruda.init();
+      erudaWindow.eruda.show();
+    };
+    erudaDocument.head.appendChild(script);
+  }
+}
+    </script>
+</body>
+</html>

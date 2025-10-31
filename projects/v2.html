@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-900 text-white dark:bg-white dark:text-black">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>XenzGPT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    /* Slide up animation for user messages */
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .slide-up {
+      animation: slideUp 0.3s ease forwards;
+    }
+    /* Blinking cursor */
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .blinking-cursor {
+      display: inline-block;
+      animation: blink 1s step-end infinite;
+      font-weight: 600;
+      color: #60a5fa; /* Tailwind blue-400 */
+    }
+    /* Markdown content styles */
+    .markdown :where(p, ul, ol, pre, blockquote) {
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .markdown code {
+      background: #1e293b; /* Tailwind slate-800 */
+      padding: 0.1rem 0.3rem;
+      border-radius: 0.3rem;
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+    .markdown pre {
+      background: #0f172a; /* Tailwind slate-900 */
+      padding: 1rem;
+      border-radius: 0.375rem;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+    .markdown a {
+      color: #3b82f6; /* Tailwind blue-500 */
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body class="h-full flex transition-colors duration-300" id="body">
+
+  <!-- Sidebar -->
+  <div class="w-72 bg-gray-800 dark:bg-white dark:text-black p-4 flex flex-col space-y-4 border-r border-gray-700 dark:border-gray-300">
+    <div class="text-lg font-bold">XenzGPT</div>
+    <div class="flex gap-2">
+      <button id="new-chat" class="bg-green-600 text-white rounded px-3 py-2">+ New Chat</button>
+      <button id="theme-toggle" class="bg-gray-700 dark:bg-gray-300 text-white dark:text-black rounded px-3 py-2">🌙</button>
+    </div>
+
+    <input id="chat-search" placeholder="Search chats..." class="p-2 rounded bg-gray-700 dark:bg-gray-200 dark:text-black"/>
+
+    <div id="chat-list" class="flex flex-col space-y-2 overflow-y-auto text-sm max-h-[300px]"></div>
+
+    <div class="mt-auto space-y-4 text-sm">
+      <div>
+        <label class="block text-gray-400 mb-1">Mode</label>
+        <select id="mode-select" class="w-full bg-gray-700 dark:bg-gray-200 dark:text-black p-2 rounded">
+          <option value="chat">Chat (GPT‑4o)</option>
+          <option value="code">Code (GPT‑4.1)</option>
+          <option value="image">Image Gen</option>
+        </select>
+      </div>
+      <button id="download-chat" class="bg-blue-600 w-full py-2 rounded text-white">⬇️ Download Chat</button>
+      <div id="typing-indicator" class="text-gray-400 italic mt-1 min-h-[1.25rem]"></div>
+    </div>
+  </div>
+
+  <!-- Chat Area -->
+  <div class="flex-1 flex flex-col h-full">
+    <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-900 dark:bg-white dark:text-black transition-colors"></div>
+    <form id="chat-form" class="p-4 border-t border-gray-700 dark:border-gray-300 bg-gray-800 dark:bg-gray-200 flex space-x-2">
+      <input id="user-input" type="text" placeholder="Send a message..." class="flex-1 p-2 rounded bg-gray-700 dark:bg-white dark:text-black"/>
+      <button class="bg-blue-600 px-4 py-2 rounded text-white" type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const chatList = document.getElementById("chat-list");
+    const chatWindow = document.getElementById("chat-window");
+    const chatForm = document.getElementById("chat-form");
+    const userInput = document.getElementById("user-input");
+    const modeSelect = document.getElementById("mode-select");
+    const newChatBtn = document.getElementById("new-chat");
+    const themeToggle = document.getElementById("theme-toggle");
+    const downloadBtn = document.getElementById("download-chat");
+    const chatSearch = document.getElementById("chat-search");
+    const typingIndicator = document.getElementById("typing-indicator");
+
+    let chats = JSON.parse(localStorage.getItem("xenz_chats") || "[]");
+    let active = 0;
+    let isDark = true;
+    let typingInterval = null;
+
+    function saveChats() {
+      localStorage.setItem("xenz_chats", JSON.stringify(chats));
+    }
+
+    function newChat() {
+      chats.push({ name: "Chat " + (chats.length + 1), messages: [] });
+      active = chats.length - 1;
+      saveChats();
+      renderChats();
+      renderMessages();
+      userInput.focus();
+    }
+
+    function deleteChat(i) {
+      if (confirm("Delete this chat?")) {
+        chats.splice(i, 1);
+        active = Math.min(active, chats.length - 1);
+        saveChats();
+        renderChats();
+        renderMessages();
+      }
+    }
+
+    function renameChat(i) {
+      const newName = prompt("Rename chat:", chats[i].name);
+      if (newName) {
+        chats[i].name = newName;
+        saveChats();
+        renderChats();
+      }
+    }
+
+    function renderChats() {
+      chatList.innerHTML = "";
+      const filter = chatSearch.value.toLowerCase();
+      chats.forEach((c, i) => {
+        if (!c.name.toLowerCase().includes(filter)) return;
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between gap-1";
+        const btn = document.createElement("button");
+        btn.className = `flex-1 text-left px-3 py-2 rounded ${i === active ? "bg-gray-700 dark:bg-gray-300 dark:text-black" : "hover:bg-gray-700 dark:hover:bg-gray-200"}`;
+        btn.textContent = c.name;
+        btn.onclick = () => {
+          active = i;
+          renderMessages();
+          renderChats();
+        };
+
+        const rename = document.createElement("button");
+        rename.textContent = "🖉";
+        rename.title = "Rename chat";
+        rename.onclick = e => {
+          e.stopPropagation();
+          renameChat(i);
+        };
+
+        const del = document.createElement("button");
+        del.textContent = "🗑️";
+        del.title = "Delete chat";
+        del.onclick = e => {
+          e.stopPropagation();
+          deleteChat(i);
+        };
+
+        row.append(btn, rename, del);
+        chatList.appendChild(row);
+      });
+    }
+
+    function renderMessages() {
+      const msgs = chats[active]?.messages || [];
+      chatWindow.innerHTML = "";
+      msgs.forEach(m => {
+        if (m.role === "image") {
+          const img = document.createElement("img");
+          img.src = m.content;
+          img.className = "rounded border border-gray-600 max-w-xs cursor-pointer hover:opacity-80 transition-opacity";
+          img.title = "Click to open full image";
+          img.onclick = () => window.open(m.content, "_blank");
+          chatWindow.appendChild(img);
+        } else {
+          const div = document.createElement("div");
+          div.className = `p-3 rounded max-w-2xl whitespace-pre-wrap markdown ${
+            m.role === "user" 
+              ? "bg-blue-700 self-end ml-auto slide-up" 
+              : "bg-gray-700 dark:bg-gray-300 dark:text-black self-start mr-auto"
+          }`;
+          if (m.role === "assistant") {
+            // Render markdown for assistant messages
+            div.innerHTML = marked.parse(m.content + (m.isTyping ? '<span class="blinking-cursor">▍</span>' : ''));
+          } else {
+            // Plain text for user
+            div.textContent = m.content;
+          }
+          chatWindow.appendChild(div);
+        }
+      });
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function setTypingIndicator(show) {
+      typingIndicator.textContent = show ? "Assistant is typing…" : "";
+    }
+
+    chatForm.onsubmit = async e => {
+      e.preventDefault();
+      if (typingInterval) return; // prevent double submits during typing
+      const prompt = userInput.value.trim();
+      if (!prompt) return;
+
+      const mode = modeSelect.value;
+      const model = mode === "chat" ? "gpt-4o"
+                    : mode === "code" ? "gpt-4-1106-preview"
+                    : null;
+
+      const chat = chats[active];
+      chat.messages.push({ role: "user", content: prompt, id: crypto.randomUUID() });
+      userInput.value = "";
+      renderMessages();
+      setTypingIndicator(true);
+      userInput.disabled = true;
+
+      if (mode === "image") {
+        try {
+          const img = await puter.ai.txt2img({ prompt });
+          chat.messages.push({ role: "assistant", content: "[Image generated]" });
+          chat.messages.push({ role: "image", content: img.url });
+          saveChats();
+          renderMessages();
+        } catch (err) {
+          chat.messages.push({ role: "assistant", content: "❌ Image generation error: " + err.message });
+          renderMessages();
+        } finally {
+          setTypingIndicator(false);
+          userInput.disabled = false;
+          userInput.focus();
+        }
+        return;
+      }
+
+      // Insert placeholder message for typing effect
+      const typingIndex = chat.messages.push({ role: "assistant", content: "", isTyping: true }) - 1;
+      renderMessages();
+
+      try {
+        const res = await puter.ai.chat(
+          chat.messages.filter(m => m.role !== "image"),
+          false,
+          { model }
+        );
+        const fullText = res.text || res.message.content || "";
+
+        let i = 0;
+        const speed = 15;
+        typingInterval = setInterval(() => {
+          if (i <= fullText.length) {
+            chat.messages[typingIndex].content = fullText.slice(0, i);
+            chat.messages[typingIndex].isTyping = true;
+            renderMessages();
+            i++;
+          } else {
+            clearInterval(typingInterval);
+            typingInterval = null;
+            chat.messages[typingIndex].content = fullText;
+            chat.messages[typingIndex].isTyping = false;
+            saveChats();
+            renderMessages();
+            setTypingIndicator(false);
+            userInput.disabled = false;
+            userInput.focus();
+          }
+        }, speed);
+      } catch (err) {
+        clearInterval(typingInterval);
+        typingInterval = null;
+        chat.messages[typingIndex].content = "❌ Error: " + err.message;
+        chat.messages[typingIndex].isTyping = false;
+        saveChats();
+        renderMessages();
+        setTypingIndicator(false);
+        userInput.disabled = false;
+        userInput.focus();
+      }
+    };
+
+    newChatBtn.onclick = () => { newChat(); userInput.focus(); };
+    chatSearch.oninput = renderChats;
+    themeToggle.onclick = () => {
+      isDark = !isDark;
+      document.documentElement.classList.toggle("dark", isDark);
+      themeToggle.textContent = isDark ? "🌙" : "☀️";
+    };
+
+    downloadBtn.onclick = () => {
+      const c = chats[active];
+      const blob = new Blob([JSON.stringify(c, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = c.name.replace(/\s+/g, "_") + ".json";
+      a.click();
+    };
+
+    // Initialize
+    if (!chats.length) newChat();
+    else { renderChats(); renderMessages(); }
+    document.documentElement.classList.add("dark");
+  </script>
+</body>
+</html>

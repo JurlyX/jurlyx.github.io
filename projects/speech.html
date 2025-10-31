@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>XenzToSpeech</title>
+  <script src="https://cdn.puter.com/puter.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans flex items-center justify-center min-h-screen p-4">
+
+  <div class="bg-white shadow-2xl rounded-2xl p-8 max-w-xl w-full text-center">
+    <h1 class="text-3xl font-bold mb-6 text-purple-600">XenzToSpeech</h1>
+    
+    <textarea id="text-input" rows="5" class="w-full p-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400" placeholder="Enter text here..."></textarea>
+    
+    <button id="generate-btn" class="mt-6 bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition duration-200">
+      🎵 Generate MP3
+    </button>
+
+    <p id="status" class="mt-4 text-gray-600"></p>
+    <a id="download-link" href="#" class="hidden mt-4 inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition" download="xenztospeech.mp3">
+      ⬇️ Download MP3
+    </a>
+  </div>
+
+  <script>
+    const generateBtn = document.getElementById("generate-btn");
+    const textInput = document.getElementById("text-input");
+    const status = document.getElementById("status");
+    const downloadLink = document.getElementById("download-link");
+
+    generateBtn.addEventListener("click", async () => {
+      const text = textInput.value.trim();
+      if (!text) {
+        status.textContent = "Please enter some text.";
+        downloadLink.classList.add("hidden");
+        return;
+      }
+
+      status.textContent = "Generating speech...";
+      downloadLink.classList.add("hidden");
+
+      try {
+        const result = await puter.ai.txt2speech({
+          text: text,
+          voice: "en-US" // Customize as needed
+        });
+
+        status.textContent = "Speech generated!";
+        downloadLink.href = result.audioUrl;
+        downloadLink.classList.remove("hidden");
+      } catch (error) {
+        console.error(error);
+        status.textContent = "Failed to generate speech.";
+        downloadLink.classList.add("hidden");
+      }
+    });
+  </script>
+
+</body>
+</html>
