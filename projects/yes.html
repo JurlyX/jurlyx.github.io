@@ -5,18 +5,18 @@
     </title>
   </head>
   <body>
-    <p id="amt"></p>
+    <p id="amt">0</p>
     <button id="main-clicker">🗿 MOYAI</button>
     <script>
       var element = {
       	clicker   : document.getElementById("main-clicker"),
       	money     : document.getElementById("amt"),
       }
-      var clicks = 0;
-      var clickPower = 1;
+      var clicks = 0,
+        clickPower = 1;
       function update() {
-        const text = `Clicks: {clicks} because you clicked the button {clicks} times!`;
-        element.money.innerHtml = text;
+        text = `Clicks: {clicks} because you clicked the button {clicks} times!`;
+        element.money.innerHTML = text;
       }
       function click() {
         clicks = clicks + clickPower;
