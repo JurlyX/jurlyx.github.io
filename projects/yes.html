@@ -3,10 +3,72 @@
     <title>
       Moyai Clicker
     </title>
+    <style>
+      .button, .clicker {
+	position: fixed;
+	/*Disable selection and drag*/
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    
+	/*Revome buttons borders and otlines*/
+	outline: none;
+	border: none;
+	background-color:#FFFFFF;/*white*/
+	
+	/*Transition Animation between hover/active...*/
+	transition: box-shadow 0.3s, background-color 0.3s;
+}
+.button:hover, .clicker:hover{
+	box-shadow: 0 27px 55px 0 rgba(0, 0, 0, 0.3), 0 17px 17px 0 rgba(15, 15, 15, 0.15);/*shadow*/
+}
+.button:active, .clicker:active{
+	/*Shadow, color transition*/
+	transition: box-shadow 0.15s, background-color 0.1s;
+	box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.3), 0 20px 20px 0 rgba(0, 0, 0, 0.15);
+	background-color:#F0F0F0;
+}
+.clicker {
+  background-color: #FF0000;
+	position: fixed;
+	/*Size*/
+	border-radius: 50%;
+	width:200px;
+	height:200px;
+	/* Position */
+	position: absolute;             
+	top: 50%; left: 50%;            
+	transform: translate(-50%, -50%);
+	/* Animation */
+	transition: width 0.3s, height 0.3s;
+}
+.clicker:hover {
+	width:225px;
+	height:225px;
+}
+.clicker:active {
+	transition: width 0.05s, height 0.05s;
+	width:200px;
+	height:200px;
+}
+.money-text {
+	position: fixed;
+	font-family: Monospace;
+	-webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  margin-left: 20px;
+  color: #FFFFFF;
+  font-size: 50;
+}
+.auto-
+    </style>
   </head>
   <body>
-    <p id="amt">0</p>
-    <button id="main-clicker">🗿 MOYAI</button>
+    <p id="amt" class="money-text">0</p>
+    <button id="main-clicker" class="Clicker">🗿 MOYAI</button>
     <script>
       var element = {
       	clicker   : document.getElementById("main-clicker"),
