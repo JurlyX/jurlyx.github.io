@@ -5,20 +5,27 @@
     </title>
   </head>
   <body>
-    <p id="amt" onclick="click()"></p>
-    <button>🗿 MOYAI</button>
+    <p id="amt"></p>
+    <button id="main-clicker">🗿 MOYAI</button>
     <script>
+      var element = {
+      	clicker   : document.getElementById("main-clicker"),
+      	money     : document.getElementById("amt"),
+      }
       var clicks = 0;
       var clickPower = 1;
       function update() {
-        const amt = document.getElementById("amt");
-        const text = clicks;
-        amt.innerHtml = text;
+        const text = `Clicks: {clicks} because you clicked the button {clicks} times!`;
+        element.money.innerHtml = text;
       }
       function click() {
         clicks = clicks + clickPower;
-        update();
       }
+      element.clicker.onclick = function() { 
+      	element.clicker.disabled = true;
+      	click(); update(); 
+      	element.clicker.disabled = false;
+      };
     </script>
   </body>
 </html>
