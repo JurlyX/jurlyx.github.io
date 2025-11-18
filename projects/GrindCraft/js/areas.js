@@ -1,7 +1,7 @@
 // Game Info
 setGameInfo({
     name: "GrindRune: A New Beggining",                         // The name of your game!
-    version: "0.5",                                     // The current version of your game!
+    version: "0.6",                                     // The current version of your game!
     icon: "images/system/blank.png",                    // Link or path to an icon image for your game!
     ID: "GrindRune",                             // Your game's ID! Should be unique for every game!
 });
@@ -12,7 +12,7 @@ addResources({                                          // Function for adding a
     dirt: {
         image: "images/dirt.png",
     },
-    glock: {
+    log: {
         image: "images/dirt.png",
     },
     stick: {
@@ -45,18 +45,18 @@ addArea("c",                                            // Function for adding a
         {
             name: "Also The Dark World",
             unlocked: true,
-            auto: ["glock"],                         // List of items that will auto-grind this grind
+            auto: ["dirt hut"],                         // List of items that will auto-grind this grind
             background: "images/grinds/overworld.png",
             resources: [
                 {
-                    id: "stick",
-                    time: [ ["glock", 0.01, 24], ["", 0.4]],
-                    probability: 50,
+                    id: "log",
+                    time: [["", 0.9]],
+                    probability: 25,
                 },
                 {
                     id: "dirt",
-                    time: [["glock", 0.01, 24], ["", 0.6]],
-                    probability: 50,
+                    time: [["", 0.6]],
+                    probability: 75,
                 },
             ]
         },
@@ -66,8 +66,9 @@ addArea("c",                                            // Function for adding a
         {
             name: "stick",
             desc: "Used to craft planks",
-            type: "display",
-            cost: [["stick", 0]],
+            type: "craft",
+            amount: 4,
+            cost: [["planks", 2]],
         },
         {
             name: "dirt",
@@ -76,17 +77,11 @@ addArea("c",                                            // Function for adding a
             cost: [["dirt", 0]],
         },
         {
-            name: "glock",
-            desc: "Used to make people your friend.",
-            type: "craft",
-            cost: [["stick", 1]],
-            message: "why is there 19 of them",
-        },
-        {
             name: "planks",
             desc: "Used to make a crafting table",
             type: "craft",
-            cost: [["stick", 2]],
+            amount: 4,
+            cost: [["log", 1]],
         },
         {
             name: "crafting table",
@@ -99,13 +94,14 @@ addArea("c",                                            // Function for adding a
             desc: "Required to build a dirt hut",
             type: "craft",
             amount: 3,
-            cost: [["planks", 6]],
+            cost: [["planks", 6], ["crafting table", 0]],
         },
         {
             name: "dirt hut",
             desc: "Required to beat the game!",
             type: "craft",
-            cost: [["stick", 1]],
+            cost: [["door", 1], ["crafting table", 1], ["dirt", 24]],
+            message: "You have beaten the game. Now go touch grass",
         },
     ],
 
