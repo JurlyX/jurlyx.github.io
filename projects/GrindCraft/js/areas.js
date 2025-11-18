@@ -1,7 +1,7 @@
 // Game Info
 setGameInfo({
     name: "GrindRune: A New Beggining",                         // The name of your game!
-    version: "0.4",                                     // The current version of your game!
+    version: "0.5",                                     // The current version of your game!
     icon: "images/system/blank.png",                    // Link or path to an icon image for your game!
     ID: "GrindRune",                             // Your game's ID! Should be unique for every game!
 });
@@ -50,12 +50,12 @@ addArea("c",                                            // Function for adding a
             resources: [
                 {
                     id: "stick",
-                    time: [ ["glock", 0.0000000000000000000000001, 99999999999999999999999999999999999999999999999], ["", 0.4]],
+                    time: [ ["glock", 0.01, 24], ["", 0.4]],
                     probability: 50,
                 },
                 {
                     id: "dirt",
-                    time: [["glock", 0.0000000000000000000000001, 99999999999999999999999999999999999999999999999], ["", 0.6]],
+                    time: [["glock", 0.01, 24], ["", 0.6]],
                     probability: 50,
                 },
             ]
