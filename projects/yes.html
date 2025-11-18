@@ -12,7 +12,8 @@
       var clickPower = 1;
       function update() {
         const amt = document.getElementById("amt");
-        amt.textContent(clicks);
+        const text = clicks;
+        amt.innerHtml = text;
       }
       function click() {
         clicks = clicks + clickPower;
