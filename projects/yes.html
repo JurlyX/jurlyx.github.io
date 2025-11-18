@@ -10,9 +10,9 @@
     <script>
       var clicks = 0;
       var clickPower = 1;
-      const amt = document.getElementById("amt");
       function update() {
-        amt.innerHtml(clicks);
+        const amt = document.getElementById("amt");
+        amt.textContent(clicks);
       }
       function click() {
         clicks = clicks + clickPower;
