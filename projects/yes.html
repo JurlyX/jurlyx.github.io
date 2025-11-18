@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title>
+      Moyai Clicker
+    </title>
+  </head>
+  <body>
+    <p id="amt" onclick="click()"></p>
+    <button>🗿 MOYAI</button>
+    <script>
+      var clicks = 0;
+      var clickPower = 1;
+      const amt = document.getElementById("amt");
+      function update() {
+        amt.innerHtml(clicks);
+      }
+      function click() {
+        clicks = clicks + clickPower;
+        update();
+      }
+    </script>
+  </body>
+</html>
