@@ -1,0 +1,51 @@
+<html>
+  <head>
+    <title>Chicken Hatching Game</title>
+  </head>
+  <body>
+    <button onclick="egg()">make egg</button>
+    <p id="ckn">🐔</p> <p id="egg1"></p> <p id="egg2"></p> <p id="egg3"></p> <p id="egg4"></p> 
+    <script>
+     const ckn = document.getElementById("ckn")
+     const egg1 = document.getElementById("egg1")
+     const egg2 = document.getElementById("egg2")
+     const egg3 = document.getElementById("egg3")
+     const egg4 = document.getElementById("egg4")
+      function egg()  {
+        if egg1.innerHTML == "🐣" or "🥚" {
+          if egg2.innerHTML == "🐣" or "🥚" {
+            if egg3.innerHTML == "🐣" or "🥚" {
+              if egg4.innerHTML == "🐣" or "🥚" {
+                alert("Eggs Are Full, Refresh to reset.");
+              }
+              else {
+                egg4.innerHTML = "🥚";
+                setTimeout(function() {
+                  egg4.innerHTML = "🐣";
+                }, 5000);
+              }
+              }
+              else {
+                egg3.innerHTML = "🥚";
+                setTimeout(function() {
+                  egg3.innerHTML = "🐣";
+                }, 5000);
+           }
+            }
+            else {
+              egg2.innerHTML = "🥚";
+              setTimeout(function() {
+                egg2.innerHTML = "🐣";
+              }, 5000);
+           }
+          }
+            else {
+              egg1.innerHTML = "🥚";
+              setTimeout(function() {
+                egg1.innerHTML = "🐣";
+              }, 5000);
+           }
+        }
+    </script>
+  </body>
+</html>
