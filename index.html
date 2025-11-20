@@ -280,7 +280,8 @@ document.addEventListener("DOMContentLoaded", () => {
 let destination = "";
 function search() {
   const url = document.getElementById("uv-address");
-  window.location.replace("https://jurlyx.github.io/projects/static/search#" + url.value);
+  const newurl = "https://jurlyx.github.io/projects/static/search#" + url.value;
+  window.location.replace(newurl);
 }
 
 registerSW()
