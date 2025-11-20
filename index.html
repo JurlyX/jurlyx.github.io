@@ -189,15 +189,93 @@ h1:hover {
 
 <form id="uv-form">
             <input   class="input" placeholder="Seach Google" id="uv-search-engine" value="https://www.google.com/search?q=%s" type="hidden"/> 
-            <input class="input"  id="uv-address" type="text" placeholder="Type a URL" class="form__input"/> <button onclick="search()">Search</button>
+            <input class="input"  id="uv-address" type="text" placeholder="Type a URL" class="form__input"/> <button class="button" onclick="search()">Search</button>
           </form>
 
 
 
-<!-- From Uiverse.io by milegelu --> 
   <script src="static/uv/uv.bundle.js"></script>
     <script src="static/uv/uv.config.js"></script>
     <script src="static/register-sw.js"></script>
+	<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const body = document.body;
+    
+    // Ripple Effect on Click
+    body.addEventListener("click", (e) => {
+        const ripple = document.createElement("div");
+        ripple.classList.add("ripple");
+        document.body.appendChild(ripple);
+        
+        ripple.style.left = `${e.clientX}px`;
+        ripple.style.top = `${e.clientY}px`;
+        
+        ripple.addEventListener("animationend", () => {
+            ripple.remove();
+        });
+    });
+    
+    // Create Stars
+    const createStar = () => {
+        const star = document.createElement("div");
+        star.classList.add("star");
+        document.body.appendChild(star);
+        
+        const size = Math.random() * 3 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.left = `${Math.random() * window.innerWidth}px`;
+        star.style.top = `${Math.random() * window.innerHeight}px`;
+        
+        setTimeout(() => star.remove(), 7000);
+    };
+    
+    setInterval(createStar, 80);
+    
+    // Create Shooting Stars
+    const createShootingStar = () => {
+        const star = document.createElement("div");
+        star.classList.add("shooting-star");
+        document.body.appendChild(star);
+        
+        star.style.left = `${Math.random() * window.innerWidth}px`;
+        star.style.top = `-${Math.random() * 50}px`;
+        
+        setTimeout(() => star.remove(), 2500);
+    };
+    
+    setInterval(createShootingStar, 5000);
+
+    // Update Ripple Effect Size
+    const style = document.createElement("style");
+    style.innerHTML = `
+        .ripple {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid cyan;
+            border-radius: 50%;
+            animation: rippleEffect 0.6s linear;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+        
+        @keyframes rippleEffect {
+            from {
+                transform: scale(0);
+                opacity: 1;
+            }
+            to {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+</script>
+
     <script>"use strict";
 let destination = "";
 function search() {
