@@ -281,7 +281,7 @@ let destination = "";
 function search() {
   const url = document.getElementById("uv-address");
   const newurl = "https://jurlyx.github.io/projects/static/search#" + url.value;
-  window.location.replace(newurl);
+  window.location.redirect(newurl);
 }
 
 registerSW()
