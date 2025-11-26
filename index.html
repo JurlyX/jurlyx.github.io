@@ -276,76 +276,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </script>
 
-    <script>"use strict";
-let destination = "";
+    <script>
 function search() {
   const url = document.getElementById("uv-address");
-  const newurl = "https://jurlyx.github.io/projects/static/search#" + url.value;
+  const newurl = "projects/static/search#" + url.value;
   window.location.redirect(newurl);
 }
-
-registerSW()
-  .then(() => {
-    window.open(
-      __uv$config.prefix + __uv$config.encodeUrl(destination),
-      "_self"
-    );
-  })
-  .catch((err) => {
-    alert(`Encountered error:\n${err}`);
-  });</script>
-      <script>"use strict";
-const hashText = location.hash.slice(1).trim();
-if (!hashText) throw new Error("Empty hash string");
-
-let destination = null;
-
-function tryUrl(candidate, base = undefined) {
-  try {
-    return base ? new URL(candidate, base).toString() : new URL(candidate).toString();
-  } catch {
-    return null;
-  }
-}
-
-// 1) protocol-relative //example.com -> prepend current protocol
-if (/^\/\//.test(hashText)) {
-  destination = tryUrl(location.protocol + hashText);
-}
-
-// 2) absolute with scheme (https:, http:, ftp:, etc.)
-if (!destination && /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(hashText)) {
-  destination = tryUrl(hashText);
-}
-
-// 3) relative URL (starts with /, ./, ../, ?, or #) -> resolve against current location
-if (!destination && /^[\/.?#]/.test(hashText)) {
-  destination = tryUrl(hashText, location.href);
-}
-
-// 4) domain-like (contains a dot) -> try https:// + text
-if (!destination && /\./.test(hashText)) {
-  destination = tryUrl("https://" + hashText);
-}
-
-// 5) last resort -> google search
-if (!destination) {
-  destination = `https://www.google.com/search?q=${encodeURIComponent(hashText)}`;
-}
-
-console.log("destination =", destination);
-// location.href = destination; // uncomment to redirect
-
-
-
-registerSW()
-  .then(() => {
-    window.open(
-      __uv$config.prefix + __uv$config.encodeUrl(destination),
-      "_self"
-    );
-  })
-  .catch((err) => {
-    alert(`Encountered error:\n${err}`);
-  });</script>
+</script>
 </body>
